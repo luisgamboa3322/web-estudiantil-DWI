@@ -258,43 +258,63 @@
                     </div>
                 </main>
 
-                <!-- Vista Gestión de Cursos (Oculta por defecto) -->
-                <main id="cursos-content" class="content-view hidden">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800">Gestión de Cursos</h1>
-                        <button id="add-course-button"
-                            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
-                            <i data-lucide="plus" class="w-5 h-5"></i>
-                            <span>Añadir Curso</span>
+<!-- Vista Gestión de Cursos -->
+<main id="cursos-content" class="content-view hidden">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Gestión de Cursos</h1>
+        <button id="add-course-button"
+            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Añadir Curso</span>
+        </button>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Nombre del Curso</th>
+                    <th scope="col" class="px-6 py-3">Código</th>
+                    <th scope="col" class="px-6 py-3">Profesor Asignado</th>
+                    <th scope="col" class="px-6 py-3">Estado</th>
+                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="curso : ${cursos}" class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" 
+                        th:text="${curso.nombre}">Nombre del curso</td>
+                    <td class="px-6 py-4" th:text="${curso.codigo}">Código</td>
+                    <td class="px-6 py-4" 
+                        th:text="${curso.profesor != null} ? 
+                                 ${curso.profesor.nombre + ' - ' + curso.profesor.especialidad} : 
+                                 'Sin asignar'">
+                        Profesor
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${curso.estado == 'ACTIVO'}" 
+                              class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            Activo
+                        </span>
+                        <span th:if="${curso.estado == 'INACTIVO'}" 
+                              class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            Inactivo
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-center space-x-2">
+                        <button class="edit-course p-2 text-blue-600 hover:bg-blue-100 rounded-full"
+                                th:data-id="${curso.id}">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3">Nombre del Curso</th>
-                                    <th scope="col" class="px-6 py-3">Código</th>
-                                    <th scope="col" class="px-6 py-3">Profesor Asignado</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="bg-white border-b hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Desarrollo Web
-                                        Integrado</td>
-                                    <td class="px-6 py-4">DW-101</td>
-                                    <td class="px-6 py-4">Juan Perez</td>
-                                    <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i
-                                                data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i
-                                                data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </main>
+                        <button class="delete-course p-2 text-red-600 hover:bg-red-100 rounded-full"
+                                th:data-id="${curso.id}">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
 
                 <!-- Vista Reportes (Oculta por defecto) -->
                 <main id="reportes-content" class="content-view hidden">
@@ -369,50 +389,141 @@
         </div>
     </div>
 
-    <!-- Modal Añadir Curso -->
-    <div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
-            <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
-                <h3 class="text-xl font-semibold">Añadir Nuevo Curso</h3>
-                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
-                        class="w-5 h-5"></i></button>
-            </div>
+    
+<!-- Modal Añadir Curso -->
+<div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
+        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
+            <h3 class="text-xl font-semibold">Añadir Nuevo Curso</h3>
+            <button type="button" class="close-modal-button p-1 hover:bg-gray-200 rounded-full">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <form id="add-course-form">
             <div class="p-6 space-y-6">
-                <div><label class="block text-sm font-medium">Nombre del Curso</label><input type="text"
-                        class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
-                <div><label class="block text-sm font-medium">Código del Curso</label><input type="text"
-                        class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
-                <div class="border-t pt-4">
-                    <h4 class="font-semibold mb-2">Contenido Semanal</h4>
-                    <!-- Semana 1 -->
-                    <div class="space-y-2 p-3 border rounded-md mb-2">
-                        <label class="font-medium text-sm">Semana 1</label>
-                        <textarea placeholder="Contenido de la semana..." rows="2"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm"></textarea>
-                        <input type="url" placeholder="Enlace a calificaciones"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                        <input type="url" placeholder="Enlace de Zoom"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                <!-- Información Básica del Curso -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
+                        <input name="nombre" type="text" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
                     </div>
-                    <!-- Semana 2 -->
-                    <div class="space-y-2 p-3 border rounded-md">
-                        <label class="font-medium text-sm">Semana 2</label>
-                        <textarea placeholder="Contenido de la semana..." rows="2"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm"></textarea>
-                        <input type="url" placeholder="Enlace a calificaciones"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                        <input type="url" placeholder="Enlace de Zoom"
-                            class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Código del Curso *</label>
+                        <input name="codigo" type="text" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
                     </div>
-                    <!-- Se pueden añadir más semanas dinámicamente -->
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Descripción</label>
+                    <textarea name="descripcion" rows="3"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        placeholder="Descripción del curso..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
+                    <select name="profesorId" 
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <option value="">Seleccionar profesor...</option>
+                        <option th:each="profesor : ${profesores}" 
+                                th:value="${profesor.id}"
+                                th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Estado</label>
+                    <select name="estado" 
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
                 </div>
             </div>
+            
             <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
-                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
-                <button class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Guardar Curso</button>
+                <button type="button" class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                    Guardar Curso
+                </button>
             </div>
-        </div>
+        </form>
     </div>
+</div>
+
+<!-- Modal Editar Curso -->
+<div id="edit-course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
+        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
+            <h3 class="text-xl font-semibold">Editar Curso</h3>
+            <button type="button" class="close-edit-course-modal p-1 hover:bg-gray-200 rounded-full">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <form id="edit-course-form">
+            <input type="hidden" name="id" id="edit-course-id">
+            <div class="p-6 space-y-6">
+                <!-- Información Básica del Curso -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
+                        <input name="nombre" id="edit-course-nombre" type="text" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Código del Curso *</label>
+                        <input name="codigo" id="edit-course-codigo" type="text" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Descripción</label>
+                    <textarea name="descripcion" id="edit-course-descripcion" rows="3"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                        placeholder="Descripción del curso..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
+                    <select name="profesorId" id="edit-course-profesor"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <option value="">Seleccionar profesor...</option>
+                        <option th:each="profesor : ${profesores}" 
+                                th:value="${profesor.id}"
+                                th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Estado</label>
+                    <select name="estado" id="edit-course-estado"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
+                <button type="button" class="close-edit-course-modal px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                    Actualizar Curso
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 
     <script>
@@ -560,6 +671,204 @@
             }
         });
     </script>
+    <!-- Script para cursos - VERSIÓN CORREGIDA -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+
+        // ========== CONFIGURACIÓN INICIAL ==========
+        const courseModal = document.getElementById('course-modal');
+        const addCourseForm = document.getElementById('add-course-form');
+
+        const editCourseModal = document.getElementById('edit-course-modal');
+        const editCourseForm = document.getElementById('edit-course-form');
+
+        // ========== FUNCIONES PARA EDITAR CURSO ==========
+        
+        // Función para abrir el modal de edición
+        function openEditCourseModal(cursoId) {
+            // Obtener datos del curso
+            fetch(`/admin/cursos/${cursoId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener curso');
+                    }
+                    return response.json();
+                })
+                .then(curso => {
+                    console.log('Curso cargado:', curso); // Para debug
+                    
+                    // Llenar formulario con datos del curso
+                    document.getElementById('edit-course-id').value = curso.id;
+                    document.getElementById('edit-course-nombre').value = curso.nombre || '';
+                    document.getElementById('edit-course-codigo').value = curso.codigo || '';
+                    document.getElementById('edit-course-descripcion').value = curso.descripcion || '';
+                    
+                    // Manejar el profesor
+                    if (curso.profesor && curso.profesor.id) {
+                        document.getElementById('edit-course-profesor').value = curso.profesor.id;
+                    } else {
+                        document.getElementById('edit-course-profesor').value = '';
+                    }
+                    
+                    document.getElementById('edit-course-estado').value = curso.estado || 'ACTIVO';
+                    
+                    // Mostrar modal
+                    editCourseModal.classList.remove('hidden');
+                    editCourseModal.classList.add('flex');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al cargar datos del curso');
+                });
+        }
+
+        // ========== EVENT LISTENERS PARA AÑADIR CURSO ==========
+
+        addCourseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(addCourseForm);
+            const payload = {
+                nombre: formData.get('nombre'),
+                codigo: formData.get('codigo'),
+                descripcion: formData.get('descripcion'),
+                estado: formData.get('estado'),
+                profesor: {
+                    id: formData.get('profesorId') ? parseInt(formData.get('profesorId')) : null
+                }
+            };
+            
+            try {
+                console.log('Enviando curso:', payload);
+                const response = await fetch('/admin/cursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    courseModal.classList.add('hidden');
+                    courseModal.classList.remove('flex');
+                    location.reload();
+                } else {
+                    const errorText = await response.text();
+                    alert('Error guardando curso: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión: ' + error.message);
+            }
+        });
+
+        // Al abrir el modal de añadir curso
+        document.getElementById('add-course-button').addEventListener('click', () => {
+            courseModal.classList.remove('hidden');
+            courseModal.classList.add('flex');
+        });
+
+        // ========== EVENT LISTENERS PARA EDITAR CURSO ==========
+
+        // Envío del formulario de edición - VERSIÓN CORREGIDA
+        editCourseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const payload = {
+                id: parseInt(document.getElementById('edit-course-id').value),
+                nombre: document.getElementById('edit-course-nombre').value,
+                codigo: document.getElementById('edit-course-codigo').value,
+                descripcion: document.getElementById('edit-course-descripcion').value,
+                estado: document.getElementById('edit-course-estado').value,
+                profesor: {
+                    id: document.getElementById('edit-course-profesor').value ? 
+                           parseInt(document.getElementById('edit-course-profesor').value) : null
+                }
+            };
+            
+            try {
+                console.log('Actualizando curso:', payload);
+                const response = await fetch('/admin/cursos/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    editCourseModal.classList.add('hidden');
+                    editCourseModal.classList.remove('flex');
+                    location.reload();
+                } else {
+                    const errorText = await response.text();
+                    alert('Error actualizando curso: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión: ' + error.message);
+            }
+        });
+
+        // ========== EVENT LISTENERS COMUNES ==========
+        
+        // Cerrar modales
+        courseModal.querySelector('.close-modal-button').addEventListener('click', () => {
+            courseModal.classList.add('hidden');
+            courseModal.classList.remove('flex');
+        });
+
+        document.querySelectorAll('.close-edit-course-modal').forEach(button => {
+            button.addEventListener('click', () => {
+                editCourseModal.classList.add('hidden');
+                editCourseModal.classList.remove('flex');
+            });
+        });
+
+        // Eliminar curso
+        document.querySelectorAll('.delete-course').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const cursoId = e.currentTarget.getAttribute('data-id');
+                if (confirm('¿Estás seguro de que quieres eliminar este curso?')) {
+                    try {
+                        const response = await fetch('/admin/cursos/delete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: cursoId })
+                        });
+
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Error eliminando curso');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error de conexión');
+                    }
+                }
+            });
+        });
+
+        // Event listeners para botones de editar en la tabla
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.edit-course')) {
+                const button = e.target.closest('.edit-course');
+                const cursoId = button.getAttribute('data-id');
+                openEditCourseModal(cursoId);
+            }
+        });
+
+        // Cerrar modales al hacer clic fuera
+        window.addEventListener('click', (event) => {
+            if (event.target === courseModal) {
+                courseModal.classList.add('hidden');
+                courseModal.classList.remove('flex');
+            }
+            if (event.target === editCourseModal) {
+                editCourseModal.classList.add('hidden');
+                editCourseModal.classList.remove('flex');
+            }
+        });
+    });
+</script>
 </body>
 
 </html>
