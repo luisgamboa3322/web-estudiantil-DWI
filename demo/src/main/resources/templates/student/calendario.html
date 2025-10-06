@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Académico Interactivo - Calendario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-icon {
+            width: 24px;
+            height: 24px;
+        }
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="flex h-screen">
+        <!-- Barra de navegación lateral (Sidebar) -->
+        <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+            <div>
+                <a href="#" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+                    <svg xmlns="http://www.w.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>UTP+class</span>
+                </a>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/student/dashboard" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+                                <span>Cursos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/student/chat" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="message-square" class="sidebar-icon"></i>
+                                <span>Chat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/student/calendario" class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+                                <i data-lucide="calendar" class="sidebar-icon"></i>
+                                <span>Calendario</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="help-circle" class="sidebar-icon"></i>
+                                <span>Ayuda</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="settings" class="sidebar-icon"></i>
+                                <span>Configuración</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div>
+                 <nav>
+                    <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                        <li>
+                            <a href="#"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <!-- En la barra lateral de cada vista de estudiante -->
+                                <a href="/logout"
+                                    class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="log-out" class="sidebar-icon"></i>
+                                    <span>Cerrar Sesión</span>
+                                </a>
+                            </a>
+                        </li>
+                       
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Cabecera (Header) -->
+            <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+                <button id="menu-button" class="md:hidden">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+                <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
+                <div class="flex items-center space-x-4 ml-auto">
+                    <button class="relative">
+                        <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-10 h-10 rounded-full">
+                        <div class="text-right hidden sm:block">
+                            <p class="font-semibold text-sm">Hola, Luis Francisco</p>
+                            <p class="text-xs text-gray-500">Estudiante</p>
+                        </div>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Área de contenido del Calendario -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
+                <!-- Columna principal del Calendario -->
+                <div class="flex-1 bg-white rounded-lg shadow-sm p-6">
+                    <!-- Cabecera del Calendario -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-2xl font-bold text-gray-800">Septiembre 2025</h2>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+                                <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                            </button>
+                            <button class="text-sm font-semibold px-4 py-2 border rounded-lg hover:bg-slate-50">Hoy</button>
+                            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+                                <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grid del Calendario -->
+                    <div class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200">
+                        <!-- Días de la semana -->
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">L</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">J</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">V</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">S</div>
+                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">D</div>
+
+                        <!-- Días del mes (ejemplo estático) -->
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">1</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">2</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">3</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">4</span><div class="mt-1 text-xs bg-blue-100 text-blue-800 rounded px-1 truncate">Entrega T1</div></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">5</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">6</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">7</span></div>
+                        
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">8</span></div>
+                        <div class="h-28 bg-orange-50 p-2 text-sm relative"><span class="font-bold text-white bg-orange-500 w-6 h-6 flex items-center justify-center rounded-full">9</span><div class="mt-1 text-xs bg-red-100 text-red-800 rounded px-1 truncate">Examen Parcial</div></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">10</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">11</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">12</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">13</span><div class="mt-1 text-xs bg-orange-100 text-orange-800 rounded px-1 truncate">Foro S05</div></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">14</span></div>
+
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">15</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">16</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">17</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">18</span><div class="mt-1 text-xs bg-blue-100 text-blue-800 rounded px-1 truncate">Entrega T2</div></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">19</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">20</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">21</span></div>
+
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">22</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">23</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">24</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">25</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">26</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">27</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">28</span></div>
+                        
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">29</span></div>
+                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">30</span></div>
+                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">1</span></div>
+                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">2</span></div>
+                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">3</span></div>
+                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">4</span></div>
+                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">5</span></div>
+                    </div>
+                </div>
+
+                <!-- Columna lateral de eventos -->
+                <aside class="w-full lg:w-80 xl:w-96 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="font-bold text-lg mb-4">Próximos Eventos</h3>
+                        <div class="space-y-4">
+                            <!-- Evento -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-10 bg-red-500 rounded-full"></div>
+                                <div>
+                                    <p class="font-semibold">Examen Parcial</p>
+                                    <p class="text-sm text-slate-500">Herramientas de Desarrollo</p>
+                                    <p class="text-sm text-slate-500">Hoy, 8:00 PM - 10:00 PM</p>
+                                </div>
+                            </div>
+                            <!-- Evento -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-10 bg-orange-500 rounded-full"></div>
+                                <div>
+                                    <p class="font-semibold">Foro S05: Consultas</p>
+                                    <p class="text-sm text-slate-500">Diseño de Productos y Servicios</p>
+                                    <p class="text-sm text-slate-500">Vence: 13 Septiembre, 11:59 PM</p>
+                                </div>
+                            </div>
+                            <!-- Evento -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-10 bg-blue-500 rounded-full"></div>
+                                <div>
+                                    <p class="font-semibold">Entrega Tarea 2</p>
+                                    <p class="text-sm text-slate-500">Desarrollo Web Integrado</p>
+                                    <p class="text-sm text-slate-500">Vence: 18 Septiembre, 11:59 PM</p>
+                                </div>
+                            </div>
+                             <!-- Evento -->
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-10 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <p class="font-semibold">Reunión de grupo</p>
+                                    <p class="text-sm text-slate-500">Proyecto final</p>
+                                    <p class="text-sm text-slate-500">22 Septiembre, 4:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const menuButton = document.getElementById('menu-button');
+        const sidebar = document.getElementById('sidebar');
+
+        // Lógica para mostrar/ocultar el menú lateral en móviles
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('z-20');
+            sidebar.classList.toggle('w-full');
+        });
+        
+        // Lógica para la selección de item de navegación
+        const navLinks = document.querySelectorAll('aside nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', e => {
+
+                // Quita la clase activa de todos los links
+                navLinks.forEach(l => {
+                    l.classList.remove('bg-orange-500', 'text-white', 'font-semibold');
+                    l.classList.add('hover:bg-gray-700');
+                });
+
+                // Añade la clase activa al link clickeado
+                e.currentTarget.classList.add('bg-orange-500', 'text-white', 'font-semibold');
+                e.currentTarget.classList.remove('hover:bg-gray-700');
+
+                // En móvil, oculta la barra lateral después de hacer clic
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

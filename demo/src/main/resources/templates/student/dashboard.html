@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Académico Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .course-progress {
+            transition: all 0.3s ease;
+        }
+
+        .course-progress:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="flex h-screen">
+        <!-- Barra de navegación lateral (Sidebar) -->
+        <aside id="sidebar"
+            class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+            <div>
+                <a href="/student/dashboard"
+                    class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-8 w-8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>UTP+class</span>
+                </a>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/student/dashboard"
+                                class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors"
+                                th:classappend="${activePage == 'dashboard'} ? 'bg-orange-500 text-white font-semibold' : 'hover:bg-gray-700'">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+                                <span>Cursos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/student/chat"
+                                class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors"
+                                th:classappend="${activePage == 'chat'} ? 'bg-orange-500 text-white font-semibold' : 'hover:bg-gray-700'">
+                                <i data-lucide="message-square" class="sidebar-icon"></i>
+                                <span>Chat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/student/calendario"
+                                class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors"
+                                th:classappend="${activePage == 'calendario'} ? 'bg-orange-500 text-white font-semibold' : 'hover:bg-gray-700'">
+                                <i data-lucide="calendar" class="sidebar-icon"></i>
+                                <span>Calendario</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="help-circle" class="sidebar-icon"></i>
+                                <span>Ayuda</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/student/configuracion"
+                                class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors"
+                                th:classappend="${activePage == 'configuracion'} ? 'bg-orange-500 text-white font-semibold' : 'hover:bg-gray-700'">
+                                <i data-lucide="settings" class="sidebar-icon"></i>
+                                <span>Configuración</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div>
+                <nav>
+                    <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                        <li>
+                            <a href="#"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <!-- En la barra lateral de cada vista de estudiante -->
+                                <a href="/logout"
+                                    class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i data-lucide="log-out" class="sidebar-icon"></i>
+                                    <span>Cerrar Sesión</span>
+                                </a>
+                            </a>
+                        </li>
+                       
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Cabecera (Header) -->
+            <header class="bg-white shadow-md p-4 flex justify-between items-center">
+                <button id="menu-button" class="md:hidden">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+                <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
+                <div class="flex items-center space-x-4 ml-auto">
+                    <button class="relative" id="notifications-btn">
+                        <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"
+                            id="notification-badge"></span>
+                    </button>
+                    <div class="flex items-center space-x-2 cursor-pointer" id="user-menu-btn">
+                        <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario"
+                            class="w-10 h-10 rounded-full">
+                        <div class="text-right hidden sm:block">
+                            <p class="font-semibold text-sm" th:text="'Hola, ' + ${studentName}">Hola, Luis Francisco</p>
+                            <p class="text-xs text-gray-500">Estudiante</p>
+                        </div>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Área de contenido desplazable -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-4 sm:p-6 lg:p-8">
+                <div class="flex flex-col lg:flex-row gap-6">
+
+                    <!-- Columna central de contenido -->
+                    <div class="w-full lg:flex-1">
+                        <!-- Banner de anuncio -->
+                        <div
+                            class="bg-white rounded-lg shadow-sm p-6 mb-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-orange-500">
+                            <div class="flex-1">
+                                <h2 class="text-2xl font-bold text-gray-800">¡Ahorra en tus cuotas!</h2>
+                                <p class="text-gray-600 mt-2">Aprovecha el <span
+                                        class="font-bold text-orange-500">descuento en tus cuotas</span> pagando antes
+                                    del vencimiento.</p>
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <button
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">Conoce
+                                        nuestros canales de pago aquí</button>
+                                    <p class="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Recuerda: Este beneficio
+                                        aplica solo a pagos hasta un día antes de la fecha de vencimiento.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <p class="text-3xl font-bold text-green-600">5%</p>
+                                    <p class="text-sm text-green-700">Débito y Scotiabank</p>
+                                </div>
+                                <div class="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-3xl font-bold text-blue-600">2.5%</p>
+                                    <p class="text-sm text-blue-700">Interbank y BCP</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección Mis Cursos -->
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold text-gray-800">Mis cursos</h2>
+                                <div class="flex items-center space-x-2">
+                                    <label for="periodo" class="text-sm font-medium">Filtrar por</label>
+                                    <select id="periodo"
+                                        class="rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm">
+                                        <option>Periodo actual</option>
+                                        <option>Periodo anterior</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-4 font-semibold">2025 - Ciclo 2 Agosto PREG (001)
+                                (Actual)</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="cursos-container">
+                                <!-- Los cursos se cargarán dinámicamente aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna lateral derecha de actividades -->
+                    <aside class="w-full lg:w-80 xl:w-96 flex-shrink-0">
+                        <div class="bg-white rounded-lg shadow-sm">
+                            <div class="bg-gray-800 text-white p-4 rounded-t-lg flex items-center space-x-2">
+                                <i data-lucide="activity" class="h-5 w-5"></i>
+                                <h3 class="font-bold">Actividades semanales</h3>
+                            </div>
+                            <div class="p-4 space-y-4" id="actividades-container">
+                                <!-- Las actividades se cargarán dinámicamente aquí -->
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de notificaciones -->
+    <div id="notifications-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 max-h-96 overflow-y-auto">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Notificaciones</h3>
+                <button id="close-notifications" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <div class="p-4" id="notifications-list">
+                <!-- Las notificaciones se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Datos de ejemplo (en un caso real, estos vendrían de tu backend)
+        const cursos = [
+            {
+                id: 1,
+                nombre: "Desarrollo Web Integrado",
+                codigo: "16649",
+                modalidad: "Presencial",
+                imagen: "https://placehold.co/600x400/FFDDC1/4A4A4A?text=Curso+Web",
+                progreso: 75,
+                color: "blue"
+            },
+            {
+                id: 2,
+                nombre: "Diseño de Productos y Servicios",
+                codigo: "16598",
+                modalidad: "Presencial",
+                imagen: "https://placehold.co/600x400/C1E1FF/4A4A4A?text=Diseño+UX/UI",
+                progreso: 37,
+                color: "green"
+            },
+            {
+                id: 3,
+                nombre: "Herramientas de Desarrollo",
+                codigo: "16571",
+                modalidad: "Presencial",
+                imagen: "https://placehold.co/600x400/D4C1FF/4A4A4A?text=DevTools",
+                progreso: 75,
+                color: "yellow"
+            }
+        ];
+
+        const actividades = [
+            {
+                tipo: "Foro no calificado",
+                titulo: "S05 - Foro de Consultas",
+                curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
+                vencimiento: "13/09/2025 a las 11:59 PM",
+                estado: "Por entregar",
+                color: "orange"
+            },
+            {
+                tipo: "Evaluación no calificada",
+                titulo: "Repasemos lo aprendido: Cuestion...",
+                curso: "SEGURIDAD INFORMATICA",
+                vencimiento: "14/09/2025 a las 11:59 PM",
+                estado: "Por entregar",
+                color: "orange"
+            },
+            {
+                tipo: "Foro no calificado",
+                titulo: "S04 - Foro de Consultas",
+                curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
+                vencimiento: "08/09/2025 a las 11:59 PM",
+                estado: "Vencida",
+                color: "red"
+            }
+        ];
+
+        const notificaciones = [
+            {
+                id: 1,
+                titulo: "Nueva calificación publicada",
+                mensaje: "Tu calificación para el examen parcial de Herramientas de Desarrollo ha sido publicada.",
+                fecha: "Hace 2 horas",
+                leida: false
+            },
+            {
+                id: 2,
+                titulo: "Recordatorio de entrega",
+                mensaje: "Recuerda que la tarea 2 de Desarrollo Web Integrado vence en 3 días.",
+                fecha: "Hace 1 día",
+                leida: true
+            },
+            {
+                id: 3,
+                titulo: "Nuevo anuncio",
+                mensaje: "El profesor ha publicado un nuevo anuncio en el curso de Diseño de Productos y Servicios.",
+                fecha: "Hace 2 días",
+                leida: true
+            }
+        ];
+
+        // Elementos del DOM
+        const menuButton = document.getElementById('menu-button');
+        const sidebar = document.getElementById('sidebar');
+        const cursosContainer = document.getElementById('cursos-container');
+        const actividadesContainer = document.getElementById('actividades-container');
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationBadge = document.getElementById('notification-badge');
+        const notificationsModal = document.getElementById('notifications-modal');
+        const closeNotifications = document.getElementById('close-notifications');
+        const notificationsList = document.getElementById('notifications-list');
+        const userMenuBtn = document.getElementById('user-menu-btn');
+
+        // Lógica para mostrar/ocultar el menú lateral en móviles
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('z-20');
+            sidebar.classList.toggle('w-full');
+        });
+
+        // Cargar cursos
+        function cargarCursos() {
+            cursosContainer.innerHTML = '';
+            cursos.forEach(curso => {
+                const cursoElement = document.createElement('div');
+                cursoElement.className = 'bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform course-progress';
+                cursoElement.innerHTML = `
+                    <img src="${curso.imagen}" alt="Imagen del curso" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+                            <div class="bg-${curso.color}-500 h-1.5 rounded-full" style="width: ${curso.progreso}%"></div>
+                        </div>
+                        <h3 class="font-bold text-lg">${curso.nombre}</h3>
+                        <p class="text-sm text-gray-500 mt-1">${curso.codigo} - ${curso.modalidad}</p>
+                    </div>
+                `;
+                cursosContainer.appendChild(cursoElement);
+            });
+        }
+
+        // Cargar actividades
+        function cargarActividades() {
+            actividadesContainer.innerHTML = '';
+            actividades.forEach(actividad => {
+                const actividadElement = document.createElement('div');
+                actividadElement.className = 'flex items-start space-x-3';
+                actividadElement.innerHTML = `
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm">${actividad.tipo}</p>
+                        <p class="text-xs text-gray-500">${actividad.titulo}</p>
+                        <p class="text-xs text-gray-500">${actividad.curso}</p>
+                        <p class="text-xs text-gray-500 mt-1">${actividad.estado === 'Vencida' ? 'Venció' : 'Vence'}: ${actividad.vencimiento}</p>
+                    </div>
+                    <span class="text-xs font-bold bg-${actividad.color}-100 text-${actividad.color}-600 px-2 py-1 rounded-full">${actividad.estado}</span>
+                `;
+                actividadesContainer.appendChild(actividadElement);
+
+                // Añadir separador excepto para el último elemento
+                if (actividades.indexOf(actividad) < actividades.length - 1) {
+                    const separator = document.createElement('hr');
+                    actividadesContainer.appendChild(separator);
+                }
+            });
+        }
+
+        // Cargar notificaciones
+        function cargarNotificaciones() {
+            const notificationsCount = notificaciones.filter(n => !n.leida).length;
+            if (notificationsCount > 0) {
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+
+            notificationsList.innerHTML = '';
+            notificaciones.forEach(notificacion => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = `p-3 border-b border-gray-200 ${notificacion.leida ? '' : 'bg-blue-50'}`;
+                notificationElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-semibold ${notificacion.leida ? '' : 'text-blue-700'}">${notificacion.titulo}</h4>
+                        <span class="text-xs text-gray-500">${notificacion.fecha}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">${notificacion.mensaje}</p>
+                `;
+                notificationsList.appendChild(notificationElement);
+            });
+        }
+
+        // Mostrar/ocultar modal de notificaciones
+        notificationsBtn.addEventListener('click', () => {
+            notificationsModal.classList.remove('hidden');
+            // Marcar todas las notificaciones como leídas al abrir el modal
+            notificaciones.forEach(n => n.leida = true);
+            cargarNotificaciones();
+        });
+
+        closeNotifications.addEventListener('click', () => {
+            notificationsModal.classList.add('hidden');
+        });
+
+        // Cerrar modal al hacer clic fuera de él
+        notificationsModal.addEventListener('click', (e) => {
+            if (e.target === notificationsModal) {
+                notificationsModal.classList.add('hidden');
+            }
+        });
+
+        // Inicializar la carga de datos
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCursos();
+            cargarActividades();
+            cargarNotificaciones();
+        });
+    </script>
+</body>
+
+</html>

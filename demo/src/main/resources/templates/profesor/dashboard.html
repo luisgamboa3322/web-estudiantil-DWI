@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Profesor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-icon {
+            width: 24px;
+            height: 24px;
+        }
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Accordion marker styling */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details > summary::after {
+            content: '+';
+            float: right;
+            font-size: 1.5rem;
+            font-weight: 300;
+            transition: transform 0.2s ease-in-out;
+        }
+        details[open] > summary::after {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="flex h-screen">
+        <!-- Barra de navegación lateral (Sidebar) -->
+        <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+            <div>
+                <a href="/profesor/dashboard" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>UTP+teacher</span>
+                </a>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/profesor/cursos" data-target="cursos" class="nav-link flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+                                <i data-lucide="book-marked" class="sidebar-icon"></i>
+                                <span>Mis Cursos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/profesor/chat" data-target="chat" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="message-square" class="sidebar-icon"></i>
+                                <span>Chat</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/profesor/calendario" data-target="calendario" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="calendar" class="sidebar-icon"></i>
+                                <span>Calendario</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/profesor/configuracion" data-target="configuracion" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="settings" class="sidebar-icon"></i>
+                                <span>Configuración</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div>
+                 <nav>
+                    <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                        <li><!-- Busca este elemento en la barra lateral -->
+<a href="/logout" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+    <i data-lucide="log-out" class="sidebar-icon"></i>
+    <span>Cerrar Sesión</span>
+</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Cabecera (Header) -->
+            <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+    <button id="menu-button" class="md:hidden"><i data-lucide="menu" class="h-6 w-6"></i></button>
+    <div class="text-xl font-semibold md:hidden text-orange-500">UTP+teacher</div>
+
+    <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+            <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+            <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+
+        <div class="flex items-center space-x-2">
+            <img src="https://placehold.co/40x40/EFEFEF/333333?text=JP" alt="Avatar de profesor" class="w-10 h-10 rounded-full">
+            <div class="flex flex-col leading-tight">
+                <p class="font-semibold text-sm" th:text="'Hola, ' + ${profesor.nombre}">Hola, Luis Francisco</p>
+                <p class="text-xs text-gray-500">Profesor</p>
+            </div>
+            <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+    </div>
+</header>
+
+            <!-- Contenedor de Vistas -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                
+                <!-- Vista de Cursos Asignados -->
+                <main id="cursos-content" class="content-view">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Mis Cursos</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Card de Curso -->
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                            <img src="https://placehold.co/600x400/F97316/FFFFFF?text=DW" alt="Banner del curso" class="h-40 w-full object-cover">
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h3 class="font-bold text-lg">Desarrollo Web Integrado</h3>
+                                <p class="text-sm text-gray-500">16549 - Presencial</p>
+                                <div class="mt-auto pt-4">
+                                    <button class="manage-course-button w-full bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">Gestionar Curso</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Vista de Gestión de un Curso Específico -->
+                <main id="gestion-curso-content" class="content-view hidden">
+                    <button id="back-to-cursos" class="flex items-center space-x-2 text-sm font-semibold text-orange-500 hover:text-orange-700 mb-4">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Volver a Mis Cursos</span>
+                    </button>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Gestionando: Desarrollo Web Integrado</h1>
+                    
+                    <!-- Acordeón de Semanas -->
+                    <div class="space-y-4">
+                        <!-- Semana 1 -->
+                        <details class="bg-white rounded-lg shadow-sm group">
+                            <summary class="flex items-center justify-between font-semibold p-4 cursor-pointer text-lg">Semana 1: Introducción a la Web</summary>
+                            <div class="p-6 border-t border-gray-200 space-y-6">
+                                <!-- Material de Estudio -->
+                                <div>
+                                    <h4 class="font-bold mb-3">Material de Estudio</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-md">
+                                            <div class="flex items-center gap-3"><i data-lucide="file-text" class="text-red-500"></i><span>syllabus.pdf</span></div>
+                                            <div><button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                                        </div>
+                                    </div>
+                                    <button class="mt-3 text-sm font-semibold text-orange-500 hover:text-orange-700 flex items-center gap-1"><i data-lucide="plus-circle" class="w-4 h-4"></i>Añadir Material</button>
+                                </div>
+                                <!-- Tareas -->
+                                <div>
+                                    <h4 class="font-bold mb-3">Tareas</h4>
+                                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-md">
+                                        <div class="flex items-center gap-3"><i data-lucide="clipboard-check" class="text-blue-500"></i><span>Tarea 1: Cuestionario Inicial</span></div>
+                                        <div><button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                                    </div>
+                                    <button class="mt-3 text-sm font-semibold text-orange-500 hover:text-orange-700 flex items-center gap-1"><i data-lucide="plus-circle" class="w-4 h-4"></i>Añadir Tarea</button>
+                                </div>
+                            </div>
+                        </details>
+                        <!-- Semana 2 -->
+                         <details class="bg-white rounded-lg shadow-sm group">
+                            <summary class="flex items-center justify-between font-semibold p-4 cursor-pointer text-lg">Semana 2: HTML y CSS</summary>
+                            <div class="p-6 border-t border-gray-200">
+                                 <p class="text-center text-gray-500">Aún no hay contenido para esta semana.</p>
+                                 <div class="flex justify-center gap-4 mt-4">
+                                     <button class="text-sm font-semibold text-orange-500 hover:text-orange-700 flex items-center gap-1"><i data-lucide="plus-circle" class="w-4 h-4"></i>Añadir Material</button>
+                                     <button class="text-sm font-semibold text-orange-500 hover:text-orange-700 flex items-center gap-1"><i data-lucide="plus-circle" class="w-4 h-4"></i>Añadir Tarea</button>
+                                 </div>
+                            </div>
+                        </details>
+                    </div>
+                </main>
+                
+                <main id="chat-content" class="content-view hidden"><h1 class="text-3xl font-bold">Chat</h1></main>
+                <main id="calendario-content" class="content-view hidden"><h1 class="text-3xl font-bold">Calendario</h1></main>
+                <main id="configuracion-content" class="content-view hidden"><h1 class="text-3xl font-bold">Configuración</h1></main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const menuButton = document.getElementById('menu-button');
+            const sidebar = document.getElementById('sidebar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentViews = document.querySelectorAll('.content-view');
+            const manageCourseButtons = document.querySelectorAll('.manage-course-button');
+            const backToCoursesButton = document.getElementById('back-to-cursos');
+            const cursosContent = document.getElementById('cursos-content');
+            const gestionCursoContent = document.getElementById('gestion-curso-content');
+
+            // Toggle sidebar en móvil
+            menuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('z-20');
+                sidebar.classList.toggle('w-full');
+            });
+
+            const switchView = (targetId) => {
+                contentViews.forEach(view => {
+                    view.classList.toggle('hidden', view.id !== `${targetId}-content`);
+                });
+                navLinks.forEach(l => {
+                    l.classList.toggle('bg-orange-500', l.dataset.target === targetId);
+                    l.classList.toggle('text-white', l.dataset.target === targetId);
+                    l.classList.toggle('font-semibold', l.dataset.target === targetId);
+                });
+            };
+
+            // Navegación principal del Sidebar
+            navLinks.forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const targetId = link.dataset.target;
+                    switchView(targetId);
+                    if (window.innerWidth < 768) sidebar.classList.add('hidden');
+                });
+            });
+
+            // Ir a la vista de gestión de curso
+            manageCourseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    cursosContent.classList.add('hidden');
+                    gestionCursoContent.classList.remove('hidden');
+                });
+            });
+
+            // Volver a la lista de cursos
+            backToCoursesButton.addEventListener('click', () => {
+                gestionCursoContent.classList.add('hidden');
+                cursosContent.classList.remove('hidden');
+                // Asegurarse de que el link de cursos quede activo
+                switchView('cursos');
+            });
+        });
+    </script>
+</body>
+</html>
