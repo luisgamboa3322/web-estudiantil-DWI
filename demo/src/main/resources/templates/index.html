@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universidad Innovación - Excelencia Académica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="navbar fixed w-full z-50 bg-white py-4 shadow-md">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold mr-2">UI</div>
+                <span class="text-xl font-bold text-blue-900">Universidad Innovación</span>
+            </div>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#" class="nav-link text-blue-900 font-medium hover:text-blue-700 transition">Inicio</a>
+                
+                <div class="dropdown relative">
+                    <a href="#" class="nav-link text-blue-900 font-medium hover:text-blue-700 transition flex items-center">
+                        Carreras <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </a>
+                    <div class="dropdown-menu absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Ingenierías</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Ciencias de la Salud</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Humanidades</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Arquitectura</a>
+                    </div>
+                </div>
+                
+                <div class="dropdown relative">
+                    <a href="#" class="nav-link text-blue-900 font-medium hover:text-blue-700 transition flex items-center">
+                        Admisión <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </a>
+                    <div class="dropdown-menu absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Proceso de Admisión</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Becas y Financiamiento</a>
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700">Requisitos</a>
+                    </div>
+                </div>
+                
+                <a href="#" class="nav-link text-blue-900 font-medium hover:text-blue-700 transition">Investigación</a>
+                <a href="#" class="nav-link text-blue-900 font-medium hover:text-blue-700 transition">Vida Universitaria</a>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="text-blue-900 font-medium hover:text-blue-700 transition">Solicita Info</a>
+                <a href="#" class="btn-primary text-white font-medium px-5 py-2 rounded-full">Postula</a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="openOffcanvas" class="md:hidden text-blue-900">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section pt-24 pb-32 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Formando Líderes del Mañana</h1>
+            <p class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto">Excelencia académica, investigación innovadora y compromiso con el desarrollo sostenible</p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
+                <a href="#" class="btn-primary text-white font-bold px-8 py-4 rounded-full text-lg inline-block">Explora Nuestras Carreras</a>
+                <a href="#" class="bg-white text-blue-900 font-bold px-8 py-4 rounded-full text-lg inline-block hover:bg-gray-100 transition">Conoce Nuestro Campus</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slider de Facultades (insertado aquí entre Hero y Stats) -->
+    <style>
+        .faculty-slider { scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
+        .faculty-slider::-webkit-scrollbar { display: none; }
+        .faculty-card { transition: all 0.3s ease; flex: 0 0 auto; }
+        .faculty-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .faculty-icon { transition: all 0.3s ease; }
+        .faculty-card:hover .faculty-icon { transform: scale(1.1); }
+        .slider-btn { transition: all 0.3s ease; }
+        .slider-btn:hover { background-color: rgba(30,58,138,0.06); }
+        .modal-transition { transition: all 0.3s ease; }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
+        .play-btn { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%{transform:scale(1);box-shadow:0 0 0 0 rgba(211,5,45,0.7);}70%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(211,5,45,0);}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(211,5,45,0);} }
+    </style>
+
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-blue-900 mb-2">Conoce nuestras carreras en (slider)</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Desliza para ver más facultades y selecciona una para ver las carreras disponibles.</p>
+            </div>
+
+            <div class="relative">
+                <button id="prevBtn" class="slider-btn absolute left-0 top-1/2 transform -translate-y-1/2 -ml-4 md:-ml-6 z-10 bg-white rounded-full p-3 shadow-lg text-blue-900 hover:text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button id="nextBtn" class="slider-btn absolute right-0 top-1/2 transform -translate-y-1/2 -mr-4 md:-mr-6 z-10 bg-white rounded-full p-3 shadow-lg text-blue-900 hover:text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+
+                <div id="facultySlider" class="faculty-slider flex overflow-x-auto pb-6 gap-6 px-2 md:px-0">
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="ingenieria">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-cogs text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Ingeniería</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="negocios">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-briefcase text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Negocios</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="derecho">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-gavel text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Derecho</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="educacion">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-book text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Educación</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="psicologia">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-brain text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Psicología</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="comunicaciones">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-comments text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Comunicaciones</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="arquitectura">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-building text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Arquitectura</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="salud">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-heartbeat text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Salud</span>
+                        </button>
+                    </div>
+                    <div class="faculty-card w-40 flex-shrink-0">
+                        <button type="button" class="w-full h-full flex flex-col items-center space-y-2 text-center transition-transform hover:scale-105" data-faculty="medicina">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-200">
+                                <i class="fas fa-stethoscope text-2xl text-blue-900"></i>
+                            </div>
+                            <span class="text-md font-semibold text-blue-900">Medicina</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para mostrar carreras (slider) -->
+    <div id="facultyModal" class="fixed inset-0 z-50 hidden modal-transition">
+        <div class="modal-backdrop absolute inset-0" id="modalBackdrop"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden modal-transition transform scale-95 opacity-0" id="modalContent">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h3 id="modalTitle" class="text-2xl font-bold text-blue-900">Carreras de <span id="facultyName"></span></h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto max-h-[60vh]" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const facultiesData = {
+            ingenieria: { name: "Ingeniería", path: "facultad-de-ingenieria", careers: ["Ingeniería Civil", "Ingeniería de Sistemas", "Ingeniería Industrial", "Ingeniería Mecánica", "Ingeniería Eléctrica", "Ingeniería Electrónica", "Ingeniería Química", "Ingeniería Ambiental", "Ingeniería de Software"] },
+            negocios: { name: "Negocios", path: "facultad-de-negocios", careers: ["Administración de Empresas", "Contabilidad", "Finanzas", "Marketing", "Negocios Internacionales", "Gestión Hotelera y Turismo", "Economía", "Emprendimiento"] },
+            derecho: { name: "Derecho", path: "facultad-de-derecho", careers: ["Derecho Civil", "Derecho Penal", "Derecho Constitucional", "Derecho Laboral", "Derecho Internacional", "Derecho Corporativo", "Derecho Ambiental"] },
+            educacion: { name: "Educación", path: "facultad-de-educacion", careers: ["Educación Inicial", "Educación Primaria", "Educación Secundaria", "Educación Especial", "Psicopedagogía", "Gestión Educativa"] },
+            psicologia: { name: "Psicología", path: "facultad-de-psicologia", careers: ["Psicología Clínica", "Psicología Organizacional", "Psicología Educativa", "Psicología Social", "Neuropsicología", "Psicología Forense"] },
+            comunicaciones: { name: "Comunicaciones", path: "facultad-de-comunicaciones", careers: ["Comunicación Audiovisual", "Periodismo", "Publicidad", "Relaciones Públicas", "Comunicación Corporativa", "Producción Multimedia"] },
+            arquitectura: { name: "Arquitectura", path: "facultad-de-arquitectura", careers: ["Arquitectura", "Diseño de Interiores", "Urbanismo", "Paisajismo", "Diseño Sustentable"] },
+            salud: { name: "Salud", path: "facultad-de-salud", careers: ["Enfermería", "Nutrición", "Fisioterapia", "Terapia Ocupacional", "Tecnología Médica", "Farmacia"] },
+            medicina: { name: "Medicina", path: "facultad-de-medicina", careers: ["Medicina Humana", "Cirugía General", "Pediatría", "Ginecología y Obstetricia", "Medicina Interna", "Cardiología", "Neurología"] }
+        };
+
+        const facultySlider = document.getElementById('facultySlider');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const facultyModal = document.getElementById('facultyModal');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const modalContent = document.getElementById('modalContent');
+        const modalBody = document.getElementById('modalBody');
+        const modalName = document.getElementById('facultyName');
+        const closeModal = document.getElementById('closeModal');
+
+        const cardWidth = 160; // w-40 = 160px
+        const gap = 24; // gap-6 = 24px
+        const scrollAmount = cardWidth + gap;
+
+        nextBtn.addEventListener('click', () => facultySlider.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
+        prevBtn.addEventListener('click', () => facultySlider.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
+
+        document.querySelectorAll('[data-faculty]').forEach(button => {
+            button.addEventListener('click', () => {
+                const facultyKey = button.getAttribute('data-faculty');
+                openFacultyModal(facultyKey);
+            });
+        });
+
+        function openFacultyModal(facultyKey) {
+            const faculty = facultiesData[facultyKey];
+            if (!faculty) return;
+            modalName.textContent = faculty.name;
+            modalBody.innerHTML = `
+                <div class="field-name-descripcion">
+                    <p class="text-center text-lg italic text-gray-700 mb-4">Conoce la malla de tu<br>carrera aquí</p>
+                </div>
+                <div class="field-group-select mb-4">
+                    <select name="carrera-malla" id="carrera-malla" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option selected disabled value="">¿Qué carrera te gustaría estudiar?</option>
+                        ${faculty.careers.map(career => {
+                            const url = `/pregrado/${faculty.path}/${career.toLowerCase().replace(/ /g, '-')}/malla-curricular`;
+                            return `<option value="${career.replace(/ /g, '')}" data-url="${url}">${career}</option>`;
+                        }).join('')}
+                    </select>
+                    <div id="msg-error-malla" class="text-red-600 text-sm mt-1" hidden>Debes elegir al menos una carrera</div>
+                </div>
+                <div class="field-name-enlace text-center">
+                    <button id="btn-redirect-carrera" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">Ir a la carrera</button>
+                </div>
+            `;
+
+            const redirectBtn = document.getElementById('btn-redirect-carrera');
+            const carreraSelect = document.getElementById('carrera-malla');
+            const errorMsg = document.getElementById('msg-error-malla');
+
+            redirectBtn.addEventListener('click', () => {
+                const selectedOption = carreraSelect.options[carreraSelect.selectedIndex];
+                const url = selectedOption ? selectedOption.getAttribute('data-url') : null;
+                if (url) {
+                    errorMsg.hidden = true;
+                    alert(`Redirigiendo a: ${url}`);
+                    // window.location.href = url; // activar en producción
+                } else {
+                    errorMsg.hidden = false;
+                }
+            });
+
+            facultyModal.classList.remove('hidden');
+            setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); modalContent.classList.add('scale-100', 'opacity-100'); }, 10);
+        }
+
+        function closeFacultyModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { facultyModal.classList.add('hidden'); }, 300);
+        }
+
+        closeModal.addEventListener('click', closeFacultyModal);
+        modalBackdrop.addEventListener('click', closeFacultyModal);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !facultyModal.classList.contains('hidden')) closeFacultyModal(); });
+    </script>
+    
+    
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-blue-900 counter" data-target="95">0</div>
+                    <p class="text-gray-600 mt-2">Tasa de empleabilidad</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-blue-900 counter" data-target="15000">0</div>
+                    <p class="text-gray-600 mt-2">Estudiantes activos</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-blue-900 counter" data-target="50">0</div>
+                    <p class="text-gray-600 mt-2">Programas académicos</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-4xl font-bold text-blue-900 counter" data-target="120">0</div>
+                    <p class="text-gray-600 mt-2">Países representados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Modalidades de Estudio (insertada desde prueba5) -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+                
+                <!-- COLUMNA IZQUIERDA: Descripción e imágenes -->
+                <div class="relative">
+                    <div class="flex flex-col h-full justify-start gap-6">
+                        <!-- Título y descripción -->
+                        <div class="flex items-start gap-6">
+                            <div class="w-1.5 bg-blue-600 rounded mr-4" aria-hidden="true"></div>
+                            <div>
+                                <h2 class="text-3xl md:text-4xl font-extrabold leading-tight text-blue-900">
+                                    Estudia a tu ritmo, en la modalidad que elijas
+                                </h2>
+                                <p class="mt-4 text-gray-600 max-w-prose text-lg">
+                                    Contamos con modalidades flexibles y horarios pensados para ti. Ya sea que prefieras 
+                                    asistir al campus, combinar clases o estudiar 100% virtual, encontrarás una opción 
+                                    que encaje con tu estilo de vida y metas profesionales.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Collage de imágenes -->
+                        <div class="mt-6 relative w-full max-w-md">
+                            <div class="absolute -left-4 -top-4 w-40 h-28 rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
+                                     alt="Estudiantes en campus universitario" 
+                                     class="w-full h-full object-cover">
+                            </div>
+                            <div class="relative ml-20 mt-8 w-56 h-36 rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                                <img src="https://images.unsplash.com/photo-1588072432836-e100327d50a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
+                                     alt="Aula virtual y tecnología educativa" 
+                                     class="w-full h-full object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Beneficios destacados (mini) -->
+                        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-blue-900">Títulos oficiales</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-laptop text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-blue-900">Plataforma virtual</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-blue-900">Docentes especializados</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-briefcase text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-blue-900">Para quienes trabajan</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: Acordeón de modalidades -->
+                <div>
+                    <div id="accordionModalidades" class="space-y-4">
+                        
+                        <!-- Modalidad Presencial -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            <button type="button" 
+                                    data-target="#modalidadPresencial" 
+                                    class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-university text-2xl text-blue-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-lg font-bold text-blue-900">Presencial</div>
+                                        <div class="text-sm text-gray-500 mt-1">Vive la experiencia universitaria completa</div>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500 transform transition-transform" viewBox="0 0 20 20" fill="none">
+                                    <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div id="modalidadPresencial" class="accordion-collapse px-6 bg-gray-50">
+                                <div class="space-y-6 py-6 text-gray-700">
+                                    
+                                    <!-- Horario Diurno -->
+                                    <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p class="font-bold text-blue-900 text-lg">Presencial — Diurno</p>
+                                                <p class="text-sm text-gray-500 mt-1">Lunes a sábado de 8:00 am a 6:00 pm</p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-sun text-xl text-blue-600"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Calendario visual -->
+                                        <div class="bg-gray-100 rounded-lg p-4">
+                                            <div class="h-3 rounded-md bg-blue-600 mb-4"></div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-3 grid grid-cols-7 gap-1 text-center">
+                                                <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                                            </div>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="calendar-day w-full h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-medium">D</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Horario Nocturno -->
+                                    <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p class="font-bold text-blue-900 text-lg">Presencial — Nocturno</p>
+                                                <p class="text-sm text-gray-500 mt-1">Lunes a viernes de 6:30 pm a 10:30 pm · Sábados de 2:00 pm a 10:30 pm</p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-moon text-xl text-indigo-600"></i>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-gray-100 rounded-lg p-4">
+                                            <div class="h-3 rounded-md bg-indigo-600 mb-4"></div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-3 grid grid-cols-7 gap-1 text-center">
+                                                <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                                            </div>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="calendar-day w-full h-8 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-indigo-500 rounded flex items-center justify-center text-white text-xs font-medium">N</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modalidad Semipresencial -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            <button type="button" 
+                                    data-target="#modalidadSemipresencial" 
+                                    class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-blender-phone text-2xl text-green-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-lg font-bold text-blue-900">Semipresencial</div>
+                                        <div class="text-sm text-gray-500 mt-1">Combina lo mejor de ambos mundos</div>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500 transform transition-transform" viewBox="0 0 20 20" fill="none">
+                                    <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div id="modalidadSemipresencial" class="accordion-collapse px-6 bg-gray-50">
+                                <div class="space-y-6 py-6 text-gray-700">
+                                    
+                                    <!-- 1 día presencial -->
+                                    <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p class="font-bold text-blue-900 text-lg">1 día presencial</p>
+                                                <p class="text-sm text-gray-500 mt-1">
+                                                    1 día presencial de lunes a viernes de 6:30 pm hasta las 10:30 pm 
+                                                    o los sábados desde las 2:00 pm
+                                                </p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar-day text-xl text-green-600"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Calendario visual - MODIFICADO para ocupar más espacio -->
+                                        <div class="bg-gray-100 rounded-lg p-4">
+                                            <div class="h-3 rounded-md bg-green-600 mb-4"></div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-3 grid grid-cols-7 gap-1 text-center">
+                                                <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                                            </div>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="calendar-day w-full h-8 bg-green-600 rounded flex items-center justify-center text-white text-xs font-medium">P</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2 días presencial -->
+                                    <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p class="font-bold text-blue-900 text-lg">2 días presencial</p>
+                                                <p class="text-sm text-gray-500 mt-1">
+                                                    Lima: Estudia presencial los viernes desde las 6:30pm y los sábados desde las 2:00 pm. 
+                                                    Provincias: Estudia presencial los sábados y domingos.
+                                                </p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar-week text-xl text-green-600"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Calendario visual - MODIFICADO para ocupar más espacio -->
+                                        <div class="bg-gray-100 rounded-lg p-4">
+                                            <div class="h-3 rounded-md bg-green-600 mb-4"></div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-3 grid grid-cols-7 gap-1 text-center">
+                                                <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                                            </div>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="calendar-day w-full h-8 bg-green-600 rounded flex items-center justify-center text-white text-xs font-medium">P</div>
+                                                <div class="calendar-day w-full h-8 bg-green-600 rounded flex items-center justify-center text-white text-xs font-medium">P</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">V</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modalidad Virtual -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            <button type="button" 
+                                    data-target="#modalidadVirtual" 
+                                    class="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-laptop-house text-2xl text-purple-600"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-lg font-bold text-blue-900">100% Virtual</div>
+                                        <div class="text-sm text-gray-500 mt-1">Estudia desde cualquier lugar</div>
+                                    </div>
+                                </div>
+                                <svg class="w-6 h-6 text-gray-500 transform transition-transform" viewBox="0 0 20 20" fill="none">
+                                    <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div id="modalidadVirtual" class="accordion-collapse px-6 bg-gray-50">
+                                <div class="space-y-6 py-6 text-gray-700">
+                                    
+                                    <div class="bg-white rounded-lg shadow-sm p-5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p class="font-bold text-blue-900 text-lg">Flexibilidad total</p>
+                                                <p class="text-sm text-gray-500 mt-1">Accede a tus clases cuando y donde quieras</p>
+                                            </div>
+                                            <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-globe text-xl text-purple-600"></i>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-gray-100 rounded-lg p-4">
+                                            <div class="h-3 rounded-md bg-purple-600 mb-4"></div>
+                                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-3 grid grid-cols-7 gap-1 text-center">
+                                                <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                                            </div>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">V</div>
+                                                <div class="calendar-day w-full h-8 bg-purple-500 rounded flex items-center justify-center text-white text-xs">V</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Características de la modalidad virtual -->
+                                    <div class="grid grid-cols-2 gap-3 mt-4">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-play-circle text-purple-500"></i>
+                                            <span class="text-sm">Clases grabadas</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-comments text-purple-500"></i>
+                                            <span class="text-sm">Foros de discusión</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-tasks text-purple-500"></i>
+                                            <span class="text-sm">Evaluaciones online</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-chalkboard-teacher text-purple-500"></i>
+                                            <span class="text-sm">Tutorías virtuales</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de llamada a la acción -->
+                    <div class="mt-8 text-center">
+                        <a href="#" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-md">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Más información sobre modalidades
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script: accordion externo -->
+    <!-- Se cargará al final del body -->
+
+    <!-- Benefits Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-blue-900 mb-12">¿Por Qué Elegir Nuestra Universidad?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Benefit 1 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-graduation-cap text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Excelencia Académica</h3>
+                    <p class="text-gray-600">Nuestros programas están acreditados internacionalmente y contamos con profesores de primer nivel en cada disciplina.</p>
+                </div>
+                
+                <!-- Benefit 2 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-flask text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Investigación de Vanguardia</h3>
+                    <p class="text-gray-600">Contamos con laboratorios equipados y centros de investigación que fomentan la innovación y el descubrimiento.</p>
+                </div>
+                
+                <!-- Benefit 3 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-handshake text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Vinculación con la Industria</h3>
+                    <p class="text-gray-600">Colaboramos con empresas líderes para ofrecer prácticas profesionales y oportunidades laborales a nuestros estudiantes.</p>
+                </div>
+                
+                <!-- Benefit 4 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-globe-americas text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Enfoque Global</h3>
+                    <p class="text-gray-600">Programas de intercambio, doble titulación y una comunidad internacional diversa enriquece la experiencia educativa.</p>
+                </div>
+                
+                <!-- Benefit 5 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-leaf text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Campus Sostenible</h3>
+                    <p class="text-gray-600">Nuestro campus fue diseñado con criterios de sostenibilidad, incluyendo energías renovables y espacios verdes.</p>
+                </div>
+                
+                <!-- Benefit 6 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-blue-900 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Comunidad Activa</h3>
+                    <p class="text-gray-600">Más de 100 clubes estudiantiles, actividades deportivas y culturales para una experiencia universitaria integral.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Faculties Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-blue-900 mb-12">Nuestras Facultades y Carreras</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Faculty 1 -->
+                <div class="faculty-card bg-white rounded-xl shadow-md p-6 text-center card-hover border border-gray-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cogs faculty-icon text-blue-900 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Ingeniería y Tecnología</h3>
+                    <p class="text-gray-600 mb-4">Programas innovadores en las áreas de ingeniería, computación y tecnología.</p>
+                    <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                        Ver programas <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Faculty 2 -->
+                <div class="faculty-card bg-white rounded-xl shadow-md p-6 text-center card-hover border border-gray-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heartbeat faculty-icon text-blue-900 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Ciencias de la Salud</h3>
+                    <p class="text-gray-600 mb-4">Formación de profesionales de la salud con altos estándares éticos y científicos.</p>
+                    <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                        Ver programas <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Faculty 3 -->
+                <div class="faculty-card bg-white rounded-xl shadow-md p-6 text-center card-hover border border-gray-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-balance-scale faculty-icon text-blue-900 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Derecho y Ciencias Sociales</h3>
+                    <p class="text-gray-600 mb-4">Programas que forman líderes en el ámbito jurídico, político y social.</p>
+                    <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                        Ver programas <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Faculty 4 -->
+                <div class="faculty-card bg-white rounded-xl shadow-md p-6 text-center card-hover border border-gray-100">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-paint-brush faculty-icon text-blue-900 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-3">Artes y Humanidades</h3>
+                    <p class="text-gray-600 mb-4">Exploración de la creatividad, la cultura y la expresión humana en todas sus formas.</p>
+                    <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                        Ver programas <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#" class="btn-primary text-white font-bold px-8 py-3 rounded-full inline-block">Ver Todas las Carreras</a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-blue-900 mb-12">Noticias y Novedades</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- News 1 -->
+                <div class="news-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="news-image-container h-48">
+                        <img src="https://images.unsplash.com/photo-1582573618381-c9d34cf5c66b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                             alt="Investigación universitaria" class="news-image w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-sm text-blue-700 font-medium">Investigación • 15 Oct 2023</span>
+                        <h3 class="text-xl font-bold text-blue-900 my-3">Nuevo descubrimiento en energías renovables</h3>
+                        <p class="text-gray-600 mb-4">Nuestro equipo de investigación ha desarrollado un nuevo material que mejora la eficiencia de paneles solares en un 25%.</p>
+                        <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                            Leer más <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- News 2 -->
+                <div class="news-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="news-image-container h-48">
+                        <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                             alt="Estudiantes universitarios" class="news-image w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-sm text-blue-700 font-medium">Eventos • 10 Oct 2023</span>
+                        <h3 class="text-xl font-bold text-blue-900 my-3">Semana de la Ciencia 2023</h3>
+                        <p class="text-gray-600 mb-4">Participa en nuestras jornadas de puertas abiertas con más de 50 actividades científicas para todos los públicos.</p>
+                        <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                            Leer más <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- News 3 -->
+                <div class="news-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="news-image-container h-48">
+                        <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                             alt="Graduación universitaria" class="news-image w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-sm text-blue-700 font-medium">Académico • 5 Oct 2023</span>
+                        <h3 class="text-xl font-bold text-blue-900 my-3">Nuevo programa de doble titulación internacional</h3>
+                        <p class="text-gray-600 mb-4">Ampliamos nuestra oferta con un nuevo programa conjunto con la Universidad de Toronto en Ciencias de Datos.</p>
+                        <a href="#" class="text-blue-700 font-medium inline-flex items-center">
+                            Leer más <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#" class="bg-white text-blue-900 font-bold px-8 py-3 rounded-full inline-block border border-blue-900 hover:bg-blue-50 transition">Ver Todas las Noticias</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campus Section (reemplazado con nuevo diseño) -->
+    <style>
+        /* Hide horizontal scrollbar for campus slider on large screens */
+        @media (min-width: 768px) {
+            .campus-slider {
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE 10+ */
+            }
+            .campus-slider::-webkit-scrollbar { /* WebKit */
+                display: none;
+                width: 0;
+                height: 0;
+            }
+        }
+    </style>
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <!-- Header de la sección -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">Estudia desde donde estés</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-4">
+                    <a href="#" class="text-blue-600 hover:text-blue-800 font-medium underline">Ubica cada campus</a>
+                </div>
+                <p class="text-gray-600 max-w-2xl mx-auto text-lg">15 campus a nivel nacional o modalidad 100% virtual.</p>
+            </div>
+
+            <!-- Slider de Campus -->
+            <div class="relative">
+                <!-- Botones de Navegación -->
+                <button id="prevCampusBtn" aria-label="Anterior" class="slider-btn absolute left-0 top-1/2 transform -translate-y-1/2 -ml-2 md:-ml-6 z-30 bg-white rounded-full p-4 md:p-3 shadow-lg text-blue-900 hover:text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                
+                <button id="nextCampusBtn" aria-label="Siguiente" class="slider-btn absolute right-0 top-1/2 transform -translate-y-1/2 -mr-2 md:-mr-6 z-30 bg-white rounded-full p-4 md:p-3 shadow-lg text-blue-900 hover:text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+
+                <!-- Contenedor del Slider -->
+                <div id="campusSlider" class="campus-slider flex overflow-x-auto pb-6 gap-6 px-2 md:px-0">
+                    
+                    <!-- Campus Lima Centro -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Lima Centro" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Lima Centro</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Jr. Hernán Velarde 289, Lima</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Lima Norte -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Lima Norte" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Lima Norte</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Av. Alfredo Mendiola 6377, Los Olivos</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Lima Sur -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Lima Sur" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Lima Sur</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Carretera Panamericana Sur Km16, Villa El Salvador</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Arequipa -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1582748777342-cfb60b8f1f3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Arequipa" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Arequipa</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Av. Tacna y Arica 160, Arequipa</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Trujillo -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Trujillo" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Trujillo</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Av. Nicolás de Piérola 1221, Trujillo</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Chiclayo -->
+                    <div class="campus-card w-80 flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                        <a href="#" class="block">
+                            <div class="relative overflow-hidden">
+                                <div class="campus-image-container h-48 overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                                         alt="Campus Chiclayo" 
+                                         class="campus-image w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div class="absolute bottom-4 left-4 text-white">
+                                    <h3 class="text-xl font-bold">Chiclayo</h3>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start mb-3">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-2"></i>
+                                    <p class="text-gray-700 text-sm">Esquina Prol. Augusto B. Leguía con Av. Hernán Meiner, Chiclayo</p>
+                                </div>
+                                <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                    <i class="fas fa-map-marked-alt mr-2"></i>
+                                    Ver ubicación
+                                </a>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Campus Virtual -->
+                    <div class="campus-card w-80 flex-shrink-0 virtual-campus-card rounded-xl shadow-md overflow-hidden border border-blue-200">
+                        <a href="#" class="block h-full">
+                            <div class="p-6 h-full flex flex-col justify-between text-white" style="background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 60%, rgba(255,255,255,0.12) 100%);">
+                                <div>
+                                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-laptop-house text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-center mb-2">Modalidad 100% Virtual</h3>
+                                    <p class="text-blue-100 text-center mb-4">
+                                        Estudia desde cualquier lugar del país con nuestra plataforma virtual de última generación.
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <span class="inline-flex items-center font-medium">
+                                        Conoce más
+                                        <i class="fas fa-arrow-right ml-2"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Indicadores del slider -->
+            <div class="flex justify-center mt-6 space-x-2">
+                <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                <div class="w-3 h-3 bg-blue-300 rounded-full"></div>
+                <div class="w-3 h-3 bg-blue-300 rounded-full"></div>
+                <div class="w-3 h-3 bg-blue-300 rounded-full"></div>
+                <div class="w-3 h-3 bg-blue-300 rounded-full"></div>
+            </div>
+
+            <!-- Botón para ver todos los campus -->
+            <div class="text-center mt-8">
+                <a href="#" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition">
+                    <i class="fas fa-map-marked-alt mr-2"></i>
+                    Ver todos los campus
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white pt-12 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <!-- Column 1 -->
+                <div>
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-900 font-bold mr-2">UI</div>
+                        <span class="text-xl font-bold">Universidad Innovación</span>
+                    </div>
+                    <p class="text-blue-200 mb-4">Formando líderes con visión global y compromiso social desde 1985.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Column 2 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Enlaces Rápidos</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Admisiones</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Programas Académicos</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Investigación</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Biblioteca</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Campus Virtual</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 3 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Recursos</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Calendario Académico</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Bolsa de Trabajo</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Portal del Estudiante</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Portal del Docente</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Directorio</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 4 -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Contacto</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">Av. Universidad 123, Ciudad Capital</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">+1 (555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">info@universidadinnovacion.edu</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-blue-800 text-center text-blue-300 text-sm">
+                <p>&copy; 2023 Universidad Innovación. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Offcanvas Mobile con Tailwind -->
+    <div id="offcanvasMobile" class="fixed inset-0 z-50 hidden">
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="offcanvasOverlay"></div>
+        
+    <!-- Panel del offcanvas (ahora se despliega desde la derecha) -->
+    <div class="fixed top-0 right-0 w-full sm:w-80 h-full bg-white shadow-xl offcanvas-transition transform translate-x-full z-50 transition-transform duration-300" id="offcanvasPanel">
+            <!-- Header -->
+            <div class="bg-blue-800 text-white p-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold">Menú UTP</h2>
+                <button id="closeOffcanvas" class="text-white hover:text-gray-200 transition">
+                    <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 18L17.7314 3.26861" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round"></path>
+                        <path d="M17.7314 17.7314L3 3" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="h-[calc(100%-80px)] overflow-y-auto custom-scrollbar">
+                <!-- Menú principal móvil -->
+                <nav class="p-4 border-b border-gray-200">
+                    <!-- Menú de admisión -->
+                    <div class="mb-4">
+                        <button class="flex justify-between items-center w-full text-left font-semibold text-blue-900 hover:text-blue-700 py-2 transition dropdown-toggle">
+                            Admisión
+                            <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu ml-4 mt-1">
+                            <!-- Estoy en el colegio -->
+                            <div class="mb-3">
+                                <button class="flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-700 py-1 transition dropdown-toggle">
+                                    Estoy en el colegio
+                                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                                </button>
+                                <div class="dropdown-menu ml-3 mt-1">
+                                    <a href="https://www.utp.edu.pe/web/estoy-en-el-cole#scroll-1" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Tercio Superior</div>
+                                        <div class="text-xs mt-1">Si perteneciste al tercio superior en 4° y 5° de secundaria, obtén el ingreso directo</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/estoy-en-el-colegio#scroll-2" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Buen Rendimiento Escolar</div>
+                                        <div class="text-xs mt-1">Si tienes 14 o más en 4° y 5° de secundaria, obtén el ingreso directo</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/estoy-en-el-colegio#scroll-3" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Examen de admisión preferencial</div>
+                                        <div class="text-xs mt-1">Si terminas el colegio este año puedes postular por este examen</div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Ya egresé del colegio -->
+                            <div class="mb-3">
+                                <button class="flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-700 py-1 transition dropdown-toggle">
+                                    Ya egresé del colegio y deseo postular
+                                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                                </button>
+                                <div class="dropdown-menu ml-3 mt-1">
+                                    <a href="https://www.utp.edu.pe/web/egrese-del-colegio-deseo-postular#scroll-1" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Tercio Superior</div>
+                                        <div class="text-xs mt-1">Si perteneciste al tercio superior en 4° y 5° de secundaria, obtén el ingreso directo</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/egrese-del-colegio-deseo-postular#scroll-2" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Buen Rendimiento Escolar</div>
+                                        <div class="text-xs mt-1">Si tienes 14 o más en 4° y 5° de secundaria, obtén el ingreso directo</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/egrese-del-colegio-deseo-postular#scroll-3" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Examen de admisión preferencial</div>
+                                        <div class="text-xs mt-1">Si terminaste el colegio el año anterior al que postulas</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/egrese-del-colegio-deseo-postular#scroll-4" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Examen de admisión regular</div>
+                                        <div class="text-xs mt-1">Si terminaste el colegio hace dos años o más</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/egrese-del-colegio-deseo-postular#scroll-5" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Otras modalidades</div>
+                                        <div class="text-xs mt-1">Bachillerato extranjero, cónyuge o hijo de diplomáticos o funcionarios internacionales, deportista calificado</div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Tengo estudios superiores -->
+                            <div class="mb-3">
+                                <button class="flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-700 py-1 transition dropdown-toggle">
+                                    Tengo estudios superiores concluidos o sin concluir
+                                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                                </button>
+                                <div class="dropdown-menu ml-3 mt-1">
+                                    <a href="https://www.utp.edu.pe/web/tengo-estudios-superiores-o-sin-concluir#scroll-1" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Traslado</div>
+                                        <div class="text-xs mt-1">Tienes mínimo 72 créditos, cuatro semestres o dos años en universidad o instituto. Trasládate a la UTP</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/tengo-estudios-superiores-o-sin-concluir#scroll-2" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Título universitario o técnico</div>
+                                        <div class="text-xs mt-1">Si cuentas con grado académico (Bachiller, Maestro o Doctor) o título profesional universitario o eres egresado de un instituto</div>
+                                    </a>
+                                    <a href="https://www.utp.edu.pe/web/tengo-estudios-superiores-o-sin-concluir#scroll-3" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        <div class="font-medium">Otras modalidades</div>
+                                        <div class="text-xs mt-1">Eres Oficial de las Fuerzas Armadas o Policía Nacional</div>
+                                    </a>
+                                    <a href="https://resultadosadmision.utp.edu.pe/" target="_blank" class="block py-2 px-3 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition font-medium">
+                                        Resultado del Proceso de Admisión 2025 Ciclo - Agosto
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carreras -->
+                    <div class="mb-4">
+                        <button class="flex justify-between items-center w-full text-left font-semibold text-blue-900 hover:text-blue-700 py-2 transition dropdown-toggle">
+                            Carreras
+                            <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu ml-4 mt-1">
+                            <!-- Ingeniería -->
+                            <div class="mb-3">
+                                <button class="flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-700 py-1 transition dropdown-toggle">
+                                    Ingeniería
+                                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                                </button>
+                                <div class="dropdown-menu ml-3 mt-1">
+                                    <a href="/pregrado/facultad-de-ingenieria/ingenieria-ambiental" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        Ingeniería Ambiental
+                                    </a>
+                                    <a href="/pregrado/facultad-de-ingenieria/ingenieria-aeronautica" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        Ingeniería Aeronáutica
+                                    </a>
+                                    <a href="/pregrado/facultad-de-ingenieria/ingenieria-automotriz" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        Ingeniería Automotriz
+                                    </a>
+                                    <!-- Más carreras de ingeniería... -->
+                                </div>
+                            </div>
+
+                            <!-- Negocios -->
+                            <div class="mb-3">
+                                <button class="flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-700 py-1 transition dropdown-toggle">
+                                    Negocios
+                                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                                </button>
+                                <div class="dropdown-menu ml-3 mt-1">
+                                    <a href="/pregrado/facultad-de-negocios/administracion-banca-y-finanzas" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        Administración Banca y Finanzas
+                                    </a>
+                                    <a href="/pregrado/facultad-de-negocios/administracion-de-empresas" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                        Administración de Empresas
+                                    </a>
+                                    <!-- Más carreras de negocios... -->
+                                </div>
+                            </div>
+
+                            <!-- Simulador de convalidaciones -->
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                <a href="https://www.utp.edu.pe/simulador-convalidaciones" class="block text-blue-700 font-medium hover:text-blue-800 transition">
+                                    Simulador de convalidaciones
+                                </a>
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Descubre cuántos cursos puedes convalidar
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vida UTP -->
+                    <div class="mb-4">
+                        <button class="flex justify-between items-center w-full text-left font-semibold text-blue-900 hover:text-blue-700 py-2 transition dropdown-toggle">
+                            Vida UTP
+                            <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu ml-4 mt-1">
+                            <a href="https://www.utp.edu.pe/servicios-universitarios/empleabilidad" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                Empleabilidad
+                            </a>
+                            <a href="https://www.utp.edu.pe/consejeria-estudiantil" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                Consejería Estudiantil
+                            </a>
+                            <a href="https://www.utp.edu.pe/web/ugo" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                Talleres y tutorías académicas
+                            </a>
+                            <!-- Más enlaces de Vida UTP... -->
+                        </div>
+                    </div>
+
+                    <!-- Investigación -->
+                    <div class="mb-4">
+                        <a href="https://www.utp.edu.pe/web/investigacion" class="block font-semibold text-blue-900 hover:text-blue-700 py-2 transition">
+                            Investigación
+                        </a>
+                    </div>
+
+                    <!-- Sobre UTP -->
+                    <div class="mb-4">
+                        <button class="flex justify-between items-center w-full text-left font-semibold text-blue-900 hover:text-blue-700 py-2 transition dropdown-toggle">
+                            Sobre UTP
+                            <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu ml-4 mt-1">
+                            <a href="https://www.utp.edu.pe/web/nosotros" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                Nuestro propósito
+                            </a>
+                            <a href="https://www.utp.edu.pe/web/autoridades" class="block py-2 px-3 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition">
+                                Nuestras autoridades
+                            </a>
+                            <!-- Más enlaces sobre UTP... -->
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Menú secundario -->
+                <nav class="p-4 border-b border-gray-200">
+                    <h3 class="font-semibold text-gray-700 mb-3">Accesos rápidos</h3>
+                    <div class="space-y-2">
+                        <a href="https://www.utp.edu.pe/test-vocacional" class="block text-blue-600 hover:text-blue-700 transition">
+                            Test Vocacional
+                        </a>
+                        <a href="https://inscripcion-online.utp.edu.pe/" class="block text-blue-600 hover:text-blue-700 transition">
+                            Postula en línea
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- Menú de usuarios -->
+                <nav class="p-4">
+                    <h3 class="font-semibold text-gray-700 mb-3">Accesos universitarios</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://www.utp.edu.pe/web/postulante" class="block text-center bg-gray-100 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded transition text-sm">
+                            Postulantes
+                        </a>
+                        <a href="https://www.utp.edu.pe/web/estudiantes" class="block text-center bg-gray-100 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded transition text-sm">
+                            Estudiantes
+                        </a>
+                        <a href="https://www.utp.edu.pe/web/docentes" class="block text-center bg-gray-100 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded transition text-sm">
+                            Docentes
+                        </a>
+                        <a href="https://www.utp.edu.pe/web/alumni" class="block text-center bg-gray-100 hover:bg-blue-100 text-blue-700 py-2 px-3 rounded transition text-sm">
+                            Egresados
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funcionalidad del offcanvas
+        const offcanvas = document.getElementById('offcanvasMobile');
+        const offcanvasPanel = document.getElementById('offcanvasPanel');
+        const openButton = document.getElementById('openOffcanvas');
+        const closeButton = document.getElementById('closeOffcanvas');
+        const overlay = document.getElementById('offcanvasOverlay');
+
+        function openOffcanvas() {
+            offcanvas.classList.remove('hidden');
+            setTimeout(() => {
+                offcanvasPanel.classList.remove('translate-x-full');
+            }, 10);
+        }
+
+        function closeOffcanvas() {
+            offcanvasPanel.classList.add('translate-x-full');
+            setTimeout(() => {
+                offcanvas.classList.add('hidden');
+            }, 300);
+        }
+
+        openButton.addEventListener('click', openOffcanvas);
+        closeButton.addEventListener('click', closeOffcanvas);
+        overlay.addEventListener('click', closeOffcanvas);
+
+        // Funcionalidad de dropdowns
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const menu = this.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                // Cerrar otros dropdowns abiertos en el mismo nivel
+                const parent = this.parentElement;
+                parent.querySelectorAll('.dropdown-menu.open').forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.classList.remove('open');
+                        otherMenu.previousElementSibling.querySelector('i').classList.remove('fa-chevron-up');
+                        otherMenu.previousElementSibling.querySelector('i').classList.add('fa-chevron-down');
+                    }
+                });
+
+                // Toggle current dropdown
+                menu.classList.toggle('open');
+                if (menu.classList.contains('open')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+
+        // Cerrar offcanvas con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !offcanvas.classList.contains('hidden')) {
+                closeOffcanvas();
+            }
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Counter animation
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const step = target / (duration / 16); // 60fps
+            
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+        
+        // Initialize counters when they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        document.querySelectorAll('.counter').forEach(counter => {
+            observer.observe(counter);
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                            const mobileMenu = document.getElementById('mobile-menu');
+                    if (mobileMenu.classList.contains('open')) {
+                        mobileMenu.classList.remove('open');
+                        const menuButton = document.getElementById('mobile-menu-button');
+                        const icon = menuButton.querySelector('i');
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- Campus slider script (standalone) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const campusSlider = document.getElementById('campusSlider');
+            const prevCampusBtn = document.getElementById('prevCampusBtn');
+            const nextCampusBtn = document.getElementById('nextCampusBtn');
+
+            if (!campusSlider || !prevCampusBtn || !nextCampusBtn) return;
+
+            const campusCardWidth = 320; // w-80 = 320px
+            const campusGap = 24; // gap-6 = 24px
+            const campusScrollAmount = campusCardWidth + campusGap;
+
+            nextCampusBtn.addEventListener('click', () => {
+                campusSlider.scrollBy({ left: campusScrollAmount, behavior: 'smooth' });
+            });
+
+            prevCampusBtn.addEventListener('click', () => {
+                campusSlider.scrollBy({ left: -campusScrollAmount, behavior: 'smooth' });
+            });
+
+            function updateSliderButtons() {
+                const scrollLeft = campusSlider.scrollLeft;
+                const scrollWidth = campusSlider.scrollWidth;
+                const clientWidth = campusSlider.clientWidth;
+
+                if (scrollLeft <= 0) {
+                    prevCampusBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    prevCampusBtn.setAttribute('aria-disabled', 'true');
+                } else {
+                    prevCampusBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    prevCampusBtn.setAttribute('aria-disabled', 'false');
+                }
+
+                if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                    nextCampusBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    nextCampusBtn.setAttribute('aria-disabled', 'true');
+                } else {
+                    nextCampusBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    nextCampusBtn.setAttribute('aria-disabled', 'false');
+                }
+            }
+
+            campusSlider.addEventListener('scroll', updateSliderButtons);
+            window.addEventListener('resize', updateSliderButtons);
+            updateSliderButtons();
+        });
+    </script>
+    <script src="assets/js/accordion.js"></script>
+</body>
+</html>
