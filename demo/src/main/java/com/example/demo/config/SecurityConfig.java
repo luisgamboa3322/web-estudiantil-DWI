@@ -71,20 +71,15 @@ public class SecurityConfig {
                 String target = "/";
 
                 if (username != null && !username.isEmpty()) {
-                    // Buscar student por email y usar su 'codigo' para decidir la ruta
-                    Optional<com.example.demo.model.Student> opt = studentService.findByEmail(username);
-                    if (opt.isPresent() && opt.get().getCodigo() != null && !opt.get().getCodigo().isEmpty()) {
-                        char first = Character.toUpperCase(opt.get().getCodigo().trim().charAt(0));
-                        if (first == 'U') target = "/student/dashboard";
-                        else if (first == 'C') target = "/teacher/dashboard";
-                        else if (first == 'A') target = "/admin/dashboard";
+                    // Determinar el rol basado en las autoridades del usuario autenticado
+                    if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+                        target = "/admin/dashboard";
+                    } else if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_TEACHER"))) {
+                        target = "/profesor/dashboard";
+                    } else if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_STUDENT"))) {
+                        target = "/student/dashboard";
                     } else {
-                        // fallback: usar la inicial del email si no hay codigo
-                        char first = Character.toUpperCase(username.charAt(0));
-                        if (first == 'U') target = "/student/dashboard";
-                        else if (first == 'C') target = "/teacher/dashboard";
-                        else if (first == 'A') target = "/admin/dashboard";
-                        else target = "/student/dashboard";
+                        target = "/student/dashboard"; // fallback
                     }
                 }
 

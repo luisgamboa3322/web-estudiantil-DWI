@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.demo.model.Admin;
+import com.example.demo.service.AdminService;
+
 import com.example.demo.model.Student;
 import com.example.demo.service.StudentService;
 
@@ -20,10 +23,12 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final AdminService adminService;
     private final StudentService studentService;
     private final ProfessorService professorService;
 
-    public AdminController(StudentService studentService, ProfessorService professorService) {
+    public AdminController(AdminService adminService, StudentService studentService, ProfessorService professorService) {
+        this.adminService = adminService;
         this.studentService = studentService;
         this.professorService = professorService;
     }
@@ -34,6 +39,8 @@ public class AdminController {
         model.addAttribute("students", students);
         // añadir lista de profesores para Thymeleaf
         model.addAttribute("professors", professorService.findAll());
+        // añadir lista de administradores
+        model.addAttribute("admins", adminService.findAll());
         return "administrador/dashboard";
     }
 
@@ -49,5 +56,12 @@ public class AdminController {
     @ResponseBody
     public Professor createProfessor(@RequestBody Professor professor) {
         return professorService.create(professor);
+    }
+
+    // Nuevo endpoint para crear administrador (JSON)
+    @PostMapping("/admins")
+    @ResponseBody
+    public Admin createAdmin(@RequestBody Admin admin) {
+        return adminService.create(admin);
     }
 }

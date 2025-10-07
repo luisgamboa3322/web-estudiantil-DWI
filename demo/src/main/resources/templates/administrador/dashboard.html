@@ -81,6 +81,13 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#" data-target="administradores"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="shield" class="sidebar-icon"></i>
+                                <span>Administradores</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#" data-target="cursos"
                                 class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="book-marked" class="sidebar-icon"></i>
@@ -258,6 +265,42 @@
                     </div>
                 </main>
 
+                <!-- Vista Gestión de Administradores (Oculta por defecto) -->
+                <main id="administradores-content" class="content-view hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Gestión de Administradores</h1>
+                        <button id="add-admin-button"
+                            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span>Añadir Administrador</span>
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nombre</th>
+                                    <th scope="col" class="px-6 py-3">Código</th>
+                                    <th scope="col" class="px-6 py-3">Correo Electrónico</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Itera los administradores desde el modelo -->
+                                <tr th:each="a : ${admins}" class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" th:text="${a.nombre}">Nombre</td>
+                                    <td class="px-6 py-4" th:text="${a.codigo}">Código</td>
+                                    <td class="px-6 py-4" th:text="${a.email}">Correo</td>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+
                 <!-- Vista Gestión de Cursos (Oculta por defecto) -->
                 <main id="cursos-content" class="content-view hidden">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -369,6 +412,33 @@
         </div>
     </div>
 
+    <!-- Modal Añadir Administrador -->
+    <div id="admin-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Añadir Nuevo Administrador</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="add-admin-form">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Contraseña</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="save-admin-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Añadir Curso -->
     <div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
@@ -466,10 +536,12 @@
             // Lógica para los modales
             const studentModal = document.getElementById('student-modal');
             const teacherModal = document.getElementById('teacher-modal');
+            const adminModal = document.getElementById('admin-modal');
             const courseModal = document.getElementById('course-modal');
 
             const addStudentButton = document.getElementById('add-student-button');
             const addTeacherButton = document.getElementById('add-teacher-button');
+            const addAdminButton = document.getElementById('add-admin-button');
             const addCourseButton = document.getElementById('add-course-button');
 
             const closeModalButtons = document.querySelectorAll('.close-modal-button');
@@ -486,12 +558,14 @@
 
             addStudentButton.addEventListener('click', () => openModal(studentModal));
             addTeacherButton.addEventListener('click', () => openModal(teacherModal));
+            addAdminButton.addEventListener('click', () => openModal(adminModal));
             addCourseButton.addEventListener('click', () => openModal(courseModal));
 
             closeModalButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     closeModal(studentModal);
                     closeModal(teacherModal);
+                    closeModal(adminModal);
                     closeModal(courseModal);
                 });
             });
@@ -500,6 +574,7 @@
             window.addEventListener('click', (event) => {
                 if (event.target === studentModal) closeModal(studentModal);
                 if (event.target === teacherModal) closeModal(teacherModal);
+                if (event.target === adminModal) closeModal(adminModal);
                 if (event.target === courseModal) closeModal(courseModal);
             });
         });
@@ -555,6 +630,36 @@
                     } else {
                         const text = await res.text();
                         alert('Error guardando profesor: ' + (text || res.status));
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const saveAdminBtn = document.getElementById('save-admin-btn');
+            const addAdminForm = document.getElementById('add-admin-form');
+            const adminModal = document.getElementById('admin-modal');
+
+            if (saveAdminBtn) {
+                saveAdminBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(addAdminForm);
+                    const payload = Object.fromEntries(formData.entries());
+
+                    const res = await fetch('/admin/admins', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        adminModal.classList.add('hidden');
+                        adminModal.classList.remove('flex');
+                        location.reload();
+                    } else {
+                        const text = await res.text();
+                        alert('Error guardando administrador: ' + (text || res.status));
                     }
                 });
             }
