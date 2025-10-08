@@ -3,9 +3,13 @@ package com.example.demo.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.security.core.Authentication;
 
+import com.example.demo.model.Student;
 import com.example.demo.service.StudentService;
 
 @Controller
@@ -45,10 +49,23 @@ public class StudentController {
     }
 
     @GetMapping("/configuracion")
-    public String showConfiguracion(Model model) {
+    public String showConfiguracion(Authentication authentication, Model model) {
         model.addAttribute("activePage", "configuracion");
-        // Lógica para la vista de configuración
-        return "student/configuracion"; // Asegúrate de tener una vista configuracion.html
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            studentService.findByEmail(email).ifPresent(student -> {
+                model.addAttribute("student", student);
+            });
+        }
+        return "student/configuracion";
+    }
+
+    @PutMapping("/profile")
+    @ResponseBody
+    public Student updateProfile(Authentication authentication, @RequestBody Student changes) {
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        return studentService.update(student.getId(), changes);
     }
 
     // Agrega métodos para las otras vistas (ayuda, etc.) de la misma manera

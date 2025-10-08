@@ -81,6 +81,13 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#" data-target="administradores"
+                                class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i data-lucide="shield" class="sidebar-icon"></i>
+                                <span>Administradores</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="#" data-target="cursos"
                                 class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="book-marked" class="sidebar-icon"></i>
@@ -108,7 +115,6 @@
                 <nav>
                     <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
                         <li>
-                            <!-- Busca este elemento en la barra lateral -->
                             <a href="/logout"
                                 class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="log-out" class="sidebar-icon"></i>
@@ -196,9 +202,9 @@
                                             th:text="'Activo'">Activo</span>
                                     </td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i
+                                        <button class="edit-student-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${s.id}"><i
                                                 data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i
+                                        <button class="delete-student-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${s.id}"><i
                                                 data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
@@ -242,15 +248,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Itera los profesores desde el modelo -->
                                 <tr th:each="p : ${professors}" class="bg-white border-b hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" th:text="${p.nombre}">Nombre</td>
                                     <td class="px-6 py-4" th:text="${p.codigo}">Código</td>
                                     <td class="px-6 py-4" th:text="${p.email}">Correo</td>
                                     <td class="px-6 py-4" th:text="${p.especialidad}">Especialidad</td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button class="edit-teacher-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${p.id}"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button class="delete-teacher-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${p.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -258,63 +263,94 @@
                     </div>
                 </main>
 
-<!-- Vista Gestión de Cursos -->
-<main id="cursos-content" class="content-view hidden">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Gestión de Cursos</h1>
-        <button id="add-course-button"
-            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
-            <i data-lucide="plus" class="w-5 h-5"></i>
-            <span>Añadir Curso</span>
-        </button>
-    </div>
-    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Nombre del Curso</th>
-                    <th scope="col" class="px-6 py-3">Código</th>
-                    <th scope="col" class="px-6 py-3">Profesor Asignado</th>
-                    <th scope="col" class="px-6 py-3">Estado</th>
-                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="curso : ${cursos}" class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" 
-                        th:text="${curso.nombre}">Nombre del curso</td>
-                    <td class="px-6 py-4" th:text="${curso.codigo}">Código</td>
-                    <td class="px-6 py-4" 
-                        th:text="${curso.profesor != null} ? 
-                                 ${curso.profesor.nombre + ' - ' + curso.profesor.especialidad} : 
-                                 'Sin asignar'">
-                        Profesor
-                    </td>
-                    <td class="px-6 py-4">
-                        <span th:if="${curso.estado == 'ACTIVO'}" 
-                              class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            Activo
-                        </span>
-                        <span th:if="${curso.estado == 'INACTIVO'}" 
-                              class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            Inactivo
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-center space-x-2">
-                        <button class="edit-course p-2 text-blue-600 hover:bg-blue-100 rounded-full"
-                                th:data-id="${curso.id}">
-                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                <!-- Vista Gestión de Administradores (Oculta por defecto) -->
+                <main id="administradores-content" class="content-view hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Gestión de Administradores</h1>
+                        <button id="add-admin-button"
+                            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span>Añadir Administrador</span>
                         </button>
-                        <button class="delete-course p-2 text-red-600 hover:bg-red-100 rounded-full"
-                                th:data-id="${curso.id}">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nombre</th>
+                                    <th scope="col" class="px-6 py-3">Código</th>
+                                    <th scope="col" class="px-6 py-3">Correo Electrónico</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="a : ${admins}" class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" th:text="${a.nombre}">Nombre</td>
+                                    <td class="px-6 py-4" th:text="${a.codigo}">Código</td>
+                                    <td class="px-6 py-4" th:text="${a.email}">Correo</td>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <button class="edit-admin-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${a.id}"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button class="delete-admin-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${a.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+
+                <!-- Vista Gestión de Cursos -->
+                <main id="cursos-content" class="content-view hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Gestión de Cursos</h1>
+                        <button id="add-course-button"
+                            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span>Añadir Curso</span>
                         </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</main>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nombre del Curso</th>
+                                    <th scope="col" class="px-6 py-3">Código</th>
+                                    <th scope="col" class="px-6 py-3">Profesor Asignado</th>
+                                    <th scope="col" class="px-6 py-3">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="curso : ${cursos}" class="bg-white border-b hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" 
+                                        th:text="${curso.nombre}">Nombre del curso</td>
+                                    <td class="px-6 py-4" th:text="${curso.codigo}">Código</td>
+                                    <td class="px-6 py-4" 
+                                        th:text="${curso.profesor != null} ? ${curso.profesor.nombre + ' - ' + curso.profesor.especialidad} : 'Sin asignar'">
+                                        Profesor
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span th:if="${curso.estado == 'ACTIVO'}" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                            Activo
+                                        </span>
+                                        <span th:if="${curso.estado == 'INACTIVO'}"  class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                            Inactivo
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center space-x-2">
+                                        <button class="edit-course p-2 text-blue-600 hover:bg-blue-100 rounded-full"
+                                                th:data-id="${curso.id}">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="delete-course p-2 text-red-600 hover:bg-red-100 rounded-full"
+                                                th:data-id="${curso.id}">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
 
                 <!-- Vista Reportes (Oculta por defecto) -->
                 <main id="reportes-content" class="content-view hidden">
@@ -378,7 +414,7 @@
                         <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
                     <div><label class="block text-sm font-medium">Especialidad</label>
                         <input name="especialidad" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
-                        <div><label class="block text-sm font-medium">Contraseña</label><input name="password"
+                    <div><label class="block text-sm font-medium">Contraseña</label><input name="password"
                             type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
                 </form>
             </div>
@@ -389,142 +425,254 @@
         </div>
     </div>
 
-    
-<!-- Modal Añadir Curso -->
-<div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
-        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
-            <h3 class="text-xl font-semibold">Añadir Nuevo Curso</h3>
-            <button type="button" class="close-modal-button p-1 hover:bg-gray-200 rounded-full">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+    <!-- Modal Añadir Administrador -->
+    <div id="admin-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Añadir Nuevo Administrador</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="add-admin-form">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                    <div><label class="block text-sm font-medium">Contraseña</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="save-admin-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Guardar</button>
+            </div>
         </div>
-        
-        <form id="add-course-form">
-            <div class="p-6 space-y-6">
-                <!-- Información Básica del Curso -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
-                        <input name="nombre" type="text" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Código del Curso *</label>
-                        <input name="codigo" type="text" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                    </div>
-                </div>
+    </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Descripción</label>
-                    <textarea name="descripcion" rows="3"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                        placeholder="Descripción del curso..."></textarea>
-                </div>
+    <!-- Modal Editar Estudiante -->
+    <div id="edit-student-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Estudiante</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-student-form">
+                    <input type="hidden" name="id" id="edit-student-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label><input name="nombre"
+                            type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label><input name="codigo" type="text"
+                            class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label><input name="email"
+                            type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-email"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                            type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-student-btn"
+                    class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
-                    <select name="profesorId" 
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                        <option value="">Seleccionar profesor...</option>
-                        <option th:each="profesor : ${profesores}" 
-                                th:value="${profesor.id}"
-                                th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
-                        </option>
-                    </select>
-                </div>
+    <!-- Modal Editar Profesor -->
+    <div id="edit-teacher-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Profesor</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-teacher-form">
+                    <input type="hidden" name="id" id="edit-teacher-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-email"></div>
+                    <div><label class="block text-sm font-medium">Especialidad</label>
+                        <input name="especialidad" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-especialidad"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-teacher-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Estado</label>
-                    <select name="estado" 
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                        <option value="ACTIVO">Activo</option>
-                        <option value="INACTIVO">Inactivo</option>
-                    </select>
-                </div>
+    <!-- Modal Editar Administrador -->
+    <div id="edit-admin-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Administrador</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-admin-form">
+                    <input type="hidden" name="id" id="edit-admin-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-email"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-admin-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Añadir Curso -->
+    <div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
+            <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
+                <h3 class="text-xl font-semibold">Añadir Nuevo Curso</h3>
+                <button type="button" class="close-modal-button p-1 hover:bg-gray-200 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
-            <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
-                <button type="button" class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
-                    Cancelar
-                </button>
-                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-                    Guardar Curso
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+            <form id="add-course-form">
+                <div class="p-6 space-y-6">
+                    <!-- Información Básica del Curso -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
+                            <input name="nombre" type="text" required
+                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Código del Curso *</label>
+                            <input name="codigo" type="text" required
+                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        </div>
+                    </div>
 
-<!-- Modal Editar Curso -->
-<div id="edit-course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
-        <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
-            <h3 class="text-xl font-semibold">Editar Curso</h3>
-            <button type="button" class="close-edit-course-modal p-1 hover:bg-gray-200 rounded-full">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Descripción</label>
+                        <textarea name="descripcion" rows="3"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                            placeholder="Descripción del curso..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
+                        <select name="profesorId" 
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            <option value="">Seleccionar profesor...</option>
+                            <option th:each="profesor : ${profesores}" 
+                                    th:value="${profesor.id}"
+                                    th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Estado</label>
+                        <select name="estado" 
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
+                    <button type="button" class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Guardar Curso
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <form id="edit-course-form">
-            <input type="hidden" name="id" id="edit-course-id">
-            <div class="p-6 space-y-6">
-                <!-- Información Básica del Curso -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
-                        <input name="nombre" id="edit-course-nombre" type="text" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Código del Curso *</label>
-                        <input name="codigo" id="edit-course-codigo" type="text" required
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                    </div>
-                </div>
+    </div>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1">Descripción</label>
-                    <textarea name="descripcion" id="edit-course-descripcion" rows="3"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                        placeholder="Descripción del curso..."></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
-                    <select name="profesorId" id="edit-course-profesor"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                        <option value="">Seleccionar profesor...</option>
-                        <option th:each="profesor : ${profesores}" 
-                                th:value="${profesor.id}"
-                                th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
-                        </option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Estado</label>
-                    <select name="estado" id="edit-course-estado"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                        <option value="ACTIVO">Activo</option>
-                        <option value="INACTIVO">Inactivo</option>
-                    </select>
-                </div>
+    <!-- Modal Editar Curso -->
+    <div id="edit-course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
+            <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white">
+                <h3 class="text-xl font-semibold">Editar Curso</h3>
+                <button type="button" class="close-edit-course-modal p-1 hover:bg-gray-200 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
-            <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
-                <button type="button" class="close-edit-course-modal px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
-                    Cancelar
-                </button>
-                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-                    Actualizar Curso
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+            <form id="edit-course-form">
+                <input type="hidden" name="id" id="edit-course-id">
+                <div class="p-6 space-y-6">
+                    <!-- Información Básica del Curso -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nombre del Curso *</label>
+                            <input name="nombre" id="edit-course-nombre" type="text" required
+                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Código del Curso *</label>
+                            <input name="codigo" id="edit-course-codigo" type="text" required
+                                class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        </div>
+                    </div>
 
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Descripción</label>
+                        <textarea name="descripcion" id="edit-course-descripcion" rows="3"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                            placeholder="Descripción del curso..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Profesor Asignado</label>
+                        <select name="profesorId" id="edit-course-profesor"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            <option value="">Seleccionar profesor...</option>
+                            <option th:each="profesor : ${profesores}" 
+                                    th:value="${profesor.id}"
+                                    th:text="${profesor.nombre + ' - ' + (profesor.especialidad ?: 'Sin especialidad')}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Estado</label>
+                        <select name="estado" id="edit-course-estado"
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end items-center p-4 border-t space-x-2 sticky bottom-0 bg-white">
+                    <button type="button" class="close-edit-course-modal px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Actualizar Curso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -577,13 +725,21 @@
             // Lógica para los modales
             const studentModal = document.getElementById('student-modal');
             const teacherModal = document.getElementById('teacher-modal');
+            const adminModal = document.getElementById('admin-modal');
             const courseModal = document.getElementById('course-modal');
+            const editCourseModal = document.getElementById('edit-course-modal');
 
             const addStudentButton = document.getElementById('add-student-button');
             const addTeacherButton = document.getElementById('add-teacher-button');
+            const addAdminButton = document.getElementById('add-admin-button');
             const addCourseButton = document.getElementById('add-course-button');
 
+            const editStudentModal = document.getElementById('edit-student-modal');
+            const editTeacherModal = document.getElementById('edit-teacher-modal');
+            const editAdminModal = document.getElementById('edit-admin-modal');
+
             const closeModalButtons = document.querySelectorAll('.close-modal-button');
+            const closeEditCourseButtons = document.querySelectorAll('.close-edit-course-modal');
 
             const openModal = (modal) => {
                 modal.classList.remove('hidden');
@@ -595,15 +751,30 @@
                 modal.classList.remove('flex');
             };
 
+            // Make functions globally available
+            window.openModal = openModal;
+            window.closeModal = closeModal;
+
             addStudentButton.addEventListener('click', () => openModal(studentModal));
             addTeacherButton.addEventListener('click', () => openModal(teacherModal));
+            addAdminButton.addEventListener('click', () => openModal(adminModal));
             addCourseButton.addEventListener('click', () => openModal(courseModal));
 
             closeModalButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     closeModal(studentModal);
                     closeModal(teacherModal);
+                    closeModal(adminModal);
+                    closeModal(editStudentModal);
+                    closeModal(editTeacherModal);
+                    closeModal(editAdminModal);
                     closeModal(courseModal);
+                });
+            });
+
+            closeEditCourseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    closeModal(editCourseModal);
                 });
             });
 
@@ -611,36 +782,70 @@
             window.addEventListener('click', (event) => {
                 if (event.target === studentModal) closeModal(studentModal);
                 if (event.target === teacherModal) closeModal(teacherModal);
+                if (event.target === adminModal) closeModal(adminModal);
+                if (event.target === editStudentModal) closeModal(editStudentModal);
+                if (event.target === editTeacherModal) closeModal(editTeacherModal);
+                if (event.target === editAdminModal) closeModal(editAdminModal);
                 if (event.target === courseModal) closeModal(courseModal);
+                if (event.target === editCourseModal) closeModal(editCourseModal);
             });
         });
     </script>
+
     <script>
+        // Gestión de Estudiantes
         document.addEventListener('DOMContentLoaded', () => {
             const saveBtn = document.getElementById('save-student-btn');
             const addStudentForm = document.getElementById('add-student-form');
             const studentModal = document.getElementById('student-modal');
-            saveBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(addStudentForm);
-                const payload = Object.fromEntries(formData.entries());
-                const res = await fetch('/admin/students', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+            
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(addStudentForm);
+                    const payload = Object.fromEntries(formData.entries());
+                    const res = await fetch('/admin/students', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        studentModal.classList.add('hidden');
+                        studentModal.classList.remove('flex');
+                        location.reload();
+                    } else {
+                        alert('Error guardando estudiante');
+                    }
                 });
-                if (res.ok) {
-                    // cerrar modal y refrescar página o actualizar tabla
-                    studentModal.classList.add('hidden');
-                    studentModal.classList.remove('flex');
-                    location.reload();
-                } else {
-                    alert('Error guardando estudiante');
-                }
-            });
+            }
+
+            // Actualizar estudiante
+            const updateStudentBtn = document.getElementById('update-student-btn');
+            if (updateStudentBtn) {
+                updateStudentBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(document.getElementById('edit-student-form'));
+                    const payload = Object.fromEntries(formData.entries());
+                    const id = payload.id;
+                    delete payload.id;
+                    const res = await fetch(`/admin/students/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        window.closeModal(document.getElementById('edit-student-modal'));
+                        location.reload();
+                    } else {
+                        alert('Error actualizando estudiante');
+                    }
+                });
+            }
         });
     </script>
+
     <script>
+        // Gestión de Profesores
         document.addEventListener('DOMContentLoaded', () => {
             const saveTeacherBtn = document.getElementById('save-teacher-btn');
             const addTeacherForm = document.getElementById('add-teacher-form');
@@ -652,7 +857,6 @@
                     const formData = new FormData(addTeacherForm);
                     const payload = Object.fromEntries(formData.entries());
 
-                    // Ajusta la URL según tu controlador backend (ej: /admin/profesores)
                     const res = await fetch('/teacher', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -669,206 +873,350 @@
                     }
                 });
             }
+
+            // Actualizar profesor
+            const updateTeacherBtn = document.getElementById('update-teacher-btn');
+            if (updateTeacherBtn) {
+                updateTeacherBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(document.getElementById('edit-teacher-form'));
+                    const payload = Object.fromEntries(formData.entries());
+                    const id = payload.id;
+                    delete payload.id;
+                    const res = await fetch(`/admin/profesores/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        window.closeModal(document.getElementById('edit-teacher-modal'));
+                        location.reload();
+                    } else {
+                        alert('Error actualizando profesor');
+                    }
+                });
+            }
         });
     </script>
-    <!-- Script para cursos - VERSIÓN CORREGIDA -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
 
-        // ========== CONFIGURACIÓN INICIAL ==========
-        const courseModal = document.getElementById('course-modal');
-        const addCourseForm = document.getElementById('add-course-form');
+    <script>
+        // Gestión de Administradores
+        document.addEventListener('DOMContentLoaded', () => {
+            const saveAdminBtn = document.getElementById('save-admin-btn');
+            const addAdminForm = document.getElementById('add-admin-form');
+            const adminModal = document.getElementById('admin-modal');
 
-        const editCourseModal = document.getElementById('edit-course-modal');
-        const editCourseForm = document.getElementById('edit-course-form');
+            if (saveAdminBtn) {
+                saveAdminBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(addAdminForm);
+                    const payload = Object.fromEntries(formData.entries());
 
-        // ========== FUNCIONES PARA EDITAR CURSO ==========
-        
-        // Función para abrir el modal de edición
-        function openEditCourseModal(cursoId) {
-            // Obtener datos del curso
-            fetch(`/admin/cursos/${cursoId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al obtener curso');
-                    }
-                    return response.json();
-                })
-                .then(curso => {
-                    console.log('Curso cargado:', curso); // Para debug
-                    
-                    // Llenar formulario con datos del curso
-                    document.getElementById('edit-course-id').value = curso.id;
-                    document.getElementById('edit-course-nombre').value = curso.nombre || '';
-                    document.getElementById('edit-course-codigo').value = curso.codigo || '';
-                    document.getElementById('edit-course-descripcion').value = curso.descripcion || '';
-                    
-                    // Manejar el profesor
-                    if (curso.profesor && curso.profesor.id) {
-                        document.getElementById('edit-course-profesor').value = curso.profesor.id;
+                    const res = await fetch('/admin/admins', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        adminModal.classList.add('hidden');
+                        adminModal.classList.remove('flex');
+                        location.reload();
                     } else {
-                        document.getElementById('edit-course-profesor').value = '';
+                        const text = await res.text();
+                        alert('Error guardando administrador: ' + (text || res.status));
                     }
-                    
-                    document.getElementById('edit-course-estado').value = curso.estado || 'ACTIVO';
-                    
-                    // Mostrar modal
-                    editCourseModal.classList.remove('hidden');
-                    editCourseModal.classList.add('flex');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al cargar datos del curso');
                 });
-        }
+            }
 
-        // ========== EVENT LISTENERS PARA AÑADIR CURSO ==========
-
-        addCourseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(addCourseForm);
-            const payload = {
-                nombre: formData.get('nombre'),
-                codigo: formData.get('codigo'),
-                descripcion: formData.get('descripcion'),
-                estado: formData.get('estado'),
-                profesor: {
-                    id: formData.get('profesorId') ? parseInt(formData.get('profesorId')) : null
-                }
-            };
-            
-            try {
-                console.log('Enviando curso:', payload);
-                const response = await fetch('/admin/cursos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+            // Actualizar administrador
+            const updateAdminBtn = document.getElementById('update-admin-btn');
+            if (updateAdminBtn) {
+                updateAdminBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(document.getElementById('edit-admin-form'));
+                    const payload = Object.fromEntries(formData.entries());
+                    const id = payload.id;
+                    delete payload.id;
+                    const res = await fetch(`/admin/admins/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        window.closeModal(document.getElementById('edit-admin-modal'));
+                        location.reload();
+                    } else {
+                        alert('Error actualizando administrador');
+                    }
                 });
-
-                if (response.ok) {
-                    courseModal.classList.add('hidden');
-                    courseModal.classList.remove('flex');
-                    location.reload();
-                } else {
-                    const errorText = await response.text();
-                    alert('Error guardando curso: ' + errorText);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión: ' + error.message);
             }
         });
+    </script>
 
-        // Al abrir el modal de añadir curso
-        document.getElementById('add-course-button').addEventListener('click', () => {
-            courseModal.classList.remove('hidden');
-            courseModal.classList.add('flex');
-        });
+    <script>
+        // Gestión de Cursos
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
 
-        // ========== EVENT LISTENERS PARA EDITAR CURSO ==========
+            const courseModal = document.getElementById('course-modal');
+            const addCourseForm = document.getElementById('add-course-form');
+            const editCourseModal = document.getElementById('edit-course-modal');
+            const editCourseForm = document.getElementById('edit-course-form');
 
-        // Envío del formulario de edición - VERSIÓN CORREGIDA
-        editCourseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const payload = {
-                id: parseInt(document.getElementById('edit-course-id').value),
-                nombre: document.getElementById('edit-course-nombre').value,
-                codigo: document.getElementById('edit-course-codigo').value,
-                descripcion: document.getElementById('edit-course-descripcion').value,
-                estado: document.getElementById('edit-course-estado').value,
-                profesor: {
-                    id: document.getElementById('edit-course-profesor').value ? 
-                           parseInt(document.getElementById('edit-course-profesor').value) : null
-                }
-            };
-            
-            try {
-                console.log('Actualizando curso:', payload);
-                const response = await fetch('/admin/cursos/update', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    editCourseModal.classList.add('hidden');
-                    editCourseModal.classList.remove('flex');
-                    location.reload();
-                } else {
-                    const errorText = await response.text();
-                    alert('Error actualizando curso: ' + errorText);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión: ' + error.message);
-            }
-        });
-
-        // ========== EVENT LISTENERS COMUNES ==========
-        
-        // Cerrar modales
-        courseModal.querySelector('.close-modal-button').addEventListener('click', () => {
-            courseModal.classList.add('hidden');
-            courseModal.classList.remove('flex');
-        });
-
-        document.querySelectorAll('.close-edit-course-modal').forEach(button => {
-            button.addEventListener('click', () => {
-                editCourseModal.classList.add('hidden');
-                editCourseModal.classList.remove('flex');
-            });
-        });
-
-        // Eliminar curso
-        document.querySelectorAll('.delete-course').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const cursoId = e.currentTarget.getAttribute('data-id');
-                if (confirm('¿Estás seguro de que quieres eliminar este curso?')) {
-                    try {
-                        const response = await fetch('/admin/cursos/delete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: cursoId })
-                        });
-
-                        if (response.ok) {
-                            location.reload();
-                        } else {
-                            alert('Error eliminando curso');
+            // Función para abrir el modal de edición
+            function openEditCourseModal(cursoId) {
+                fetch(`/admin/cursos/${cursoId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al obtener curso');
                         }
-                    } catch (error) {
+                        return response.json();
+                    })
+                    .then(curso => {
+                        console.log('Curso cargado:', curso);
+                        
+                        document.getElementById('edit-course-id').value = curso.id;
+                        document.getElementById('edit-course-nombre').value = curso.nombre || '';
+                        document.getElementById('edit-course-codigo').value = curso.codigo || '';
+                        document.getElementById('edit-course-descripcion').value = curso.descripcion || '';
+                        
+                        if (curso.profesor && curso.profesor.id) {
+                            document.getElementById('edit-course-profesor').value = curso.profesor.id;
+                        } else {
+                            document.getElementById('edit-course-profesor').value = '';
+                        }
+                        
+                        document.getElementById('edit-course-estado').value = curso.estado || 'ACTIVO';
+                        
+                        editCourseModal.classList.remove('hidden');
+                        editCourseModal.classList.add('flex');
+                    })
+                    .catch(error => {
                         console.error('Error:', error);
-                        alert('Error de conexión');
+                        alert('Error al cargar datos del curso');
+                    });
+            }
+
+            // Añadir curso
+            addCourseForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(addCourseForm);
+                const payload = {
+                    nombre: formData.get('nombre'),
+                    codigo: formData.get('codigo'),
+                    descripcion: formData.get('descripcion'),
+                    estado: formData.get('estado'),
+                    profesor: {
+                        id: formData.get('profesorId') ? parseInt(formData.get('profesorId')) : null
                     }
+                };
+                
+                try {
+                    console.log('Enviando curso:', payload);
+                    const response = await fetch('/admin/cursos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        courseModal.classList.add('hidden');
+                        courseModal.classList.remove('flex');
+                        location.reload();
+                    } else {
+                        const errorText = await response.text();
+                        alert('Error guardando curso: ' + errorText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Editar curso
+            editCourseForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const payload = {
+                    id: parseInt(document.getElementById('edit-course-id').value),
+                    nombre: document.getElementById('edit-course-nombre').value,
+                    codigo: document.getElementById('edit-course-codigo').value,
+                    descripcion: document.getElementById('edit-course-descripcion').value,
+                    estado: document.getElementById('edit-course-estado').value,
+                    profesor: {
+                        id: document.getElementById('edit-course-profesor').value ? 
+                               parseInt(document.getElementById('edit-course-profesor').value) : null
+                    }
+                };
+                
+                try {
+                    console.log('Actualizando curso:', payload);
+                    const response = await fetch('/admin/cursos/update', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        editCourseModal.classList.add('hidden');
+                        editCourseModal.classList.remove('flex');
+                        location.reload();
+                    } else {
+                        const errorText = await response.text();
+                        alert('Error actualizando curso: ' + errorText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Eliminar curso
+            document.querySelectorAll('.delete-course').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const cursoId = e.currentTarget.getAttribute('data-id');
+                    if (confirm('¿Estás seguro de que quieres eliminar este curso?')) {
+                        try {
+                            const response = await fetch('/admin/cursos/delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: cursoId })
+                            });
+
+                            if (response.ok) {
+                                location.reload();
+                            } else {
+                                alert('Error eliminando curso');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Error de conexión');
+                        }
+                    }
+                });
+            });
+
+            // Event listeners para botones de editar en la tabla
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.edit-course')) {
+                    const button = e.target.closest('.edit-course');
+                    const cursoId = button.getAttribute('data-id');
+                    openEditCourseModal(cursoId);
                 }
             });
         });
+    </script>
 
-        // Event listeners para botones de editar en la tabla
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.edit-course')) {
-                const button = e.target.closest('.edit-course');
-                const cursoId = button.getAttribute('data-id');
-                openEditCourseModal(cursoId);
-            }
-        });
+    <script>
+        // Gestión de Edición/Eliminación de Usuarios
+        document.addEventListener('DOMContentLoaded', () => {
+            // Editar estudiante
+            document.querySelectorAll('.edit-student-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/students/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const student = await res.json();
+                        document.getElementById('edit-student-id').value = student.id;
+                        document.getElementById('edit-student-nombre').value = student.nombre;
+                        document.getElementById('edit-student-codigo').value = student.codigo;
+                        document.getElementById('edit-student-email').value = student.email;
+                        document.getElementById('edit-student-password').value = '';
+                        window.openModal(document.getElementById('edit-student-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del estudiante:', error);
+                        alert('No se pudieron cargar los datos del estudiante. Error: ' + error.message);
+                    }
+                });
+            });
 
-        // Cerrar modales al hacer clic fuera
-        window.addEventListener('click', (event) => {
-            if (event.target === courseModal) {
-                courseModal.classList.add('hidden');
-                courseModal.classList.remove('flex');
-            }
-            if (event.target === editCourseModal) {
-                editCourseModal.classList.add('hidden');
-                editCourseModal.classList.remove('flex');
-            }
+            // Eliminar estudiante
+            document.querySelectorAll('.delete-student-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar estudiante?')) {
+                        fetch(`/admin/students/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
+
+            // Editar profesor
+            document.querySelectorAll('.edit-teacher-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/profesores/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const professor = await res.json();
+                        document.getElementById('edit-teacher-id').value = professor.id;
+                        document.getElementById('edit-teacher-nombre').value = professor.nombre;
+                        document.getElementById('edit-teacher-codigo').value = professor.codigo;
+                        document.getElementById('edit-teacher-email').value = professor.email;
+                        document.getElementById('edit-teacher-especialidad').value = professor.especialidad;
+                        document.getElementById('edit-teacher-password').value = '';
+                        window.openModal(document.getElementById('edit-teacher-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del profesor:', error);
+                        alert('No se pudieron cargar los datos del profesor. Error: ' + error.message);
+                    }
+                });
+            });
+
+            // Eliminar profesor
+            document.querySelectorAll('.delete-teacher-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar profesor?')) {
+                        fetch(`/admin/profesores/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
+
+            // Editar administrador
+            document.querySelectorAll('.edit-admin-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/admins/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const admin = await res.json();
+                        document.getElementById('edit-admin-id').value = admin.id;
+                        document.getElementById('edit-admin-nombre').value = admin.nombre;
+                        document.getElementById('edit-admin-codigo').value = admin.codigo;
+                        document.getElementById('edit-admin-email').value = admin.email;
+                        document.getElementById('edit-admin-password').value = '';
+                        window.openModal(document.getElementById('edit-admin-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del administrador:', error);
+                        alert('No se pudieron cargar los datos del administrador. Error: ' + error.message);
+                    }
+                });
+            });
+
+            // Eliminar administrador
+            document.querySelectorAll('.delete-admin-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar administrador?')) {
+                        fetch(`/admin/admins/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
         });
-    });
-</script>
+    </script>
+
 </body>
 
 </html>

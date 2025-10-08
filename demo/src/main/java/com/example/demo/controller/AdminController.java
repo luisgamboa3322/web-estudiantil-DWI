@@ -5,20 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.model.Admin;
 import com.example.demo.model.Student;
 import com.example.demo.model.Professor;
 import com.example.demo.model.Curso;
 import com.example.demo.model.EstadoCurso;
+
+import com.example.demo.service.AdminService;
 import com.example.demo.service.StudentService;
 import com.example.demo.service.ProfessorService;
+
 import com.example.demo.repository.CursoRepository;
 import com.example.demo.repository.ProfessorRepository;
 
@@ -30,150 +28,202 @@ import java.util.Optional;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final AdminService adminService;
     private final StudentService studentService;
     private final ProfessorService professorService;
-   @Autowired
-    private CursoRepository cursoRepository;
-    
+
     @Autowired
-    private ProfessorRepository profesorRepository;
+    private CursoRepository cursoRepository;
 
+    @Autowired
+    private ProfessorRepository professorRepository;
 
-    public AdminController(StudentService studentService, 
-                         ProfessorService professorService,
-                         CursoRepository cursoRepository,
-                         ProfessorRepository professorRepository) {
+    public AdminController(AdminService adminService,
+                           StudentService studentService,
+                           ProfessorService professorService,
+                           CursoRepository cursoRepository,
+                           ProfessorRepository professorRepository) {
+        this.adminService = adminService;
         this.studentService = studentService;
         this.professorService = professorService;
         this.cursoRepository = cursoRepository;
-        this.profesorRepository = professorRepository;
+        this.professorRepository = professorRepository;
     }
 
+    // ===========================
+    // DASHBOARD
+    // ===========================
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        List<Student> students = studentService.findAll();
-        List<Professor> professors = professorService.findAll();
-        List<Curso> cursos = cursoRepository.findAll();
-        
-        model.addAttribute("students", students);
-        model.addAttribute("professors", professors);
-        model.addAttribute("cursos", cursos); // Para la tabla de cursos
-        model.addAttribute("profesores", professors); // Para el select del modal
-        
+        model.addAttribute("students", studentService.findAll());
+        model.addAttribute("professors", professorService.findAll());
+        model.addAttribute("admins", adminService.findAll());
+        model.addAttribute("cursos", cursoRepository.findAll());
         return "administrador/dashboard";
     }
 
-    // Endpoint para crear estudiante (JSON)
+    // ===========================
+    // CRUD STUDENTS
+    // ===========================
     @PostMapping("/students")
     @ResponseBody
     public Student createStudent(@RequestBody Student student) {
         return studentService.save(student);
     }
 
-    // Endpoint para crear profesor (JSON)
+    @GetMapping("/students/{id}")
+    @ResponseBody
+    public Student getStudent(@PathVariable Long id) {
+        return studentService.findById(id).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+    }
+
+    @PutMapping("/students/{id}")
+    @ResponseBody
+    public Student updateStudent(@PathVariable Long id, @RequestBody Student student) {
+        return studentService.update(id, student);
+    }
+
+    @DeleteMapping("/students/{id}")
+    @ResponseBody
+    public String deleteStudent(@PathVariable Long id) {
+        studentService.delete(id);
+        return "Estudiante eliminado";
+    }
+
+    // ===========================
+    // CRUD PROFESSORS
+    // ===========================
     @PostMapping("/profesores")
     @ResponseBody
     public Professor createProfessor(@RequestBody Professor professor) {
         return professorService.create(professor);
     }
 
-    // ✅ NUEVO: Endpoint para crear curso (JSON)
-@PostMapping("/cursos")
-@ResponseBody
-public ResponseEntity<?> createCurso(@RequestBody Map<String, Object> payload) {
-    try {
-        Curso curso = new Curso();
-        curso.setNombre((String) payload.get("nombre"));
-        curso.setCodigo((String) payload.get("codigo"));
-        curso.setDescripcion((String) payload.get("descripcion"));
-        
-        if (payload.get("estado") != null) {
-            curso.setEstado(EstadoCurso.valueOf((String) payload.get("estado")));
-        }
-        
-        // Manejar profesor - FORMA CORRECTA
-        if (payload.get("profesor") != null) {
-            Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
-            if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
-                Long profesorId = Long.valueOf(profesorMap.get("id").toString());
-                Optional<Professor> profesorOpt = profesorRepository.findById(profesorId);
-                if (profesorOpt.isPresent()) {
-                    curso.setProfesor(profesorOpt.get());
+    @GetMapping("/profesores/{id}")
+    @ResponseBody
+    public Professor getProfessor(@PathVariable Long id) {
+        return professorService.getById(id).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+    }
+
+    @PutMapping("/profesores/{id}")
+    @ResponseBody
+    public Professor updateProfessor(@PathVariable Long id, @RequestBody Professor professor) {
+        return professorService.update(id, professor);
+    }
+
+    @DeleteMapping("/profesores/{id}")
+    @ResponseBody
+    public String deleteProfessor(@PathVariable Long id) {
+        professorService.delete(id);
+        return "Profesor eliminado";
+    }
+
+    // ===========================
+    // CRUD ADMINS
+    // ===========================
+    @PostMapping("/admins")
+    @ResponseBody
+    public Admin createAdmin(@RequestBody Admin admin) {
+        return adminService.create(admin);
+    }
+
+    @GetMapping("/admins/{id}")
+    @ResponseBody
+    public Admin getAdmin(@PathVariable Long id) {
+        return adminService.findById(id).orElseThrow(() -> new IllegalStateException("Administrador no encontrado"));
+    }
+
+    @PutMapping("/admins/{id}")
+    @ResponseBody
+    public Admin updateAdmin(@PathVariable Long id, @RequestBody Admin admin) {
+        return adminService.update(id, admin);
+    }
+
+    @DeleteMapping("/admins/{id}")
+    @ResponseBody
+    public String deleteAdmin(@PathVariable Long id) {
+        adminService.delete(id);
+        return "Administrador eliminado";
+    }
+
+    // ===========================
+    // CRUD CURSOS
+    // ===========================
+    @PostMapping("/cursos")
+    @ResponseBody
+    public ResponseEntity<?> createCurso(@RequestBody Map<String, Object> payload) {
+        try {
+            Curso curso = new Curso();
+            curso.setNombre((String) payload.get("nombre"));
+            curso.setCodigo((String) payload.get("codigo"));
+            curso.setDescripcion((String) payload.get("descripcion"));
+
+            if (payload.get("estado") != null) {
+                curso.setEstado(EstadoCurso.valueOf((String) payload.get("estado")));
+            }
+
+            if (payload.get("profesor") != null) {
+                Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
+                if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
+                    Long profesorId = Long.valueOf(profesorMap.get("id").toString());
+                    professorRepository.findById(profesorId).ifPresent(curso::setProfesor);
                 }
             }
-        }
-        
-        Curso savedCurso = cursoRepository.save(curso);
-        return ResponseEntity.ok(savedCurso);
-    } catch (Exception e) {
-        return ResponseEntity.badRequest().body("Error creando curso: " + e.getMessage());
-    }
-}
 
-    // ✅ NUEVO: Endpoint para obtener todos los cursos (JSON)
-    
-    // Obtener curso por ID para editar
+            Curso savedCurso = cursoRepository.save(curso);
+            return ResponseEntity.ok(savedCurso);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creando curso: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/cursos/{id}")
     public ResponseEntity<Curso> getCurso(@PathVariable Long id) {
         Optional<Curso> curso = cursoRepository.findById(id);
-        return curso.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+        return curso.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    // Actualizar curso
-    // En AdminController.java - REEMPLAZA el método updateCurso actual
-@PutMapping("/cursos/update")
-public ResponseEntity<String> updateCurso(@RequestBody Map<String, Object> payload) {
-    try {
-        Long cursoId = Long.valueOf(payload.get("id").toString());
-        Optional<Curso> cursoExistenteOpt = cursoRepository.findById(cursoId);
-        
-        if (!cursoExistenteOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Curso no encontrado");
-        }
-        
-        Curso cursoExistente = cursoExistenteOpt.get();
-        
-        // Actualizar campos básicos
-        cursoExistente.setNombre(payload.get("nombre").toString());
-        cursoExistente.setCodigo(payload.get("codigo").toString());
-        cursoExistente.setDescripcion(payload.get("descripcion").toString());
-        
-        // Manejar el estado
-        if (payload.get("estado") != null) {
-            cursoExistente.setEstado(EstadoCurso.valueOf(payload.get("estado").toString()));
-        }
-        
-        // Manejar el profesor - FORMA CORRECTA
-        if (payload.get("profesor") != null) {
-            Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
-            if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
-                Long profesorId = Long.valueOf(profesorMap.get("id").toString());
-                Optional<Professor> profesorOpt = profesorRepository.findById(profesorId);
-                if (profesorOpt.isPresent()) {
-                    cursoExistente.setProfesor(profesorOpt.get());
+    @PutMapping("/cursos/update")
+    public ResponseEntity<String> updateCurso(@RequestBody Map<String, Object> payload) {
+        try {
+            Long cursoId = Long.valueOf(payload.get("id").toString());
+            Optional<Curso> cursoExistenteOpt = cursoRepository.findById(cursoId);
+
+            if (!cursoExistenteOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
+            }
+
+            Curso curso = cursoExistenteOpt.get();
+            curso.setNombre(payload.get("nombre").toString());
+            curso.setCodigo(payload.get("codigo").toString());
+            curso.setDescripcion(payload.get("descripcion").toString());
+
+            if (payload.get("estado") != null) {
+                curso.setEstado(EstadoCurso.valueOf(payload.get("estado").toString()));
+            }
+
+            if (payload.get("profesor") != null) {
+                Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
+                if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
+                    Long profesorId = Long.valueOf(profesorMap.get("id").toString());
+                    professorRepository.findById(profesorId).ifPresent(curso::setProfesor);
                 } else {
-                    cursoExistente.setProfesor(null);
+                    curso.setProfesor(null);
                 }
             } else {
-                cursoExistente.setProfesor(null);
+                curso.setProfesor(null);
             }
-        } else {
-            cursoExistente.setProfesor(null);
-        }
-        
-        cursoRepository.save(cursoExistente);
-        return ResponseEntity.ok("Curso actualizado exitosamente");
-        
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error al actualizar curso: " + e.getMessage());
-    }
-}
 
-    // Eliminar curso (ya lo tienes)
+            cursoRepository.save(curso);
+            return ResponseEntity.ok("Curso actualizado exitosamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar curso: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/cursos/delete")
     public ResponseEntity<String> deleteCurso(@RequestBody Map<String, Long> payload) {
         try {
@@ -183,11 +233,11 @@ public ResponseEntity<String> updateCurso(@RequestBody Map<String, Object> paylo
                 return ResponseEntity.ok("Curso eliminado exitosamente");
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Curso no encontrado");
+                        .body("Curso no encontrado");
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error al eliminar curso: " + e.getMessage());
+                    .body("Error al eliminar curso: " + e.getMessage());
         }
     }
 }

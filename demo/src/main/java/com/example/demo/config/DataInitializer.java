@@ -3,23 +3,23 @@ package com.example.demo.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.example.demo.model.Student;
-import com.example.demo.service.StudentService;
+import com.example.demo.model.Admin;
+import com.example.demo.service.AdminService;
 
 @Configuration
 public class DataInitializer {
 
     @Bean
-    public CommandLineRunner initAdmin(StudentService studentService) {
+    public CommandLineRunner initAdmin(AdminService adminService) {
         return args -> {
             String adminEmail = "admin@example.com";
-            if (studentService.findByEmail(adminEmail).isEmpty()) {
-                Student s = new Student();
-                s.setNombre("Admin");
-                s.setCodigo("A0001"); // inicia con 'A' para redirigir a admin
-                s.setEmail(adminEmail);
-                s.setPassword("admin123"); // StudentService.save codifica la contraseña
-                studentService.save(s);
+            if (adminService.findByEmail(adminEmail).isEmpty()) {
+                Admin a = new Admin();
+                a.setNombre("Admin");
+                a.setCodigo("A0001");
+                a.setEmail(adminEmail);
+                a.setPassword("admin123"); // AdminService.create codifica la contraseña
+                adminService.create(a);
                 System.out.println("Admin creado: " + adminEmail);
             }
         };

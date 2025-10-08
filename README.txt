@@ -3,7 +3,7 @@
 Aplicación web con autenticación por formulario, vistas con Thymeleaf y endpoints JSON para gestionar Estudiantes y Profesores. La redirección posterior al login se hace según la inicial del código del usuario.
 
 Tecnologías
-- Java 17
+- Java 21
 - Spring Boot 3.5.5
 - Spring Web, Spring Security, Spring Data JPA
 - MySQL
