@@ -203,9 +203,9 @@
                                             th:text="'Activo'">Activo</span>
                                     </td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i
+                                        <button class="edit-student-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${s.id}"><i
                                                 data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i
+                                        <button class="delete-student-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${s.id}"><i
                                                 data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
@@ -256,8 +256,8 @@
                                     <td class="px-6 py-4" th:text="${p.email}">Correo</td>
                                     <td class="px-6 py-4" th:text="${p.especialidad}">Especialidad</td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button class="edit-teacher-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${p.id}"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button class="delete-teacher-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${p.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -292,8 +292,8 @@
                                     <td class="px-6 py-4" th:text="${a.codigo}">Código</td>
                                     <td class="px-6 py-4" th:text="${a.email}">Correo</td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="p-2 text-blue-600 hover:bg-blue-100 rounded-full"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-red-600 hover:bg-red-100 rounded-full"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button class="edit-admin-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" th:data-id="${a.id}"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button class="delete-admin-btn p-2 text-red-600 hover:bg-red-100 rounded-full" th:data-id="${a.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -439,6 +439,93 @@
         </div>
     </div>
 
+    <!-- Modal Editar Estudiante -->
+    <div id="edit-student-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Estudiante</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-student-form">
+                    <input type="hidden" name="id" id="edit-student-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label><input name="nombre"
+                            type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label><input name="codigo" type="text"
+                            class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label><input name="email"
+                            type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-email"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                            type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-student-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-student-btn"
+                    class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Profesor -->
+    <div id="edit-teacher-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Profesor</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-teacher-form">
+                    <input type="hidden" name="id" id="edit-teacher-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-email"></div>
+                    <div><label class="block text-sm font-medium">Especialidad</label>
+                        <input name="especialidad" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-especialidad"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-teacher-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-teacher-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Administrador -->
+    <div id="edit-admin-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-10">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold">Editar Administrador</h3>
+                <button class="close-modal-button p-1 hover:bg-gray-200 rounded-full"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="edit-admin-form">
+                    <input type="hidden" name="id" id="edit-admin-id">
+                    <div><label class="block text-sm font-medium">Nombre Completo</label>
+                        <input name="nombre" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-nombre"></div>
+                    <div><label class="block text-sm font-medium">Código</label>
+                        <input name="codigo" type="text" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-codigo"></div>
+                    <div><label class="block text-sm font-medium">Correo Electrónico</label>
+                        <input name="email" type="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-email"></div>
+                    <div><label class="block text-sm font-medium">Contraseña (dejar vacío para no cambiar)</label><input name="password"
+                        type="password" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" id="edit-admin-password"></div>
+                </form>
+            </div>
+            <div class="flex justify-end items-center p-4 border-t space-x-2">
+                <button class="close-modal-button px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="update-admin-btn" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Actualizar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Añadir Curso -->
     <div id="course-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop overflow-y-auto">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto my-10">
@@ -544,6 +631,10 @@
             const addAdminButton = document.getElementById('add-admin-button');
             const addCourseButton = document.getElementById('add-course-button');
 
+            const editStudentModal = document.getElementById('edit-student-modal');
+            const editTeacherModal = document.getElementById('edit-teacher-modal');
+            const editAdminModal = document.getElementById('edit-admin-modal');
+
             const closeModalButtons = document.querySelectorAll('.close-modal-button');
 
             const openModal = (modal) => {
@@ -556,6 +647,10 @@
                 modal.classList.remove('flex');
             };
 
+            // Make functions globally available
+            window.openModal = openModal;
+            window.closeModal = closeModal;
+
             addStudentButton.addEventListener('click', () => openModal(studentModal));
             addTeacherButton.addEventListener('click', () => openModal(teacherModal));
             addAdminButton.addEventListener('click', () => openModal(adminModal));
@@ -566,6 +661,9 @@
                     closeModal(studentModal);
                     closeModal(teacherModal);
                     closeModal(adminModal);
+                    closeModal(editStudentModal);
+                    closeModal(editTeacherModal);
+                    closeModal(editAdminModal);
                     closeModal(courseModal);
                 });
             });
@@ -575,6 +673,9 @@
                 if (event.target === studentModal) closeModal(studentModal);
                 if (event.target === teacherModal) closeModal(teacherModal);
                 if (event.target === adminModal) closeModal(adminModal);
+                if (event.target === editStudentModal) closeModal(editStudentModal);
+                if (event.target === editTeacherModal) closeModal(editTeacherModal);
+                if (event.target === editAdminModal) closeModal(editAdminModal);
                 if (event.target === courseModal) closeModal(courseModal);
             });
         });
@@ -662,6 +763,172 @@
                         alert('Error guardando administrador: ' + (text || res.status));
                     }
                 });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Editar estudiante
+            document.querySelectorAll('.edit-student-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/students/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const student = await res.json();
+                        document.getElementById('edit-student-id').value = student.id;
+                        document.getElementById('edit-student-nombre').value = student.nombre;
+                        document.getElementById('edit-student-codigo').value = student.codigo;
+                        document.getElementById('edit-student-email').value = student.email;
+                        document.getElementById('edit-student-password').value = '';
+                        window.openModal(document.getElementById('edit-student-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del estudiante:', error);
+                        alert('No se pudieron cargar los datos del estudiante. Error: ' + error.message);
+                    }
+                });
+            });
+
+            // Eliminar estudiante
+            document.querySelectorAll('.delete-student-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar estudiante?')) {
+                        fetch(`/admin/students/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
+
+            // Editar profesor
+            document.querySelectorAll('.edit-teacher-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/profesores/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const professor = await res.json();
+                        document.getElementById('edit-teacher-id').value = professor.id;
+                        document.getElementById('edit-teacher-nombre').value = professor.nombre;
+                        document.getElementById('edit-teacher-codigo').value = professor.codigo;
+                        document.getElementById('edit-teacher-email').value = professor.email;
+                        document.getElementById('edit-teacher-especialidad').value = professor.especialidad;
+                        document.getElementById('edit-teacher-password').value = '';
+                        window.openModal(document.getElementById('edit-teacher-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del profesor:', error);
+                        alert('No se pudieron cargar los datos del profesor. Error: ' + error.message);
+                    }
+                });
+            });
+
+            // Eliminar profesor
+            document.querySelectorAll('.delete-teacher-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar profesor?')) {
+                        fetch(`/admin/profesores/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
+
+            // Editar administrador
+            document.querySelectorAll('.edit-admin-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    try {
+                        const res = await fetch(`/admin/admins/${id}`);
+                        if (!res.ok) {
+                            throw new Error(`Error ${res.status}: ${await res.text()}`);
+                        }
+                        const admin = await res.json();
+                        document.getElementById('edit-admin-id').value = admin.id;
+                        document.getElementById('edit-admin-nombre').value = admin.nombre;
+                        document.getElementById('edit-admin-codigo').value = admin.codigo;
+                        document.getElementById('edit-admin-email').value = admin.email;
+                        document.getElementById('edit-admin-password').value = '';
+                        window.openModal(document.getElementById('edit-admin-modal'));
+                    } catch (error) {
+                        console.error('Error al obtener datos del administrador:', error);
+                        alert('No se pudieron cargar los datos del administrador. Error: ' + error.message);
+                    }
+                });
+            });
+
+            // Eliminar administrador
+            document.querySelectorAll('.delete-admin-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    if (confirm('¿Eliminar administrador?')) {
+                        fetch(`/admin/admins/${id}`, { method: 'DELETE' })
+                            .then(() => location.reload());
+                    }
+                });
+            });
+        });
+
+        // Actualizar estudiante
+        document.getElementById('update-student-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('edit-student-form'));
+            const payload = Object.fromEntries(formData.entries());
+            const id = payload.id;
+            delete payload.id;
+            const res = await fetch(`/admin/students/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                window.closeModal(document.getElementById('edit-student-modal'));
+                location.reload();
+            } else {
+                alert('Error actualizando estudiante');
+            }
+        });
+
+        // Actualizar profesor
+        document.getElementById('update-teacher-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('edit-teacher-form'));
+            const payload = Object.fromEntries(formData.entries());
+            const id = payload.id;
+            delete payload.id;
+            const res = await fetch(`/admin/profesores/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                window.closeModal(document.getElementById('edit-teacher-modal'));
+                location.reload();
+            } else {
+                alert('Error actualizando profesor');
+            }
+        });
+
+        // Actualizar administrador
+        document.getElementById('update-admin-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('edit-admin-form'));
+            const payload = Object.fromEntries(formData.entries());
+            const id = payload.id;
+            delete payload.id;
+            const res = await fetch(`/admin/admins/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                window.closeModal(document.getElementById('edit-admin-modal'));
+                location.reload();
+            } else {
+                alert('Error actualizando administrador');
             }
         });
     </script>

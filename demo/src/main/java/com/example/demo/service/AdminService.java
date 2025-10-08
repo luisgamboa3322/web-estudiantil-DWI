@@ -38,4 +38,30 @@ public class AdminService {
     public List<Admin> findAll() {
         return repo.findAll();
     }
+
+    public Optional<Admin> findById(Long id) {
+        return repo.findById(id);
+    }
+
+    public Admin update(Long id, Admin changes) {
+        Admin existing = repo.findById(id).orElseThrow(() -> new IllegalStateException("Administrador no encontrado"));
+        if (changes.getNombre() != null) existing.setNombre(changes.getNombre());
+        if (changes.getCodigo() != null && !changes.getCodigo().equals(existing.getCodigo())) {
+            if (repo.existsByCodigo(changes.getCodigo())) throw new IllegalStateException("Código ya existe");
+            existing.setCodigo(changes.getCodigo());
+        }
+        if (changes.getEmail() != null && !changes.getEmail().equals(existing.getEmail())) {
+            if (repo.existsByEmail(changes.getEmail())) throw new IllegalStateException("Email ya existe");
+            existing.setEmail(changes.getEmail());
+        }
+        if (changes.getPassword() != null) {
+            existing.setPassword(encoder.encode(changes.getPassword()));
+        }
+        return repo.save(existing);
+    }
+
+    public void delete(Long id) {
+        if (!repo.existsById(id)) throw new IllegalStateException("Administrador no encontrado");
+        repo.deleteById(id);
+    }
 }
