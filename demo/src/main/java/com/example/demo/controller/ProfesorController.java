@@ -57,6 +57,49 @@ public class ProfesorController {
         return "profesor/configuracion";
     }
 
+    @GetMapping("/cursos")
+    public String showCursos(Authentication authentication, Model model) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            service.findByEmail(email).ifPresent(professor -> {
+                model.addAttribute("profesor", professor);
+                java.util.List<Curso> cursos = cursoRepository.findByProfesorId(professor.getId());
+                model.addAttribute("cursos", cursos);
+            });
+        }
+        return "profesor/dashboard"; // la vista de cursos está en dashboard
+    }
+
+    @GetMapping("/chat")
+    public String showChat(Authentication authentication, Model model) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            service.findByEmail(email).ifPresent(professor -> model.addAttribute("profesor", professor));
+        }
+        return "profesor/chat";
+    }
+
+    @GetMapping("/calendario")
+    public String showCalendario(Authentication authentication, Model model) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            service.findByEmail(email).ifPresent(professor -> model.addAttribute("profesor", professor));
+        }
+        return "profesor/calendario";
+    }
+
+    @GetMapping("/gestion-curso")
+    public String gestionCurso(@RequestParam(name = "id", required = false) Long id, Authentication authentication, Model model) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            service.findByEmail(email).ifPresent(professor -> model.addAttribute("profesor", professor));
+        }
+        if (id != null) {
+            cursoRepository.findById(id).ifPresent(curso -> model.addAttribute("curso", curso));
+        }
+        return "profesor/gestion-curso";
+    }
+
     @PutMapping("/profile")
     @ResponseBody
     public Professor updateProfile(Authentication authentication, @RequestBody Professor changes) {

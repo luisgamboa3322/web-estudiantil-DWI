@@ -1,0 +1,82 @@
+<!-- Fragments reutilizables para vistas de profesor -->
+<div th:fragment="sidebar">
+    <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+        <div>
+            <a th:href="@{/profesor/dashboard}" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>UTP+teacher</span>
+            </a>
+            <nav>
+                <ul class="space-y-2">
+                    <li>
+                                <a th:href="@{/profesor/cursos}"
+                                    th:classappend="${currentPath != null and currentPath.startsWith('/profesor/cursos') ? ' bg-orange-500 text-white font-semibold' : ''}"
+                                    data-target="cursos" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="book-marked" class="sidebar-icon"></i>
+                            <span>Mis Cursos</span>
+                        </a>
+                    </li>
+                    <li>
+                                <a th:href="@{/profesor/chat}"
+                                    th:classappend="${currentPath != null and currentPath.startsWith('/profesor/chat') ? ' bg-orange-500 text-white font-semibold' : ''}"
+                                    data-target="chat" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="message-square" class="sidebar-icon"></i>
+                            <span>Chat</span>
+                        </a>
+                    </li>
+                    <li>
+                                <a th:href="@{/profesor/calendario}"
+                                    th:classappend="${currentPath != null and currentPath.startsWith('/profesor/calendario') ? ' bg-orange-500 text-white font-semibold' : ''}"
+                                    data-target="calendario" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="calendar" class="sidebar-icon"></i>
+                            <span>Calendario</span>
+                        </a>
+                    </li>
+                    <li>
+                                <a th:href="@{/profesor/configuracion}"
+                                    th:classappend="${currentPath != null and currentPath.startsWith('/profesor/configuracion') ? ' bg-orange-500 text-white font-semibold' : ''}"
+                                    data-target="configuracion" class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="settings" class="sidebar-icon"></i>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div>
+            <nav>
+                <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                    <li>
+                        <a th:href="@{/logout}" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="log-out" class="sidebar-icon"></i>
+                            <span>Cerrar Sesión</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+</div>
+
+<div th:fragment="header">
+    <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+        <button id="menu-button" class="md:hidden"><i data-lucide="menu" class="h-6 w-6"></i></button>
+        <div class="text-xl font-semibold md:hidden text-orange-500">UTP+teacher</div>
+
+        <div class="flex items-center space-x-4 ml-auto">
+            <button class="relative">
+                <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+                <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+
+            <div class="flex items-center space-x-2">
+                <img src="https://placehold.co/40x40/EFEFEF/333333?text=JP" alt="Avatar" class="w-10 h-10 rounded-full">
+                <div class="flex flex-col leading-tight">
+                    <p class="font-semibold text-sm" th:text="'Hola, ' + ${profesor.nombre}">Hola, Profesor</p>
+                    <p class="text-xs text-gray-500">Profesor</p>
+                </div>
+                <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+            </div>
+        </div>
+    </header>
+</div>
