@@ -56,7 +56,10 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("students", studentService.findAll());
-        model.addAttribute("professors", professorService.findAll());
+        List<Professor> professors = professorService.findAll();
+        model.addAttribute("professors", professors);
+        // También exponemos la lista con la clave en español porque los templates la usan así
+        model.addAttribute("profesores", professors);
         model.addAttribute("admins", adminService.findAll());
         model.addAttribute("cursos", cursoRepository.findAll());
         return "administrador/dashboard";

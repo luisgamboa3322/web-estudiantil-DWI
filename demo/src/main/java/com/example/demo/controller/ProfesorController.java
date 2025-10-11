@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Professor;
+import com.example.demo.model.Curso;
 import com.example.demo.service.ProfessorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,9 +21,11 @@ import java.util.Optional;
 public class ProfesorController {
 
     private final ProfessorService service;
+    private final com.example.demo.repository.CursoRepository cursoRepository;
 
-    public ProfesorController(ProfessorService service) {
+    public ProfesorController(ProfessorService service, com.example.demo.repository.CursoRepository cursoRepository) {
         this.service = service;
+        this.cursoRepository = cursoRepository;
     }
 
     @GetMapping("/dashboard")
@@ -31,7 +34,11 @@ public class ProfesorController {
         if (email != null) {
             Optional<Professor> opt = service.findByEmail(email);
             if (opt.isPresent()) {
-                model.addAttribute("profesor", opt.get());
+                Professor profesor = opt.get();
+                model.addAttribute("profesor", profesor);
+                // cargar cursos asignados al profesor y exponerlos al modelo
+                java.util.List<Curso> cursos = cursoRepository.findByProfesorId(profesor.getId());
+                model.addAttribute("cursos", cursos);
                 return "profesor/dashboard";
             }
         }

@@ -857,7 +857,7 @@
                     const formData = new FormData(addTeacherForm);
                     const payload = Object.fromEntries(formData.entries());
 
-                    const res = await fetch('/teacher', {
+                    const res = await fetch('/admin/profesores', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)

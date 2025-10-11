@@ -137,14 +137,16 @@
                 <main id="cursos-content" class="content-view">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Mis Cursos</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <!-- Card de Curso -->
-                        <div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-                            <img src="https://placehold.co/600x400/F97316/FFFFFF?text=DW" alt="Banner del curso" class="h-40 w-full object-cover">
+                        <div th:if="${#lists.isEmpty(cursos)}" class="col-span-1">
+                            <div class="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500">No tienes cursos asignados.</div>
+                        </div>
+                        <div th:each="curso : ${cursos}" class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                            <img th:src="${'https://placehold.co/600x400/F97316/FFFFFF?text=' + #strings.replace(curso.nombre, ' ', '+')}" alt="Banner del curso" class="h-40 w-full object-cover">
                             <div class="p-4 flex flex-col flex-grow">
-                                <h3 class="font-bold text-lg">Desarrollo Web Integrado</h3>
-                                <p class="text-sm text-gray-500">16549 - Presencial</p>
+                                <h3 class="font-bold text-lg" th:text="${curso.nombre}">Nombre del curso</h3>
+                                <p class="text-sm text-gray-500" th:text="${curso.codigo + ' - ' + (curso.descripcion != null ? 'Presencial' : '')}">Código - Modalidad</p>
                                 <div class="mt-auto pt-4">
-                                    <button class="manage-course-button w-full bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">Gestionar Curso</button>
+                                    <button class="manage-course-button w-full bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors" th:attr="data-id=${curso.id}">Gestionar Curso</button>
                                 </div>
                             </div>
                         </div>
