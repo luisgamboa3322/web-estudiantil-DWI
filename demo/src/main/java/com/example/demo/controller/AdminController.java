@@ -12,15 +12,15 @@ import com.example.demo.model.Student;
 import com.example.demo.model.Professor;
 import com.example.demo.model.Curso;
 import com.example.demo.model.EstadoCurso;
+import com.example.demo.model.StudentCurso;
 
 import com.example.demo.service.AdminService;
 import com.example.demo.service.StudentService;
 import com.example.demo.service.ProfessorService;
+import com.example.demo.service.StudentCursoService;
 
 import com.example.demo.repository.CursoRepository;
 import com.example.demo.repository.ProfessorRepository;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,6 +31,7 @@ public class AdminController {
     private final AdminService adminService;
     private final StudentService studentService;
     private final ProfessorService professorService;
+    private final StudentCursoService studentCursoService;
 
     @Autowired
     private CursoRepository cursoRepository;
@@ -41,11 +42,13 @@ public class AdminController {
     public AdminController(AdminService adminService,
                            StudentService studentService,
                            ProfessorService professorService,
+                           StudentCursoService studentCursoService,
                            CursoRepository cursoRepository,
                            ProfessorRepository professorRepository) {
         this.adminService = adminService;
         this.studentService = studentService;
         this.professorService = professorService;
+        this.studentCursoService = studentCursoService;
         this.cursoRepository = cursoRepository;
         this.professorRepository = professorRepository;
     }
@@ -55,13 +58,27 @@ public class AdminController {
     // ===========================
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("students", studentService.findAll());
-        List<Professor> professors = professorService.findAll();
+        var students = studentService.findAll();
+        var professors = professorService.findAll();
+        var cursos = cursoRepository.findAll();
+        var asignaciones = studentCursoService.findAllWithDetails();
+
+        System.out.println("DEBUG: Students count: " + students.size());
+        System.out.println("DEBUG: Professors count: " + professors.size());
+        System.out.println("DEBUG: Cursos count: " + cursos.size());
+        System.out.println("DEBUG: Asignaciones count: " + asignaciones.size());
+
+        for (var curso : cursos) {
+            System.out.println("DEBUG: Curso - ID: " + curso.getId() + ", Nombre: " + curso.getNombre() + ", Estado: " + curso.getEstado() + ", Profesor: " + (curso.getProfesor() != null ? curso.getProfesor().getNombre() : "null"));
+        }
+
+        model.addAttribute("students", students);
         model.addAttribute("professors", professors);
         // También exponemos la lista con la clave en español porque los templates la usan así
         model.addAttribute("profesores", professors);
         model.addAttribute("admins", adminService.findAll());
-        model.addAttribute("cursos", cursoRepository.findAll());
+        model.addAttribute("cursos", cursos);
+        model.addAttribute("asignaciones", asignaciones);
         return "administrador/dashboard";
     }
 
@@ -166,6 +183,7 @@ public class AdminController {
             }
 
             if (payload.get("profesor") != null) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
                 if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
                     Long profesorId = Long.valueOf(profesorMap.get("id").toString());
@@ -206,6 +224,7 @@ public class AdminController {
             }
 
             if (payload.get("profesor") != null) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> profesorMap = (Map<String, Object>) payload.get("profesor");
                 if (profesorMap.get("id") != null && !profesorMap.get("id").toString().isEmpty()) {
                     Long profesorId = Long.valueOf(profesorMap.get("id").toString());
@@ -242,5 +261,39 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al eliminar curso: " + e.getMessage());
         }
+    }
+
+    // ===========================
+    // CRUD ASIGNACIONES
+    // ===========================
+    @PostMapping("/asignaciones")
+    @ResponseBody
+    public ResponseEntity<?> assignCursoToStudent(@RequestBody Map<String, Long> payload) {
+        try {
+            Long studentId = payload.get("studentId");
+            Long cursoId = payload.get("cursoId");
+            var asignacion = studentCursoService.assignCursoToStudent(studentId, cursoId);
+            return ResponseEntity.ok(asignacion);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error asignando curso: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/asignaciones/{id}")
+    @ResponseBody
+    public ResponseEntity<String> unassignCursoFromStudent(@PathVariable Long id) {
+        try {
+            studentCursoService.unassignCursoFromStudent(id);
+            return ResponseEntity.ok("Asignación eliminada exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error eliminando asignación: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/asignaciones/{id}")
+    @ResponseBody
+    public ResponseEntity<StudentCurso> getAsignacion(@PathVariable Long id) {
+        var asignacion = studentCursoService.findById(id);
+        return asignacion.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

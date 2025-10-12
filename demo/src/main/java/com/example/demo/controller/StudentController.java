@@ -10,27 +10,54 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.security.core.Authentication;
 
 import com.example.demo.model.Student;
+import com.example.demo.model.StudentCurso;
+import com.example.demo.model.EstadoAsignacion;
+import java.util.List;
+import java.util.ArrayList;
 import com.example.demo.service.StudentService;
+import com.example.demo.service.StudentCursoService;
 
 @Controller
 @RequestMapping("/student")
 public class StudentController {
 
     private final StudentService studentService;
+    private final StudentCursoService studentCursoService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, StudentCursoService studentCursoService) {
         this.studentService = studentService;
+        this.studentCursoService = studentCursoService;
     }
 
     @GetMapping("/dashboard")
     public String showDashboard(Authentication authentication, Model model) {
         String email = authentication != null ? authentication.getName() : null;
+        System.out.println("DEBUG: Student dashboard accessed by: " + email);
         String nombre = (email != null)
             ? studentService.findByEmail(email).map(s -> s.getNombre()).orElse(email)
             : "Estudiante";
         model.addAttribute("studentName", nombre);
         model.addAttribute("activePage", "dashboard");
-        // Tu lógica actual para el dashboard
+
+        // Obtener cursos asignados al estudiante
+        List<StudentCurso> cursosAsignados = new ArrayList<>();
+        if (email != null) {
+            var studentOpt = studentService.findByEmail(email);
+            if (studentOpt.isPresent()) {
+                var student = studentOpt.get();
+                cursosAsignados = studentCursoService.findByStudentId(student.getId());
+                System.out.println("DEBUG: Student " + student.getNombre() + " has " + cursosAsignados.size() + " courses assigned");
+            } else {
+                System.out.println("DEBUG: Student not found for email: " + email);
+            }
+        } else {
+            System.out.println("DEBUG: No authentication found");
+        }
+        model.addAttribute("cursosAsignados", cursosAsignados);
+
+        boolean mostrarMensajeNoCursos = cursosAsignados.isEmpty() || cursosAsignados.stream().noneMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
+        model.addAttribute("mostrarMensajeNoCursos", mostrarMensajeNoCursos);
+
         return "student/dashboard";
     }
 

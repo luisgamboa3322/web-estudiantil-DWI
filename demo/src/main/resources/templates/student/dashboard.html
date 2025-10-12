@@ -205,7 +205,24 @@
                                 (Actual)</p>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="cursos-container">
-                                <!-- Los cursos se cargarán dinámicamente aquí -->
+                                <div th:each="asignacion : ${cursosAsignados}" th:if="${asignacion.estado.name() == 'ACTIVO'}"
+                                     class="bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform course-progress">
+                                    <img src="https://placehold.co/600x400/FFDDC1/4A4A4A?text=Curso" alt="Imagen del curso" class="w-full h-40 object-cover">
+                                    <div class="p-4">
+                                        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+                                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                        <h3 class="font-bold text-lg" th:text="${asignacion.curso.nombre}">Nombre del curso</h3>
+                                        <p class="text-sm text-gray-500 mt-1" th:text="${asignacion.curso.codigo + ' - ' + (asignacion.curso.profesor != null ? asignacion.curso.profesor.nombre : 'Sin profesor')}">Código - Profesor</p>
+                                        <p class="text-xs text-gray-400 mt-1" th:text="|Asignado: ${#temporals.format(asignacion.fechaAsignacion, 'dd/MM/yyyy')}|">Fecha asignación</p>
+                                    </div>
+                                </div>
+                                <div th:if="${mostrarMensajeNoCursos}"
+                                     class="col-span-full text-center py-12">
+                                    <i data-lucide="book-open" class="h-16 w-16 text-gray-300 mx-auto mb-4"></i>
+                                    <h3 class="text-lg font-semibold text-gray-600 mb-2">No tienes cursos asignados</h3>
+                                    <p class="text-gray-500">Contacta al administrador para que te asigne cursos.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -246,36 +263,7 @@
     <script>
         lucide.createIcons();
 
-        // Datos de ejemplo (en un caso real, estos vendrían de tu backend)
-        const cursos = [
-            {
-                id: 1,
-                nombre: "Desarrollo Web Integrado",
-                codigo: "16649",
-                modalidad: "Presencial",
-                imagen: "https://placehold.co/600x400/FFDDC1/4A4A4A?text=Curso+Web",
-                progreso: 75,
-                color: "blue"
-            },
-            {
-                id: 2,
-                nombre: "Diseño de Productos y Servicios",
-                codigo: "16598",
-                modalidad: "Presencial",
-                imagen: "https://placehold.co/600x400/C1E1FF/4A4A4A?text=Diseño+UX/UI",
-                progreso: 37,
-                color: "green"
-            },
-            {
-                id: 3,
-                nombre: "Herramientas de Desarrollo",
-                codigo: "16571",
-                modalidad: "Presencial",
-                imagen: "https://placehold.co/600x400/D4C1FF/4A4A4A?text=DevTools",
-                progreso: 75,
-                color: "yellow"
-            }
-        ];
+        // Los cursos ahora se cargan dinámicamente desde el backend usando Thymeleaf
 
         const actividades = [
             {
@@ -348,25 +336,7 @@
             sidebar.classList.toggle('w-full');
         });
 
-        // Cargar cursos
-        function cargarCursos() {
-            cursosContainer.innerHTML = '';
-            cursos.forEach(curso => {
-                const cursoElement = document.createElement('div');
-                cursoElement.className = 'bg-white rounded-lg shadow-sm overflow-hidden transform hover:-translate-y-1 transition-transform course-progress';
-                cursoElement.innerHTML = `
-                    <img src="${curso.imagen}" alt="Imagen del curso" class="w-full h-40 object-cover">
-                    <div class="p-4">
-                        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-3">
-                            <div class="bg-${curso.color}-500 h-1.5 rounded-full" style="width: ${curso.progreso}%"></div>
-                        </div>
-                        <h3 class="font-bold text-lg">${curso.nombre}</h3>
-                        <p class="text-sm text-gray-500 mt-1">${curso.codigo} - ${curso.modalidad}</p>
-                    </div>
-                `;
-                cursosContainer.appendChild(cursoElement);
-            });
-        }
+        // Los cursos ahora se renderizan con Thymeleaf
 
         // Cargar actividades
         function cargarActividades() {
@@ -438,7 +408,6 @@
 
         // Inicializar la carga de datos
         document.addEventListener('DOMContentLoaded', () => {
-            cargarCursos();
             cargarActividades();
             cargarNotificaciones();
         });
