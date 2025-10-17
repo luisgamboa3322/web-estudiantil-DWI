@@ -56,15 +56,27 @@ public class ProfessorService {
             if (repository.existsByEmail(changes.getEmail())) throw new IllegalStateException("Email ya existe");
             existing.setEmail(changes.getEmail());
         }
-        if (changes.getPassword() != null) {
-            // codificar contraseña si se actualiza
-            existing.setPassword(encoder.encode(changes.getPassword()));
+        if (changes.getEspecialidad() != null) existing.setEspecialidad(changes.getEspecialidad());
+        if (changes.getPassword() != null && !changes.getPassword().isEmpty()) {
+            // Solo codifica si la contraseña es nueva (no está codificada)
+            // Si la contraseña ya está codificada, no la recodifiques
+            if (!changes.getPassword().startsWith("$2a$") && !changes.getPassword().startsWith("$2b$") && !changes.getPassword().startsWith("$2y$")) {
+                existing.setPassword(encoder.encode(changes.getPassword()));
+            } else {
+                existing.setPassword(changes.getPassword());
+            }
         }
         return repository.save(existing);
     }
 
     public void delete(Long id) {
         if (!repository.existsById(id)) throw new IllegalStateException("Profesor no encontrado");
+
+        // Eliminar las relaciones de roles primero
+        Professor professor = repository.findById(id).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+        professor.getRoles().clear();
+        repository.save(professor);
+
         repository.deleteById(id);
     }
 

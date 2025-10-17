@@ -48,14 +48,26 @@ public class StudentService {
             if (repo.existsByEmail(changes.getEmail())) throw new IllegalStateException("Email ya existe");
             existing.setEmail(changes.getEmail());
         }
-        if (changes.getPassword() != null) {
-            existing.setPassword(encoder.encode(changes.getPassword()));
+        if (changes.getPassword() != null && !changes.getPassword().isEmpty()) {
+            // Solo codifica si la contraseña es nueva (no está codificada)
+            // Si la contraseña ya está codificada, no la recodifiques
+            if (!changes.getPassword().startsWith("$2a$") && !changes.getPassword().startsWith("$2b$") && !changes.getPassword().startsWith("$2y$")) {
+                existing.setPassword(encoder.encode(changes.getPassword()));
+            } else {
+                existing.setPassword(changes.getPassword());
+            }
         }
         return repo.save(existing);
     }
 
     public void delete(Long id) {
         if (!repo.existsById(id)) throw new IllegalStateException("Estudiante no encontrado");
+
+        // Eliminar las relaciones de roles primero
+        Student student = repo.findById(id).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        student.getRoles().clear();
+        repo.save(student);
+
         repo.deleteById(id);
     }
 }

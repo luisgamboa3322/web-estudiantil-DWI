@@ -13,6 +13,7 @@ import com.example.demo.model.Professor;
 import com.example.demo.model.Curso;
 import com.example.demo.model.EstadoCurso;
 import com.example.demo.model.StudentCurso;
+import com.example.demo.model.EstadoAsignacion;
 
 import com.example.demo.service.AdminService;
 import com.example.demo.service.StudentService;
@@ -21,8 +22,13 @@ import com.example.demo.service.StudentCursoService;
 
 import com.example.demo.repository.CursoRepository;
 import com.example.demo.repository.ProfessorRepository;
+import com.example.demo.repository.RoleRepository;
+import com.example.demo.model.Role;
 import java.util.Map;
 import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/admin")
@@ -38,6 +44,9 @@ public class AdminController {
 
     @Autowired
     private ProfessorRepository professorRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     public AdminController(AdminService adminService,
                            StudentService studentService,
@@ -88,6 +97,12 @@ public class AdminController {
     @PostMapping("/students")
     @ResponseBody
     public Student createStudent(@RequestBody Student student) {
+        // Asignar rol STUDENT por defecto
+        Role studentRole = roleRepository.findByName("STUDENT")
+            .orElseThrow(() -> new IllegalStateException("Rol STUDENT no encontrado"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(studentRole);
+        student.setRoles(roles);
         return studentService.save(student);
     }
 
@@ -105,9 +120,31 @@ public class AdminController {
 
     @DeleteMapping("/students/{id}")
     @ResponseBody
-    public String deleteStudent(@PathVariable Long id) {
-        studentService.delete(id);
-        return "Estudiante eliminado";
+    public ResponseEntity<Map<String, Object>> deleteStudent(@PathVariable Long id) {
+        try {
+            // Verificar si el estudiante tiene asignaciones activas
+            var asignaciones = studentCursoService.findByStudentId(id);
+            boolean hasActiveAsignaciones = asignaciones.stream()
+                .anyMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (hasActiveAsignaciones) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "No se puede eliminar el estudiante porque tiene cursos asignados activos. Primero desasigne los cursos.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            studentService.delete(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Estudiante eliminado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error al eliminar estudiante: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     // ===========================
@@ -116,6 +153,12 @@ public class AdminController {
     @PostMapping("/profesores")
     @ResponseBody
     public Professor createProfessor(@RequestBody Professor professor) {
+        // Asignar rol TEACHER por defecto
+        Role teacherRole = roleRepository.findByName("TEACHER")
+            .orElseThrow(() -> new IllegalStateException("Rol TEACHER no encontrado"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(teacherRole);
+        professor.setRoles(roles);
         return professorService.create(professor);
     }
 
@@ -133,9 +176,27 @@ public class AdminController {
 
     @DeleteMapping("/profesores/{id}")
     @ResponseBody
-    public String deleteProfessor(@PathVariable Long id) {
-        professorService.delete(id);
-        return "Profesor eliminado";
+    public ResponseEntity<Map<String, Object>> deleteProfessor(@PathVariable Long id) {
+        try {
+            // Verificar si el profesor tiene cursos asignados
+            var cursosAsignados = cursoRepository.findByProfesorId(id);
+            if (!cursosAsignados.isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "No se puede eliminar el profesor porque tiene cursos asignados. Primero reasigne o elimine los cursos.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            professorService.delete(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Profesor eliminado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error al eliminar profesor: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     // ===========================
@@ -144,6 +205,12 @@ public class AdminController {
     @PostMapping("/admins")
     @ResponseBody
     public Admin createAdmin(@RequestBody Admin admin) {
+        // Asignar rol ADMIN por defecto
+        Role adminRole = roleRepository.findByName("ADMIN")
+            .orElseThrow(() -> new IllegalStateException("Rol ADMIN no encontrado"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(adminRole);
+        admin.setRoles(roles);
         return adminService.create(admin);
     }
 
@@ -161,9 +228,27 @@ public class AdminController {
 
     @DeleteMapping("/admins/{id}")
     @ResponseBody
-    public String deleteAdmin(@PathVariable Long id) {
-        adminService.delete(id);
-        return "Administrador eliminado";
+    public ResponseEntity<Map<String, Object>> deleteAdmin(@PathVariable Long id) {
+        try {
+            // Verificar si es el último administrador
+            var allAdmins = adminService.findAll();
+            if (allAdmins.size() <= 1) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "No se puede eliminar el último administrador del sistema.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            adminService.delete(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Administrador eliminado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error al eliminar administrador: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     // ===========================
@@ -247,19 +332,38 @@ public class AdminController {
     }
 
     @PostMapping("/cursos/delete")
-    public ResponseEntity<String> deleteCurso(@RequestBody Map<String, Long> payload) {
+    public ResponseEntity<Map<String, Object>> deleteCurso(@RequestBody Map<String, Long> payload) {
         try {
             Long cursoId = payload.get("id");
             if (cursoRepository.existsById(cursoId)) {
+                // Verificar si el curso tiene estudiantes asignados activos
+                var asignacionesActivas = studentCursoService.findAll().stream()
+                    .filter(a -> a.getCurso().getId().equals(cursoId) && a.getEstado() == EstadoAsignacion.ACTIVO)
+                    .findAny();
+
+                if (asignacionesActivas.isPresent()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("message", "No se puede eliminar el curso porque tiene estudiantes asignados activos. Primero desasigne los estudiantes.");
+                    return ResponseEntity.badRequest().body(response);
+                }
+
                 cursoRepository.deleteById(cursoId);
-                return ResponseEntity.ok("Curso eliminado exitosamente");
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Curso eliminado exitosamente");
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Curso no encontrado");
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Curso no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al eliminar curso: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error al eliminar curso: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

@@ -78,4 +78,12 @@ public class StudentCursoService {
     public List<StudentCurso> findByStudentId(Long studentId) {
         return studentCursoRepository.findByStudentId(studentId);
     }
+
+    public boolean hasActiveAsignacionesByStudentId(Long studentId) {
+        return studentCursoRepository.existsByStudentIdAndEstado(studentId, EstadoAsignacion.ACTIVO);
+    }
+
+    public boolean hasActiveAsignacionesByCursoId(Long cursoId) {
+        return studentCursoRepository.existsByCursoIdAndEstado(cursoId, EstadoAsignacion.ACTIVO);
+    }
 }

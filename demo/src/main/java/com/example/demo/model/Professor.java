@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "professors")
@@ -15,6 +16,14 @@ public class Professor {
     private String email;
     private String especialidad; // <- agregar
     private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "professor_roles",
+        joinColumns = @JoinColumn(name = "professor_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 
     // getters y setters
     public Long getId() { return id; }
@@ -34,4 +43,7 @@ public class Professor {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
 }

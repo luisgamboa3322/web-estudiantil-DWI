@@ -30,8 +30,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login", "/", "/css/**", "/js/**", "/images/**", "/webjars/**",
-                    "/static/**", "/favicon.ico", "/error").permitAll()
-                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                    "/static/**", "/favicon.ico", "/error", "/select-dashboard").permitAll()
+                .requestMatchers("/admin/**").hasAuthority("ACCESS_ADMIN_DASHBOARD")
+                .requestMatchers("/profesor/**").hasAuthority("ACCESS_TEACHER_DASHBOARD")
+                .requestMatchers("/student/**").hasAuthority("ACCESS_STUDENT_DASHBOARD")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -70,12 +72,19 @@ public class SecurityConfig {
                 String target = "/";
 
                 if (username != null && !username.isEmpty()) {
-                    // Determinar el rol basado en las autoridades del usuario autenticado
-                    if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+                    // Verificar si el usuario tiene múltiples dashboards disponibles (ej. TEACHER)
+                    boolean hasAdmin = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
+                    boolean hasTeacher = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ACCESS_TEACHER_DASHBOARD"));
+                    boolean hasStudent = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+
+                    if (hasAdmin && hasTeacher && hasStudent) {
+                        // TEACHER: múltiples opciones, redirigir a selección
+                        target = "/select-dashboard";
+                    } else if (hasAdmin) {
                         target = "/admin/dashboard";
-                    } else if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_TEACHER"))) {
+                    } else if (hasTeacher) {
                         target = "/profesor/dashboard";
-                    } else if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_STUDENT"))) {
+                    } else if (hasStudent) {
                         target = "/student/dashboard";
                     } else {
                         target = "/student/dashboard"; // fallback
