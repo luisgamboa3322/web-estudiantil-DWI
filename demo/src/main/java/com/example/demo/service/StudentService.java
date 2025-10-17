@@ -65,8 +65,10 @@ public class StudentService {
 
         // Eliminar las relaciones de roles primero
         Student student = repo.findById(id).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
-        student.getRoles().clear();
-        repo.save(student);
+        if (student.getRoles() != null) {
+            student.getRoles().clear();
+            repo.save(student);
+        }
 
         repo.deleteById(id);
     }

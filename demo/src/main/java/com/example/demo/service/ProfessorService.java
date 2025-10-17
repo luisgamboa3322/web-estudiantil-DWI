@@ -74,8 +74,10 @@ public class ProfessorService {
 
         // Eliminar las relaciones de roles primero
         Professor professor = repository.findById(id).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
-        professor.getRoles().clear();
-        repository.save(professor);
+        if (professor.getRoles() != null) {
+            professor.getRoles().clear();
+            repository.save(professor);
+        }
 
         repository.deleteById(id);
     }

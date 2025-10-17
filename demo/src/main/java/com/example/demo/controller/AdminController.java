@@ -5,7 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+
+import jakarta.validation.Valid;
 
 import com.example.demo.model.Admin;
 import com.example.demo.model.Student;
@@ -96,14 +100,28 @@ public class AdminController {
     // ===========================
     @PostMapping("/students")
     @ResponseBody
-    public Student createStudent(@RequestBody Student student) {
-        // Asignar rol STUDENT por defecto
-        Role studentRole = roleRepository.findByName("STUDENT")
-            .orElseThrow(() -> new IllegalStateException("Rol STUDENT no encontrado"));
-        Set<Role> roles = new HashSet<>();
-        roles.add(studentRole);
-        student.setRoles(roles);
-        return studentService.save(student);
+    public ResponseEntity<?> createStudent(@Valid @RequestBody Student student, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            // Asignar rol STUDENT por defecto
+            Role studentRole = roleRepository.findByName("STUDENT")
+                .orElseThrow(() -> new IllegalStateException("Rol STUDENT no encontrado"));
+            Set<Role> roles = new HashSet<>();
+            roles.add(studentRole);
+            student.setRoles(roles);
+            Student savedStudent = studentService.save(student);
+            return ResponseEntity.ok(savedStudent);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear estudiante: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @GetMapping("/students/{id}")

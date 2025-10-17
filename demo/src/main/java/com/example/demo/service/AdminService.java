@@ -71,8 +71,10 @@ public class AdminService {
 
         // Eliminar las relaciones de roles primero
         Admin admin = repo.findById(id).orElseThrow(() -> new IllegalStateException("Administrador no encontrado"));
-        admin.getRoles().clear();
-        repo.save(admin);
+        if (admin.getRoles() != null) {
+            admin.getRoles().clear();
+            repo.save(admin);
+        }
 
         repo.deleteById(id);
     }

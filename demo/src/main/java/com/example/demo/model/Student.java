@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.Set;
 
 @Entity
@@ -9,11 +10,21 @@ public class Student {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre es obligatorio")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "El nombre solo puede contener letras y espacios")
     private String nombre;
+
+    @NotBlank(message = "El código es obligatorio")
     @Column(unique = true, nullable = false)
     private String codigo;
+
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El correo debe tener un formato válido, ej. usuario@gmail.com")
     @Column(unique = true, nullable = false)
     private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, max = 20, message = "La contraseña debe tener entre 8 y 20 caracteres")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)

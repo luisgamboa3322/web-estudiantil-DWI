@@ -924,7 +924,22 @@
                         studentModal.classList.remove('flex');
                         location.reload();
                     } else {
-                        alert('Error guardando estudiante');
+                        const errorData = await res.json();
+                        if (errorData.nombre) {
+                            alert('Nombre: ' + errorData.nombre);
+                        }
+                        if (errorData.codigo) {
+                            alert('Código: ' + errorData.codigo);
+                        }
+                        if (errorData.email) {
+                            alert('Email: ' + errorData.email);
+                        }
+                        if (errorData.password) {
+                            alert('Contraseña: ' + errorData.password);
+                        }
+                        if (errorData.error) {
+                            alert('Error: ' + errorData.error);
+                        }
                     }
                 });
             }
