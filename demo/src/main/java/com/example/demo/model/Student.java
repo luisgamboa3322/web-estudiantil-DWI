@@ -11,7 +11,7 @@ public class Student {
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
-    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "El nombre solo puede contener letras y espacios")
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$", message = "El nombre solo puede contener letras, espacios y caracteres especiales válidos")
     private String nombre;
 
     @NotBlank(message = "El código es obligatorio")

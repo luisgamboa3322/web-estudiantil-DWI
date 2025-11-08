@@ -100,21 +100,6 @@ public class DataInitializer {
                 a.setRoles(roles);
                 adminService.create(a);
                 System.out.println("Admin creado: " + adminEmail);
-
-                // Crear profesor para el admin (para permitir acceso al dashboard docente)
-                if (professorService.findByEmail(adminEmail).isEmpty()) {
-                    Professor p = new Professor();
-                    p.setNombre("Admin Docente");
-                    p.setCodigo("A0001-P");
-                    p.setEmail(adminEmail);
-                    p.setEspecialidad("Administración");
-                    p.setPassword("admin123"); // misma contraseña
-                    Set<Role> profRoles = new HashSet<>();
-                    profRoles.add(teacherRole);
-                    p.setRoles(profRoles);
-                    professorService.create(p);
-                    System.out.println("Profesor creado para admin: " + adminEmail);
-                }
             }
 
             // Crear profesor

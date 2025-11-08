@@ -31,6 +31,16 @@ public class StudentController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Authentication authentication, Model model) {
+        // Verificar si el usuario tiene permiso para acceder al dashboard estudiante
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+
+        if (!hasStudentPermission) {
+            // Usuario no tiene permiso para acceder al dashboard estudiante
+            model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard de estudiante");
+            return "error/acceso-denegado";
+        }
+
         String email = authentication != null ? authentication.getName() : null;
         System.out.println("DEBUG: Student dashboard accessed by: " + email);
         String nombre = (email != null)

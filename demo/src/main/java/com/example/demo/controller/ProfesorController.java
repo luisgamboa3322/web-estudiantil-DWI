@@ -32,6 +32,16 @@ public class ProfesorController {
     public String dashboard(Model model, Authentication authentication) {
         String email = (authentication != null) ? authentication.getName() : null;
         if (email != null) {
+            // Verificar si el usuario tiene permiso para acceder al dashboard docente
+            boolean hasTeacherPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_TEACHER_DASHBOARD"));
+
+            if (!hasTeacherPermission) {
+                // Usuario no tiene permiso para acceder al dashboard docente
+                model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard docente");
+                return "error/acceso-denegado";
+            }
+
             Optional<Professor> opt = service.findByEmail(email);
             if (opt.isPresent()) {
                 Professor profesor = opt.get();
@@ -40,10 +50,20 @@ public class ProfesorController {
                 java.util.List<Curso> cursos = cursoRepository.findByProfesorId(profesor.getId());
                 model.addAttribute("cursos", cursos);
                 return "profesor/dashboard";
+            } else {
+                // Es un admin o usuario con permisos de docente pero no es profesor registrado
+                // Crear un objeto profesor virtual para mostrar información básica
+                Professor profesorVirtual = new Professor();
+                profesorVirtual.setNombre("Usuario con permisos docentes");
+                profesorVirtual.setEmail(email);
+                profesorVirtual.setEspecialidad("Acceso administrativo");
+                model.addAttribute("profesor", profesorVirtual);
+                model.addAttribute("cursos", java.util.Collections.emptyList()); // Lista vacía de cursos
+                return "profesor/dashboard";
             }
         }
-        // fallback: redirigir al login si no se encuentra el profesor
-        return "redirect:/login?error=no_profesor";
+        // fallback: redirigir al login si no hay autenticación
+        return "redirect:/login?error=no_auth";
     }
 
     @GetMapping("/configuracion")

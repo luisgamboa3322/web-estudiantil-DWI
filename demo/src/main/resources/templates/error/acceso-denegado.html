@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso Denegado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h3 class="text-center mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Acceso Denegado
+                        </h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading">¡No autorizado!</h4>
+                            <p th:text="${error != null ? error : 'No tienes permisos suficientes para acceder a esta sección.'}"></p>
+                            <hr>
+                            <p class="mb-0">Si crees que esto es un error, contacta al administrador del sistema.</p>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="/select-dashboard" class="btn btn-primary me-2">
+                                <i class="fas fa-arrow-left"></i> Volver al selector
+                            </a>
+                            <a href="/logout" class="btn btn-outline-secondary">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>

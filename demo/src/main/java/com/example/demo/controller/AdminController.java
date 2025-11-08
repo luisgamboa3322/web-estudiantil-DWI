@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 
 import jakarta.validation.Valid;
@@ -70,7 +71,17 @@ public class AdminController {
     // DASHBOARD
     // ===========================
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, Authentication authentication) {
+        // Verificar si el usuario tiene permiso para acceder al dashboard admin
+        boolean hasAdminPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
+
+        if (!hasAdminPermission) {
+            // Usuario no tiene permiso para acceder al dashboard admin
+            model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard administrativo");
+            return "error/acceso-denegado";
+        }
+
         var students = studentService.findAll();
         var professors = professorService.findAll();
         var cursos = cursoRepository.findAll();

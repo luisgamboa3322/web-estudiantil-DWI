@@ -78,7 +78,10 @@ public class SecurityConfig {
                     boolean hasStudent = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
 
                     if (hasAdmin && hasTeacher && hasStudent) {
-                        // TEACHER: múltiples opciones, redirigir a selección
+                        // ADMIN: múltiples opciones, redirigir a selección
+                        target = "/select-dashboard";
+                    } else if (hasTeacher && hasStudent && !hasAdmin) {
+                        // TEACHER: múltiples opciones (docente + estudiante), redirigir a selección
                         target = "/select-dashboard";
                     } else if (hasAdmin) {
                         target = "/admin/dashboard";
