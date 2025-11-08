@@ -180,14 +180,28 @@ public class AdminController {
     // ===========================
     @PostMapping("/profesores")
     @ResponseBody
-    public Professor createProfessor(@RequestBody Professor professor) {
-        // Asignar rol TEACHER por defecto
-        Role teacherRole = roleRepository.findByName("TEACHER")
-            .orElseThrow(() -> new IllegalStateException("Rol TEACHER no encontrado"));
-        Set<Role> roles = new HashSet<>();
-        roles.add(teacherRole);
-        professor.setRoles(roles);
-        return professorService.create(professor);
+    public ResponseEntity<?> createProfessor(@Valid @RequestBody Professor professor, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            // Asignar rol TEACHER por defecto
+            Role teacherRole = roleRepository.findByName("TEACHER")
+                .orElseThrow(() -> new IllegalStateException("Rol TEACHER no encontrado"));
+            Set<Role> roles = new HashSet<>();
+            roles.add(teacherRole);
+            professor.setRoles(roles);
+            Professor savedProfessor = professorService.create(professor);
+            return ResponseEntity.ok(savedProfessor);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear profesor: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @GetMapping("/profesores/{id}")
@@ -232,14 +246,28 @@ public class AdminController {
     // ===========================
     @PostMapping("/admins")
     @ResponseBody
-    public Admin createAdmin(@RequestBody Admin admin) {
-        // Asignar rol ADMIN por defecto
-        Role adminRole = roleRepository.findByName("ADMIN")
-            .orElseThrow(() -> new IllegalStateException("Rol ADMIN no encontrado"));
-        Set<Role> roles = new HashSet<>();
-        roles.add(adminRole);
-        admin.setRoles(roles);
-        return adminService.create(admin);
+    public ResponseEntity<?> createAdmin(@Valid @RequestBody Admin admin, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        try {
+            // Asignar rol ADMIN por defecto
+            Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseThrow(() -> new IllegalStateException("Rol ADMIN no encontrado"));
+            Set<Role> roles = new HashSet<>();
+            roles.add(adminRole);
+            admin.setRoles(roles);
+            Admin savedAdmin = adminService.create(admin);
+            return ResponseEntity.ok(savedAdmin);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear administrador: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @GetMapping("/admins/{id}")
