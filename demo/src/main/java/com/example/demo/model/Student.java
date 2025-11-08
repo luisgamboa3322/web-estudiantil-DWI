@@ -24,7 +24,7 @@ public class Student {
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 8, max = 20, message = "La contraseña debe tener entre 8 y 20 caracteres")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)

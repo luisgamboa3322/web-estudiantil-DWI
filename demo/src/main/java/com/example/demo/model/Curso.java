@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "curso")
@@ -9,9 +10,11 @@ public class Curso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre del curso es obligatorio")
     @Column(nullable = false)
     private String nombre;
 
+    @NotBlank(message = "El código del curso es obligatorio")
     @Column(unique = true, nullable = false)
     private String codigo;
 
