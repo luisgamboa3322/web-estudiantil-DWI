@@ -13,18 +13,55 @@ public class DashboardController {
         String email = authentication != null ? authentication.getName() : null;
         model.addAttribute("userEmail", email);
 
-        // Determinar qué dashboards están disponibles
-        boolean hasAdmin = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
-        boolean hasTeacher = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_TEACHER_DASHBOARD"));
-        boolean hasStudent = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-
-        model.addAttribute("hasAdmin", hasAdmin);
-        model.addAttribute("hasTeacher", hasTeacher);
-        model.addAttribute("hasStudent", hasStudent);
+        // Mostrar TODAS las opciones del dashboard para todos los usuarios
+        // El control de acceso se maneja en cada dashboard individualmente
+        model.addAttribute("hasAdmin", true);   // Siempre mostrar opción admin
+        model.addAttribute("hasTeacher", true); // Siempre mostrar opción docente
+        model.addAttribute("hasStudent", true); // Siempre mostrar opción estudiante
 
         return "select-dashboard";
+    }
+
+    @GetMapping("/error/acceso-denegado")
+    public String accesoDenegado(Model model, Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        model.addAttribute("userEmail", email);
+        return "error/acceso-denegado";
+    }
+
+    @GetMapping("/redirect/admin")
+    public String redirectToAdmin(Authentication authentication) {
+        boolean hasAdminPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
+
+        if (hasAdminPermission) {
+            return "redirect:/admin/dashboard";
+        } else {
+            return "redirect:/error/acceso-denegado";
+        }
+    }
+
+    @GetMapping("/redirect/profesor")
+    public String redirectToProfesor(Authentication authentication) {
+        boolean hasTeacherPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_TEACHER_DASHBOARD"));
+
+        if (hasTeacherPermission) {
+            return "redirect:/profesor/dashboard";
+        } else {
+            return "redirect:/error/acceso-denegado";
+        }
+    }
+
+    @GetMapping("/redirect/student")
+    public String redirectToStudent(Authentication authentication) {
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+
+        if (hasStudentPermission) {
+            return "redirect:/student/dashboard";
+        } else {
+            return "redirect:/error/acceso-denegado";
+        }
     }
 }

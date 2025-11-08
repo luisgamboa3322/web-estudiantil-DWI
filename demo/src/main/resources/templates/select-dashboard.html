@@ -18,18 +18,18 @@
                         <p class="text-center mb-4">Tienes acceso a múltiples dashboards. Selecciona cuál deseas usar:</p>
 
                         <div class="d-grid gap-3">
-                            <a th:if="${hasAdmin}" href="/admin/dashboard" class="btn btn-primary btn-lg">
-                                <i class="fas fa-cog"></i> Dashboard Administrador
-                            </a>
+                             <a href="/redirect/admin" class="btn btn-primary btn-lg">
+                                 <i class="fas fa-cog"></i> Dashboard Administrador
+                             </a>
 
-                            <a th:if="${hasTeacher}" href="/profesor/dashboard" class="btn btn-success btn-lg">
-                                <i class="fas fa-chalkboard-teacher"></i> Dashboard Docente
-                            </a>
+                             <a href="/redirect/profesor" class="btn btn-success btn-lg">
+                                 <i class="fas fa-chalkboard-teacher"></i> Dashboard Docente
+                             </a>
 
-                            <a th:if="${hasStudent}" href="/student/dashboard" class="btn btn-info btn-lg">
-                                <i class="fas fa-user-graduate"></i> Dashboard Estudiante
-                            </a>
-                        </div>
+                             <a href="/redirect/student" class="btn btn-info btn-lg">
+                                 <i class="fas fa-user-graduate"></i> Dashboard Estudiante
+                             </a>
+                         </div>
 
                         <div class="text-center mt-4">
                             <a href="/logout" class="btn btn-outline-secondary">Cerrar Sesión</a>

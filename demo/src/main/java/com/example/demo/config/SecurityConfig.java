@@ -30,7 +30,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login", "/", "/css/**", "/js/**", "/images/**", "/webjars/**",
-                    "/static/**", "/favicon.ico", "/error", "/select-dashboard").permitAll()
+                    "/static/**", "/favicon.ico", "/error", "/select-dashboard", "/error/acceso-denegado",
+                    "/redirect/admin", "/redirect/profesor", "/redirect/student").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ACCESS_ADMIN_DASHBOARD")
                 .requestMatchers("/profesor/**").hasAuthority("ACCESS_TEACHER_DASHBOARD")
                 .requestMatchers("/student/**").hasAuthority("ACCESS_STUDENT_DASHBOARD")
@@ -82,6 +83,9 @@ public class SecurityConfig {
                         target = "/select-dashboard";
                     } else if (hasTeacher && hasStudent && !hasAdmin) {
                         // TEACHER: múltiples opciones (docente + estudiante), redirigir a selección
+                        target = "/select-dashboard";
+                    } else if (hasStudent && !hasTeacher && !hasAdmin) {
+                        // STUDENT: solo estudiante, pero mostrar selector para consistencia
                         target = "/select-dashboard";
                     } else if (hasAdmin) {
                         target = "/admin/dashboard";

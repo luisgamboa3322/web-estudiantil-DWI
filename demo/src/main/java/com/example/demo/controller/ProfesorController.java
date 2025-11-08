@@ -38,8 +38,7 @@ public class ProfesorController {
 
             if (!hasTeacherPermission) {
                 // Usuario no tiene permiso para acceder al dashboard docente
-                model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard docente");
-                return "error/acceso-denegado";
+                return "redirect:/error/acceso-denegado";
             }
 
             Optional<Professor> opt = service.findByEmail(email);

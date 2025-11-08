@@ -78,8 +78,7 @@ public class AdminController {
 
         if (!hasAdminPermission) {
             // Usuario no tiene permiso para acceder al dashboard admin
-            model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard administrativo");
-            return "error/acceso-denegado";
+            return "redirect:/error/acceso-denegado";
         }
 
         var students = studentService.findAll();

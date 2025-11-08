@@ -37,8 +37,7 @@ public class StudentController {
 
         if (!hasStudentPermission) {
             // Usuario no tiene permiso para acceder al dashboard estudiante
-            model.addAttribute("error", "Acceso denegado: No tienes permisos para acceder al dashboard de estudiante");
-            return "error/acceso-denegado";
+            return "redirect:/error/acceso-denegado";
         }
 
         String email = authentication != null ? authentication.getName() : null;
