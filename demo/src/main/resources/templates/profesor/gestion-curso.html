@@ -49,16 +49,503 @@
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     <span>Volver</span>
                 </button>
-                <h1 class="text-3xl font-bold text-gray-800 mb-6" th:text="${curso != null} ? curso.nombre : 'Gestionando Curso'">Gestionando: Curso</h1>
+                <h1 class="text-3xl font-bold text-gray-800 mb-6" th:text="${curso != null} ? 'Gestionando: ' + curso.nombre : 'Gestionando Curso'">Gestionando: Curso</h1>
 
-                <!-- Contenido de gestión (puedes ampliarlo) -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="font-semibold mb-3">Materiales y Tareas</h3>
-                    <p class="text-sm text-gray-500">Aquí puedes agregar material del curso, tareas y otras configuraciones.</p>
+                <!-- Botón para crear semana -->
+                <div class="mb-6">
+                    <button id="create-semana-btn" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>Crear Semana
+                    </button>
+                </div>
+
+                <!-- Lista de Semanas -->
+                <div id="semanas-container" class="space-y-4">
+                    <div th:if="${#lists.isEmpty(semanas)}" class="bg-white rounded-lg shadow-sm p-6 text-center text-gray-500">
+                        No hay semanas creadas para este curso.
+                    </div>
+                    <div th:each="semana : ${semanas}" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-lg" th:text="'Semana ' + ${semana.numeroSemana} + ': ' + ${semana.titulo}">Semana 1</h3>
+                                <div class="flex space-x-2">
+                                    <button class="add-material-btn bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
+                                            th:data-semana-id="${semana.id}">
+                                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>Material
+                                    </button>
+                                    <button class="add-tarea-btn bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-colors"
+                                            th:data-semana-id="${semana.id}">
+                                        <i data-lucide="clipboard-check" class="w-4 h-4 inline mr-1"></i>Tarea
+                                    </button>
+                                </div>
+                            </div>
+                            <p th:if="${semana.descripcion != null}" class="text-gray-600 mt-2" th:text="${semana.descripcion}"></p>
+                        </div>
+
+                        <!-- Materiales de la semana -->
+                        <div class="p-4 border-b border-gray-100">
+                            <h4 class="font-semibold mb-3 text-gray-700">Material de Estudio</h4>
+                            <div id="materiales-container" th:data-semana-id="${semana.id}" class="space-y-3">
+                                <!-- Materiales se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Tareas de la semana -->
+                        <div class="p-4">
+                            <h4 class="font-semibold mb-3 text-gray-700">Tareas</h4>
+                            <div id="tareas-container" th:data-semana-id="${semana.id}" class="space-y-3">
+                                <!-- Tareas se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
-    <script>lucide.createIcons();</script>
+    <!-- Modal para crear semana -->
+    <div id="semana-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <h3 class="text-lg font-bold mb-4">Crear Nueva Semana</h3>
+                <form id="semana-form">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número de Semana</label>
+                        <input type="number" id="semana-numero" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                        <input type="text" id="semana-titulo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
+                        <textarea id="semana-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-semana-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">Crear Semana</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear material -->
+    <div id="material-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <h3 class="text-lg font-bold mb-4">Añadir Material</h3>
+                <form id="material-form" enctype="multipart/form-data">
+                    <input type="hidden" id="material-semana-id">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Material</label>
+                        <input type="text" id="material-nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Seleccionar Archivo</label>
+                        <input type="file" id="material-file" class="w-full px-3 py-2 border border-gray-300 rounded-md" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif" required>
+                        <p class="text-xs text-gray-500 mt-1">Formatos permitidos: PDF, Word, Excel, PowerPoint, imágenes, etc. (Máx. 500MB)</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
+                        <textarea id="material-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-material-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Añadir Material</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear tarea -->
+    <div id="tarea-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <h3 class="text-lg font-bold mb-4">Crear Nueva Tarea</h3>
+                <form id="tarea-form">
+                    <input type="hidden" id="tarea-semana-id">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título de la Tarea</label>
+                        <input type="text" id="tarea-titulo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea id="tarea-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
+                        <input type="datetime-local" id="tarea-fecha-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Puntos Máximos</label>
+                        <input type="number" id="tarea-puntos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="0" value="100" required>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-tarea-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Crear Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Obtener cursoId de los parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const cursoId = urlParams.get('id');
+
+            if (!cursoId) {
+                alert('Error: No se especificó un curso válido');
+                window.location.href = '/profesor/dashboard';
+                return;
+            }
+
+            // Modal de semana
+            const semanaModal = document.getElementById('semana-modal');
+            const createSemanaBtn = document.getElementById('create-semana-btn');
+            const cancelSemanaBtn = document.getElementById('cancel-semana-btn');
+            const semanaForm = document.getElementById('semana-form');
+
+            // Modal de material
+            const materialModal = document.getElementById('material-modal');
+            const addMaterialBtns = document.querySelectorAll('.add-material-btn');
+            const cancelMaterialBtn = document.getElementById('cancel-material-btn');
+            const materialForm = document.getElementById('material-form');
+
+            // Modal de tarea
+            const tareaModal = document.getElementById('tarea-modal');
+            const addTareaBtns = document.querySelectorAll('.add-tarea-btn');
+            const cancelTareaBtn = document.getElementById('cancel-tarea-btn');
+            const tareaForm = document.getElementById('tarea-form');
+
+            // Funciones de modal
+            function showModal(modal) {
+                modal.classList.remove('hidden');
+            }
+
+            function hideModal(modal) {
+                modal.classList.add('hidden');
+            }
+
+            // Función para cargar materiales de una semana
+            async function loadMateriales(semanaId) {
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/materiales`);
+                    if (response.ok) {
+                        const materiales = await response.json();
+                        const container = document.querySelector(`#materiales-container[data-semana-id="${semanaId}"]`);
+                        container.innerHTML = '';
+
+                        if (materiales.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center text-gray-500 py-4">
+                                    <i data-lucide="file-text" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                    <p>No hay material para esta semana</p>
+                                </div>
+                            `;
+                        } else {
+                            materiales.forEach(material => {
+                                const materialElement = document.createElement('div');
+                                materialElement.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-md';
+                                materialElement.innerHTML = `
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="file-text" class="text-red-500"></i>
+                                        <div>
+                                            <span class="font-medium">${material.nombre}</span>
+                                            <span class="text-sm text-gray-500 ml-2">(${material.fileType || 'Archivo'})</span>
+                                            ${material.descripcion ? `<p class="text-sm text-gray-600">${material.descripcion}</p>` : ''}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex gap-2">
+                                            <a href="/profesor/materiales/${material.id}/download"
+                                               class="p-1 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-100"
+                                               title="Descargar archivo">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                            </a>
+                                            <button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100 delete-material-btn"
+                                                    data-material-id="${material.id}">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                container.appendChild(materialElement);
+                            });
+                        }
+                        lucide.createIcons();
+                    }
+                } catch (error) {
+                    console.error('Error cargando materiales:', error);
+                }
+            }
+
+            // Función para cargar tareas de una semana
+            async function loadTareas(semanaId) {
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/tareas`);
+                    if (response.ok) {
+                        const tareas = await response.json();
+                        const container = document.querySelector(`#tareas-container[data-semana-id="${semanaId}"]`);
+                        container.innerHTML = '';
+
+                        if (tareas.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center text-gray-500 py-4">
+                                    <i data-lucide="clipboard-check" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                    <p>No hay tareas para esta semana</p>
+                                </div>
+                            `;
+                        } else {
+                            tareas.forEach(tarea => {
+                                const tareaElement = document.createElement('div');
+                                tareaElement.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-md';
+                                tareaElement.innerHTML = `
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="clipboard-check" class="text-blue-500"></i>
+                                        <div>
+                                            <span class="font-medium">${tarea.titulo}</span>
+                                            <span class="text-sm text-gray-500 ml-2">(${tarea.puntosMaximos} pts)</span>
+                                            ${tarea.descripcion ? `<p class="text-sm text-gray-600">${tarea.descripcion}</p>` : ''}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100 delete-tarea-btn"
+                                                data-tarea-id="${tarea.id}">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                container.appendChild(tareaElement);
+                            });
+                        }
+                        lucide.createIcons();
+                    }
+                } catch (error) {
+                    console.error('Error cargando tareas:', error);
+                }
+            }
+
+            // Cargar materiales y tareas al cargar la página
+            document.querySelectorAll('#materiales-container').forEach(container => {
+                const semanaId = container.getAttribute('data-semana-id');
+                loadMateriales(semanaId);
+            });
+
+            document.querySelectorAll('#tareas-container').forEach(container => {
+                const semanaId = container.getAttribute('data-semana-id');
+                loadTareas(semanaId);
+            });
+
+            // Eventos de semana
+            createSemanaBtn.addEventListener('click', () => showModal(semanaModal));
+            cancelSemanaBtn.addEventListener('click', () => hideModal(semanaModal));
+
+            semanaForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = {
+                    numeroSemana: document.getElementById('semana-numero').value,
+                    titulo: document.getElementById('semana-titulo').value,
+                    descripcion: document.getElementById('semana-descripcion').value
+                };
+
+                try {
+                    const response = await fetch(`/profesor/cursos/${cursoId}/semanas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('Semana creada exitosamente');
+                        location.reload();
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Eventos de material
+            addMaterialBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('material-semana-id').value = btn.dataset.semanaId;
+                    showModal(materialModal);
+                });
+            });
+            cancelMaterialBtn.addEventListener('click', () => hideModal(materialModal));
+
+            materialForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const semanaId = document.getElementById('material-semana-id').value;
+                const fileInput = document.getElementById('material-file');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('Por favor selecciona un archivo');
+                    return;
+                }
+
+                // Validar tamaño del archivo (máximo 500MB)
+                if (file.size > 500 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. Máximo 500MB.');
+                    return;
+                }
+
+                // Convertir archivo a base64
+                const fileData = await fileToBase64(file);
+
+                const formData = {
+                    nombre: document.getElementById('material-nombre').value,
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileData: fileData,
+                    descripcion: document.getElementById('material-descripcion').value
+                };
+
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/materiales`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('Material añadido exitosamente');
+                        hideModal(materialModal);
+                        materialForm.reset();
+                        loadMateriales(semanaId); // Recargar materiales
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Función para convertir archivo a base64
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        // Remover el prefijo "data:mime/type;base64,"
+                        const base64 = reader.result.split(',')[1];
+                        resolve(base64);
+                    };
+                    reader.onerror = error => reject(error);
+                });
+            }
+
+            // Eventos de tarea
+            addTareaBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('tarea-semana-id').value = btn.dataset.semanaId;
+                    showModal(tareaModal);
+                });
+            });
+            cancelTareaBtn.addEventListener('click', () => hideModal(tareaModal));
+
+            tareaForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const semanaId = document.getElementById('tarea-semana-id').value;
+                const formData = {
+                    titulo: document.getElementById('tarea-titulo').value,
+                    descripcion: document.getElementById('tarea-descripcion').value,
+                    fechaLimite: document.getElementById('tarea-fecha-limite').value,
+                    puntosMaximos: document.getElementById('tarea-puntos').value
+                };
+
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/tareas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('Tarea creada exitosamente');
+                        hideModal(tareaModal);
+                        tareaForm.reset();
+                        loadTareas(semanaId); // Recargar tareas
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Event listeners para eliminar materiales
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.delete-material-btn')) {
+                    const button = e.target.closest('.delete-material-btn');
+                    const materialId = button.getAttribute('data-material-id');
+                    const semanaId = button.closest('#materiales-container').getAttribute('data-semana-id');
+
+                    if (confirm('¿Estás seguro de que quieres eliminar este material?')) {
+                        try {
+                            const response = await fetch(`/profesor/materiales/${materialId}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                alert('Material eliminado exitosamente');
+                                loadMateriales(semanaId);
+                            } else {
+                                const error = await response.json();
+                                alert('Error: ' + (error.error || 'Error desconocido'));
+                            }
+                        } catch (error) {
+                            alert('Error de conexión: ' + error.message);
+                        }
+                    }
+                }
+            });
+
+            // Event listeners para eliminar tareas
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.delete-tarea-btn')) {
+                    const button = e.target.closest('.delete-tarea-btn');
+                    const tareaId = button.getAttribute('data-tarea-id');
+                    const semanaId = button.closest('#tareas-container').getAttribute('data-semana-id');
+
+                    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+                        try {
+                            const response = await fetch(`/profesor/tareas/${tareaId}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                alert('Tarea eliminada exitosamente');
+                                loadTareas(semanaId);
+                            } else {
+                                const error = await response.json();
+                                alert('Error: ' + (error.error || 'Error desconocido'));
+                            }
+                        } catch (error) {
+                            alert('Error de conexión: ' + error.message);
+                        }
+                    }
+                }
+            });
+
+            // Cerrar modales al hacer clic fuera
+            [semanaModal, materialModal, tareaModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        hideModal(modal);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

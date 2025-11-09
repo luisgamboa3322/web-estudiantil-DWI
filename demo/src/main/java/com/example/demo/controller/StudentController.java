@@ -1,21 +1,20 @@
 package com.example.demo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
-import com.example.demo.model.Student;
-import com.example.demo.model.StudentCurso;
-import com.example.demo.model.EstadoAsignacion;
+import com.example.demo.model.*;
+import com.example.demo.service.*;
+
 import java.util.List;
 import java.util.ArrayList;
-import com.example.demo.service.StudentService;
-import com.example.demo.service.StudentCursoService;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/student")
@@ -23,6 +22,18 @@ public class StudentController {
 
     private final StudentService studentService;
     private final StudentCursoService studentCursoService;
+
+    @Autowired
+    private SemanaService semanaService;
+
+    @Autowired
+    private MaterialService materialService;
+
+    @Autowired
+    private TareaService tareaService;
+
+    @Autowired
+    private EntregaTareaService entregaTareaService;
 
     public StudentController(StudentService studentService, StudentCursoService studentCursoService) {
         this.studentService = studentService;
@@ -104,5 +115,125 @@ public class StudentController {
         return studentService.update(student.getId(), changes);
     }
 
-    // Agrega métodos para las otras vistas (ayuda, etc.) de la misma manera
+    // ===========================
+    // API PARA VER CONTENIDO DE CURSOS
+    // ===========================
+    @GetMapping("/cursos/{cursoId}/semanas")
+    @ResponseBody
+    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, Authentication authentication) {
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+        // Verificar que el estudiante está asignado al curso
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            throw new IllegalStateException("No tienes acceso a este curso");
+        }
+
+        return semanaService.findByCursoId(cursoId);
+    }
+
+    @GetMapping("/semanas/{semanaId}/materiales")
+    @ResponseBody
+    public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+
+        // Verificar que el estudiante está asignado al curso de la semana
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            throw new IllegalStateException("No tienes acceso a esta semana");
+        }
+
+        return materialService.findBySemanaId(semanaId);
+    }
+
+    @GetMapping("/semanas/{semanaId}/tareas")
+    @ResponseBody
+    public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+
+        // Verificar que el estudiante está asignado al curso de la semana
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            throw new IllegalStateException("No tienes acceso a esta semana");
+        }
+
+        return tareaService.findBySemanaId(semanaId);
+    }
+
+    // ===========================
+    // API PARA ENTREGAR TAREAS
+    // ===========================
+    @PostMapping("/tareas/{tareaId}/entregar")
+    @ResponseBody
+    public ResponseEntity<?> entregarTarea(@PathVariable Long tareaId, @RequestBody Map<String, String> payload, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+            Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
+
+            // Verificar que el estudiante está asignado al curso de la tarea
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(tarea.getSemana().getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return ResponseEntity.status(403).body("No tienes acceso a esta tarea");
+            }
+
+            String contenido = payload.get("contenido");
+            EntregaTarea entrega = entregaTareaService.entregarTarea(contenido, tarea, student);
+            return ResponseEntity.ok(entrega);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error entregando tarea: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/tareas/{tareaId}/entrega")
+    @ResponseBody
+    public ResponseEntity<?> getEstadoEntrega(@PathVariable Long tareaId, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+            Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
+
+            // Verificar que el estudiante está asignado al curso de la tarea
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(tarea.getSemana().getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return ResponseEntity.status(403).body("No tienes acceso a esta tarea");
+            }
+
+            Optional<EntregaTarea> entregaOpt = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
+
+            Map<String, Object> response = new HashMap<>();
+            if (entregaOpt.isPresent()) {
+                EntregaTarea entrega = entregaOpt.get();
+                response.put("entregada", true);
+                response.put("fechaEntrega", entrega.getFechaEntrega());
+                response.put("calificada", entrega.isCalificada());
+                response.put("calificacion", entrega.getCalificacion());
+                response.put("contenido", entrega.getContenido());
+            } else {
+                response.put("entregada", false);
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error obteniendo estado de entrega: " + e.getMessage());
+        }
+    }
 }
