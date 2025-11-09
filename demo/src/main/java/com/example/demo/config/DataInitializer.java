@@ -1,8 +1,12 @@
 package com.example.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.example.demo.model.Admin;
 import com.example.demo.model.Student;
 import com.example.demo.model.Professor;
@@ -23,6 +27,14 @@ import java.util.Set;
 
 @Configuration
 public class DataInitializer {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return Jackson2ObjectMapperBuilder.json()
+                .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .modules(new JavaTimeModule())
+                .build();
+    }
 
     @Bean
     public CommandLineRunner initData(AdminService adminService, StudentService studentService,
@@ -142,28 +154,37 @@ public class DataInitializer {
             if (student != null && studentCursoService.findByStudentId(student.getId()).isEmpty()) {
                 var cursos = cursoRepository.findAll();
                 if (!cursos.isEmpty()) {
-                    var cursoConProfesor = cursos.stream()
-                        .filter(c -> c.getProfesor() != null)
+                    // Asignar el curso "DESARROLLO WEB INTEGRADO" si existe, sino el primero disponible
+                    var cursoPreferido = cursos.stream()
+                        .filter(c -> c.getCodigo().equals("DWI-001"))
                         .findFirst();
-                    if (cursoConProfesor.isPresent()) {
-                        studentCursoService.assignCursoToStudent(student.getId(), cursoConProfesor.get().getId());
-                        System.out.println("Curso asignado al estudiante: " + cursoConProfesor.get().getNombre());
+
+                    if (cursoPreferido.isEmpty()) {
+                        cursoPreferido = cursos.stream()
+                            .filter(c -> c.getProfesor() != null)
+                            .findFirst();
+                    }
+
+                    if (cursoPreferido.isPresent()) {
+                        studentCursoService.assignCursoToStudent(student.getId(), cursoPreferido.get().getId());
+                        System.out.println("Curso asignado al estudiante: " + cursoPreferido.get().getNombre());
                     }
                 }
             }
 
-            // Crear curso
-            if (cursoRepository.findByCodigo("MAT101").isEmpty()) {
+            // Crear curso básico para pruebas
+            if (cursoRepository.findByCodigo("DWI-001").isEmpty()) {
                 Curso c = new Curso();
-                c.setNombre("Matemáticas Básicas");
-                c.setCodigo("MAT101");
-                c.setDescripcion("Curso de matemáticas básicas");
+                c.setNombre("DESARROLLO WEB INTEGRADO");
+                c.setCodigo("DWI-001");
+                c.setDescripcion("Curso completo de desarrollo web con tecnologías modernas");
                 c.setEstado(EstadoCurso.ACTIVO);
                 // Asignar profesor
                 professorService.findByEmail(profEmail).ifPresent(c::setProfesor);
                 cursoRepository.save(c);
-                System.out.println("Curso creado: MAT101");
+                System.out.println("Curso creado: DWI-001 - DESARROLLO WEB INTEGRADO");
             }
         };
     }
+
 }

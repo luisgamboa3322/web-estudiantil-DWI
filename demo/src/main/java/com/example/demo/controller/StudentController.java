@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @Controller
 @RequestMapping("/student")
@@ -107,20 +110,18 @@ public class StudentController {
         return "student/configuracion";
     }
 
-    @PutMapping("/profile")
-    @ResponseBody
-    public Student updateProfile(Authentication authentication, @RequestBody Student changes) {
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
-        return studentService.update(student.getId(), changes);
-    }
+    // ===========================
+    // VISTA DE DETALLE DE CURSO
+    // ===========================
+    @GetMapping("/curso/{cursoId}")
+    public String showCursoDetalle(@PathVariable Long cursoId, Authentication authentication, Model model) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return "redirect:/error/acceso-denegado";
+        }
 
-    // ===========================
-    // API PARA VER CONTENIDO DE CURSOS
-    // ===========================
-    @GetMapping("/cursos/{cursoId}/semanas")
-    @ResponseBody
-    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, Authentication authentication) {
         String email = authentication.getName();
         Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
 
@@ -129,7 +130,49 @@ public class StudentController {
             .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
 
         if (!estaAsignado) {
-            throw new IllegalStateException("No tienes acceso a este curso");
+            return "redirect:/error/acceso-denegado";
+        }
+
+        // Obtener información del curso
+        var asignacionOpt = studentCursoService.findByStudentId(student.getId()).stream()
+            .filter(sc -> sc.getCurso().getId().equals(cursoId))
+            .findFirst();
+
+        if (asignacionOpt.isPresent()) {
+            model.addAttribute("curso", asignacionOpt.get().getCurso());
+            model.addAttribute("asignacion", asignacionOpt.get());
+            model.addAttribute("studentName", student.getNombre());
+            model.addAttribute("activePage", "cursos");
+        }
+
+        return "student/curso-detalle";
+    }
+
+    // ===========================
+    // APIs PARA CONTENIDO DINÁMICO
+    // ===========================
+
+    @GetMapping("/cursos/{cursoId}/semanas")
+    @ResponseBody
+    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, Authentication authentication) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return new ArrayList<>();
+        }
+
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElse(null);
+
+        if (student == null) return new ArrayList<>();
+
+        // Verificar que el estudiante está asignado al curso
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            return new ArrayList<>();
         }
 
         return semanaService.findByCursoId(cursoId);
@@ -138,17 +181,28 @@ public class StudentController {
     @GetMapping("/semanas/{semanaId}/materiales")
     @ResponseBody
     public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return new ArrayList<>();
+        }
+
         String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        Student student = studentService.findByEmail(email).orElse(null);
 
-        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+        if (student == null) return new ArrayList<>();
 
-        // Verificar que el estudiante está asignado al curso de la semana
+        // Verificar que la semana pertenece a un curso asignado al estudiante
+        Semana semana = semanaService.findById(semanaId).orElse(null);
+        if (semana == null) return new ArrayList<>();
+
         boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
 
         if (!estaAsignado) {
-            throw new IllegalStateException("No tienes acceso a esta semana");
+            return new ArrayList<>();
         }
 
         return materialService.findBySemanaId(semanaId);
@@ -157,83 +211,174 @@ public class StudentController {
     @GetMapping("/semanas/{semanaId}/tareas")
     @ResponseBody
     public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return new ArrayList<>();
+        }
+
         String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        Student student = studentService.findByEmail(email).orElse(null);
 
-        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+        if (student == null) return new ArrayList<>();
 
-        // Verificar que el estudiante está asignado al curso de la semana
+        // Verificar que la semana pertenece a un curso asignado al estudiante
+        Semana semana = semanaService.findById(semanaId).orElse(null);
+        if (semana == null) return new ArrayList<>();
+
         boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
 
         if (!estaAsignado) {
-            throw new IllegalStateException("No tienes acceso a esta semana");
+            return new ArrayList<>();
         }
 
         return tareaService.findBySemanaId(semanaId);
     }
 
-    // ===========================
-    // API PARA ENTREGAR TAREAS
-    // ===========================
+    @GetMapping("/tareas/{tareaId}/entrega")
+    @ResponseBody
+    public Map<String, Object> getEstadoEntrega(@PathVariable Long tareaId, Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("entregada", false);
+
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return response;
+        }
+
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElse(null);
+
+        if (student == null) return response;
+
+        Optional<EntregaTarea> entregaOpt = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
+
+        if (entregaOpt.isPresent()) {
+            EntregaTarea entrega = entregaOpt.get();
+            response.put("entregada", true);
+            response.put("calificada", entrega.isCalificada());
+            if (entrega.isCalificada()) {
+                response.put("calificacion", entrega.getCalificacion());
+            }
+        }
+
+        return response;
+    }
+
     @PostMapping("/tareas/{tareaId}/entregar")
     @ResponseBody
-    public ResponseEntity<?> entregarTarea(@PathVariable Long tareaId, @RequestBody Map<String, String> payload, Authentication authentication) {
+    public ResponseEntity<?> entregarTarea(@PathVariable Long tareaId,
+                                         @RequestBody Map<String, String> payload,
+                                         Authentication authentication) {
         try {
+            // Verificar permisos
+            boolean hasStudentPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+            if (!hasStudentPermission) {
+                return ResponseEntity.status(403).body("Acceso denegado");
+            }
+
             String email = authentication.getName();
-            Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+            Student student = studentService.findByEmail(email).orElse(null);
 
-            Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
-
-            // Verificar que el estudiante está asignado al curso de la tarea
-            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-                .anyMatch(sc -> sc.getCurso().getId().equals(tarea.getSemana().getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
-
-            if (!estaAsignado) {
-                return ResponseEntity.status(403).body("No tienes acceso a esta tarea");
+            if (student == null) {
+                return ResponseEntity.status(404).body("Estudiante no encontrado");
             }
 
             String contenido = payload.get("contenido");
-            EntregaTarea entrega = entregaTareaService.entregarTarea(contenido, tarea, student);
-            return ResponseEntity.ok(entrega);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error entregando tarea: " + e.getMessage());
-        }
-    }
+            if (contenido == null || contenido.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("El contenido no puede estar vacío");
+            }
 
-    @GetMapping("/tareas/{tareaId}/entrega")
-    @ResponseBody
-    public ResponseEntity<?> getEstadoEntrega(@PathVariable Long tareaId, Authentication authentication) {
-        try {
-            String email = authentication.getName();
-            Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
-
-            Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
+            // Verificar que la tarea existe y pertenece a un curso asignado al estudiante
+            Tarea tarea = tareaService.findById(tareaId).orElse(null);
+            if (tarea == null) {
+                return ResponseEntity.status(404).body("Tarea no encontrada");
+            }
 
             // Verificar que el estudiante está asignado al curso de la tarea
             boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-                .anyMatch(sc -> sc.getCurso().getId().equals(tarea.getSemana().getCurso().getId()) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+                .anyMatch(sc -> sc.getCurso().getId().equals(tarea.getSemana().getCurso().getId())
+                          && sc.getEstado() == EstadoAsignacion.ACTIVO);
 
             if (!estaAsignado) {
                 return ResponseEntity.status(403).body("No tienes acceso a esta tarea");
             }
 
-            Optional<EntregaTarea> entregaOpt = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
-
-            Map<String, Object> response = new HashMap<>();
-            if (entregaOpt.isPresent()) {
-                EntregaTarea entrega = entregaOpt.get();
-                response.put("entregada", true);
-                response.put("fechaEntrega", entrega.getFechaEntrega());
-                response.put("calificada", entrega.isCalificada());
-                response.put("calificacion", entrega.getCalificacion());
-                response.put("contenido", entrega.getContenido());
-            } else {
-                response.put("entregada", false);
+            // Verificar que no haya entregado ya
+            Optional<EntregaTarea> entregaExistente = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
+            if (entregaExistente.isPresent()) {
+                return ResponseEntity.badRequest().body("Ya has entregado esta tarea");
             }
-            return ResponseEntity.ok(response);
+
+            // Crear la entrega
+            EntregaTarea entrega = new EntregaTarea();
+            entrega.setTarea(tarea);
+            entrega.setStudent(student);
+            entrega.setContenido(contenido.trim());
+            entrega.setFechaEntrega(LocalDateTime.now());
+
+            entregaTareaService.save(entrega);
+
+            return ResponseEntity.ok().body("Tarea entregada exitosamente");
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error obteniendo estado de entrega: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
     }
+
+    @PutMapping("/profile")
+    @ResponseBody
+    public Student updateProfile(Authentication authentication, @RequestBody Student changes) {
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        return studentService.update(student.getId(), changes);
+    }
+
+    @GetMapping("/materiales/{materialId}/download")
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadMaterial(@PathVariable Long materialId, Authentication authentication) {
+        try {
+            // Verificar permisos
+            boolean hasStudentPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+            if (!hasStudentPermission) {
+                return ResponseEntity.status(403).build();
+            }
+
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student == null) {
+                return ResponseEntity.status(404).build();
+            }
+
+            Material material = materialService.findById(materialId).orElse(null);
+            if (material == null) {
+                return ResponseEntity.status(404).build();
+            }
+
+            // Verificar que el material pertenece a una semana de un curso asignado al estudiante
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(material.getSemana().getCurso().getId())
+                          && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return ResponseEntity.status(403).build();
+            }
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + material.getFileName() + "\"")
+                .contentType(MediaType.parseMediaType(material.getFileType()))
+                .body(material.getFileData());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }
