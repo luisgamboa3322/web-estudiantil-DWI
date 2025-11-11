@@ -26,12 +26,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, StudentService studentService) throws Exception {
         http
-            .csrf().disable()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {}) // Habilitar CORS configurado en WebConfig
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/login", "/", "/css/**", "/js/**", "/images/**", "/webjars/**",
                     "/static/**", "/favicon.ico", "/error", "/select-dashboard", "/error/acceso-denegado",
-                    "/redirect/admin", "/redirect/profesor", "/redirect/student").permitAll()
+                    "/redirect/admin", "/redirect/profesor", "/redirect/student",
+                    "/api/**" // Permitir todas las requests de API para Angular
+                ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ACCESS_ADMIN_DASHBOARD")
                 .requestMatchers("/profesor/**").hasAuthority("ACCESS_TEACHER_DASHBOARD")
                 .requestMatchers("/student/**").hasAuthority("ACCESS_STUDENT_DASHBOARD")

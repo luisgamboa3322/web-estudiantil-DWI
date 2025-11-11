@@ -1,0 +1,44 @@
+{
+  "/api/*": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/login": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/admin": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/profesor": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/student": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/select-dashboard": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/logout": {
+    "target": "http://localhost:8083",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

@@ -1,0 +1,48 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.left-panel {
+    background-color: #2D2D2D;
+}
+
+.right-panel {
+    background-color: #7C4DFF;
+    position: relative;
+    overflow: hidden;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 0;
+}
+
+.custom-illustration {
+    position: relative;
+    z-index: 10;
+}
+
+.alert-message {
+    transition: all 0.3s ease;
+}
+
+/* Ocultar mensajes después de 5 segundos */
+.alert-message.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .custom-illustration {
+        display: none;
+    }
+    
+    .right-panel {
+        display: none;
+    }
+}

@@ -1,0 +1,72 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-danger mb-4" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando dashboards disponibles...</p>
+      </div>
+
+      <div *ngIf="!isLoading" class="card">
+        <!-- Card Header -->
+        <div class="card-header">
+          <h3 class="text-center mb-0">Seleccionar Dashboard</h3>
+          <p class="text-center text-muted mb-0" *ngIf="user">
+            Bienvenido, <span class="fw-bold">{{ getUserName() }}</span>
+          </p>
+          <p class="text-center text-muted mb-0" *ngIf="user">
+            {{ getUserEmail() }}
+          </p>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <p class="text-center mb-4">Tienes acceso a múltiples dashboards. Selecciona cuál deseas usar:</p>
+
+          <!-- Dashboard Buttons -->
+          <div class="d-grid gap-3">
+            <!-- Admin Dashboard Button -->
+            <button *ngIf="hasAdminAccess" 
+               type="button"
+               (click)="navigateToDashboard('/admin/dashboard')"
+               class="btn btn-primary btn-lg">
+              <i class="fas fa-cog"></i> Dashboard Administrador
+            </button>
+
+            <!-- Teacher Dashboard Button -->
+            <button *ngIf="hasTeacherAccess" 
+               type="button"
+               (click)="navigateToDashboard('/profesor/dashboard')"
+               class="btn btn-success btn-lg">
+              <i class="fas fa-chalkboard-teacher"></i> Dashboard Docente
+            </button>
+
+            <!-- Student Dashboard Button -->
+            <button *ngIf="hasStudentAccess" 
+               type="button"
+               (click)="navigateToDashboard('/student/dashboard')"
+               class="btn btn-info btn-lg">
+              <i class="fas fa-user-graduate"></i> Dashboard Estudiante
+            </button>
+          </div>
+
+          <!-- Logout Section -->
+          <div class="text-center mt-4">
+            <button type="button" 
+               (click)="logout()"
+               class="btn btn-outline-secondary">
+              <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

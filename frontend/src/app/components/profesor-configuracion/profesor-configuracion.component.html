@@ -1,0 +1,136 @@
+<div class="flex h-screen">
+    <app-profesor-sidebar></app-profesor-sidebar>
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <app-profesor-header></app-profesor-header>
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Configuración</h1>
+            
+            <div class="max-w-4xl mx-auto space-y-8">
+                <!-- Información del Perfil -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-bold border-b pb-4 mb-4">Información del Perfil</h2>
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="relative">
+                            <img src="https://placehold.co/100x100/EFEFEF/333333?text=JP" alt="Avatar de usuario" class="w-24 h-24 rounded-full">
+                            <button class="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600">
+                                <i data-lucide="camera" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                                <input type="text" id="nombre" [(ngModel)]="profile.nombre" 
+                                    [readonly]="!editing"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                                    [class.bg-gray-100]="!editing">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                                <input type="email" id="email" [(ngModel)]="profile.email"
+                                    [readonly]="!editing"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                                    [class.bg-gray-100]="!editing">
+                            </div>
+                            <div>
+                                <label for="codigo" class="block text-sm font-medium text-gray-700">Código de Profesor</label>
+                                <input type="text" id="codigo" [(ngModel)]="profile.codigo" 
+                                    [readonly]="!editing"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 sm:text-sm" disabled>
+                            </div>
+                            <div>
+                                <label for="especialidad" class="block text-sm font-medium text-gray-700">Especialidad</label>
+                                <input type="text" id="especialidad" [(ngModel)]="profile.especialidad"
+                                    [readonly]="!editing"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                                    [class.bg-gray-100]="!editing">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6 space-x-2">
+                        <button *ngIf="editing" (click)="cancelEdit()" 
+                            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button *ngIf="!editing" (click)="editing = true"
+                            class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                            Editar Perfil
+                        </button>
+                        <button *ngIf="editing" (click)="saveProfile()"
+                            class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Notificaciones -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-bold border-b pb-4 mb-4">Notificaciones</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">Calificaciones publicadas</p>
+                                <p class="text-sm text-gray-500">Recibir notificaciones cuando publique calificaciones.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="notifications.calificaciones" 
+                                    class="sr-only peer" (change)="saveNotificationSettings()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">Anuncios de cursos</p>
+                                <p class="text-sm text-gray-500">Recibir notificaciones sobre anuncios importantes.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="notifications.anuncios" 
+                                    class="sr-only peer" (change)="saveNotificationSettings()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium">Recordatorios de entregas</p>
+                                <p class="text-sm text-gray-500">Recordar fechas límite de tareas y evaluaciones.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="notifications.recordatorios" 
+                                    class="sr-only peer" (change)="saveNotificationSettings()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seguridad y Contraseña -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-bold border-b pb-4 mb-4">Seguridad y Contraseña</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="current_password" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+                            <input type="password" id="current_password" [(ngModel)]="passwordData.current"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                        </div>
+                        <div></div>
+                        <div>
+                            <label for="new_password" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                            <input type="password" id="new_password" [(ngModel)]="passwordData.new"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="confirm_password" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+                            <input type="password" id="confirm_password" [(ngModel)]="passwordData.confirm"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button (click)="changePassword()"
+                            class="px-4 py-2 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors">
+                            Cambiar Contraseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

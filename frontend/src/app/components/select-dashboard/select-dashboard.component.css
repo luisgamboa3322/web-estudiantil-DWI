@@ -1,0 +1,139 @@
+/* Bootstrap 5.1.3 compatible styles for Select Dashboard */
+
+/* Container styling to match original template */
+.container {
+  max-width: 600px;
+}
+
+/* Card enhancements */
+.card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 20px;
+}
+
+.card-header h3 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+/* Button enhancements */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+}
+
+.btn-lg {
+  padding: 15px 30px;
+  font-size: 1.1rem;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-success:hover {
+  background-color: #146c43;
+  border-color: #146c43;
+  transform: translateY(-1px);
+}
+
+.btn-info {
+  background-color: #0dcaf0;
+  color: #000;
+}
+
+.btn-info:hover {
+  background-color: #31d2f2;
+  color: #000;
+  transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+/* Icon spacing */
+.btn i {
+  margin-right: 8px;
+}
+
+/* Loading spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Error message styling */
+.alert {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Text styling */
+.text-muted {
+  font-size: 0.9rem;
+}
+
+.fw-bold {
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .card-header {
+    padding: 15px;
+  }
+  
+  .card-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .btn-lg {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+}
+
+/* Accessibility improvements */
+.btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.alert:focus {
+  outline: none;
+}

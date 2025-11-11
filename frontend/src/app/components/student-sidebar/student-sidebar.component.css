@@ -1,0 +1,40 @@
+.sidebar-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Active link styling */
+.bg-orange-500 {
+    background-color: #f97316;
+}
+
+.text-white {
+    color: white;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+/* Hover effects */
+.hover\:bg-gray-700:hover {
+    background-color: #374151;
+}

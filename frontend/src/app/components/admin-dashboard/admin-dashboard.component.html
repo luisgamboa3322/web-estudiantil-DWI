@@ -1,0 +1,377 @@
+<div class="flex h-screen">
+  <!-- Barra de navegación lateral (Sidebar) -->
+  <aside id="sidebar"
+    class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+      <a href="#" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="h-8 w-8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>UTP+admin</span>
+      </a>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a href="#" (click)="switchView('dashboard')" 
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="layout-grid" class="sidebar-icon"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('estudiantes')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+              <i data-lucide="users" class="sidebar-icon"></i>
+              <span>Estudiantes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('profesores')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="graduation-cap" class="sidebar-icon"></i>
+              <span>Profesores</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('administradores')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="shield" class="sidebar-icon"></i>
+              <span>Administradores</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('cursos')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="book-marked" class="sidebar-icon"></i>
+              <span>Cursos</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('asignaciones')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="user-check" class="sidebar-icon"></i>
+              <span>Asignaciones</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('reportes')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="bar-chart-3" class="sidebar-icon"></i>
+              <span>Reportes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" (click)="switchView('configuracion')"
+              class="nav-link flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="settings" class="sidebar-icon"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <nav>
+        <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+          <li>
+            <a href="/logout" (click)="logout()"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="log-out" class="sidebar-icon"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Cabecera (Header) -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+      <button id="menu-button" class="md:hidden" (click)="toggleSidebar()">
+        <i data-lucide="menu" class="h-6 w-6"></i>
+      </button>
+      <div class="text-xl font-semibold md:hidden text-orange-500">UTP+admin</div>
+      <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+          <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+          <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <img src="https://placehold.co/40x40/EFEFEF/333333?text=AD" alt="Avatar de administrador"
+            class="w-10 h-10 rounded-full">
+          <div class="text-right hidden sm:block">
+            <p class="font-semibold text-sm">Hola, Admin</p>
+            <p class="text-xs text-gray-500">Administrador</p>
+          </div>
+          <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenedor para las diferentes vistas -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <!-- Vista Dashboard (Oculta por defecto) -->
+      <main id="dashboard-content" class="content-view hidden">
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <p class="mt-2 text-gray-600">Vista general del sistema.</p>
+      </main>
+
+      <!-- Vista Gestión de Estudiantes (Visible por defecto) -->
+      <main id="estudiantes-content" class="content-view">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Gestión de Estudiantes</h1>
+          <div class="flex items-center space-x-2 mt-4 sm:mt-0">
+            <div class="relative">
+              <input type="text" placeholder="Buscar estudiante..." [(ngModel)]="searchStudent"
+                class="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-auto">
+              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            </div>
+            <button (click)="openAddStudentModal()"
+              class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+              <span>Añadir Estudiante</span>
+            </button>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Nombre</th>
+                <th scope="col" class="px-6 py-3">Código</th>
+                <th scope="col" class="px-6 py-3">Correo Electrónico</th>
+                <th scope="col" class="px-6 py-3">Estado</th>
+                <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ student.nombre }}</td>
+                <td class="px-6 py-4">{{ student.codigo }}</td>
+                <td class="px-6 py-4">{{ student.email }}</td>
+                <td class="px-6 py-4">
+                  <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">Activo</span>
+                </td>
+                <td class="px-6 py-4 text-center space-x-2">
+                  <button class="edit-student-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" (click)="editStudent(student)">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                  <button class="delete-student-btn p-2 text-red-600 hover:bg-red-100 rounded-full" (click)="deleteStudent(student)">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <nav class="flex items-center justify-between pt-4" aria-label="Table navigation">
+          <span class="text-sm font-normal text-gray-500">Mostrando <span
+              class="font-semibold text-gray-900">1-{{ students.length }}</span> de <span
+              class="font-semibold text-gray-900">{{ students.length }}</span></span>
+          <ul class="inline-flex items-center -space-x-px">
+            <li>
+              <a href="#"
+                class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700">Anterior</a>
+            </li>
+            <li>
+              <a href="#"
+                class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+      </main>
+
+      <!-- Vista Gestión de Profesores (Oculta por defecto) -->
+      <main id="profesores-content" class="content-view hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Gestión de Profesores</h1>
+          <button (click)="openAddTeacherModal()"
+            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Añadir Profesor</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Nombre</th>
+                <th scope="col" class="px-6 py-3">Código</th>
+                <th scope="col" class="px-6 py-3">Correo Electrónico</th>
+                <th scope="col" class="px-6 py-3">Especialidad</th>
+                <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let professor of professors" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ professor.nombre }}</td>
+                <td class="px-6 py-4">{{ professor.codigo }}</td>
+                <td class="px-6 py-4">{{ professor.email }}</td>
+                <td class="px-6 py-4">{{ professor.especialidad }}</td>
+                <td class="px-6 py-4 text-center space-x-2">
+                  <button class="edit-teacher-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" (click)="editTeacher(professor)">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                  <button class="delete-teacher-btn p-2 text-red-600 hover:bg-red-100 rounded-full" (click)="deleteTeacher(professor)">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <!-- Vista Gestión de Administradores (Oculta por defecto) -->
+      <main id="administradores-content" class="content-view hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Gestión de Administradores</h1>
+          <button (click)="openAddAdminModal()"
+            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Añadir Administrador</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Nombre</th>
+                <th scope="col" class="px-6 py-3">Código</th>
+                <th scope="col" class="px-6 py-3">Correo Electrónico</th>
+                <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let admin of admins" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ admin.nombre }}</td>
+                <td class="px-6 py-4">{{ admin.codigo }}</td>
+                <td class="px-6 py-4">{{ admin.email }}</td>
+                <td class="px-6 py-4 text-center space-x-2">
+                  <button class="edit-admin-btn p-2 text-blue-600 hover:bg-blue-100 rounded-full" (click)="editAdmin(admin)">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                  <button class="delete-admin-btn p-2 text-red-600 hover:bg-red-100 rounded-full" (click)="deleteAdmin(admin)">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <!-- Vista Gestión de Cursos -->
+      <main id="cursos-content" class="content-view hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Gestión de Cursos</h1>
+          <button (click)="openAddCourseModal()"
+            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Añadir Curso</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Nombre del Curso</th>
+                <th scope="col" class="px-6 py-3">Código</th>
+                <th scope="col" class="px-6 py-3">Profesor Asignado</th>
+                <th scope="col" class="px-6 py-3">Estado</th>
+                <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let curso of cursos" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ curso.nombre }}</td>
+                <td class="px-6 py-4">{{ curso.codigo }}</td>
+                <td class="px-6 py-4">{{ curso.profesor ? curso.profesor.nombre + ' - ' + curso.profesor.especialidad : 'Sin asignar' }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="curso.estado === 'ACTIVO'" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Activo</span>
+                  <span *ngIf="curso.estado === 'INACTIVO'" class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Inactivo</span>
+                </td>
+                <td class="px-6 py-4 text-center space-x-2">
+                  <button class="edit-course p-2 text-blue-600 hover:bg-blue-100 rounded-full" (click)="editCourse(curso)">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                  <button class="delete-course p-2 text-red-600 hover:bg-red-100 rounded-full" (click)="deleteCourse(curso)">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <!-- Vista Gestión de Asignaciones -->
+      <main id="asignaciones-content" class="content-view hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Gestión de Asignaciones</h1>
+          <button (click)="openAssignCourseModal()"
+            class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2 mt-4 sm:mt-0">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            <span>Asignar Curso</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3">Estudiante</th>
+                <th scope="col" class="px-6 py-3">Curso</th>
+                <th scope="col" class="px-6 py-3">Profesor</th>
+                <th scope="col" class="px-6 py-3">Fecha Asignación</th>
+                <th scope="col" class="px-6 py-3">Estado</th>
+                <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let asignacion of asignaciones" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ asignacion.student.nombre }}</td>
+                <td class="px-6 py-4">{{ asignacion.curso.nombre }}</td>
+                <td class="px-6 py-4">{{ asignacion.curso.profesor ? asignacion.curso.profesor.nombre + ' (' + asignacion.curso.profesor.especialidad + ')' : 'Sin profesor' }}</td>
+                <td class="px-6 py-4">{{ formatDate(asignacion.fechaAsignacion) }}</td>
+                <td class="px-6 py-4">
+                  <span *ngIf="asignacion.estado === 'ACTIVO'" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Activo</span>
+                  <span *ngIf="asignacion.estado === 'INACTIVO'" class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Inactivo</span>
+                </td>
+                <td class="px-6 py-4 text-center space-x-2">
+                  <button class="unassign-course p-2 text-red-600 hover:bg-red-100 rounded-full" (click)="unassignCourse(asignacion)">
+                    <i data-lucide="user-x" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <!-- Vista Reportes (Oculta por defecto) -->
+      <main id="reportes-content" class="content-view hidden">
+        <h1 class="text-3xl font-bold text-gray-800">Reportes</h1>
+        <p class="mt-2 text-gray-600">Sección para generar reportes.</p>
+      </main>
+
+      <!-- Vista Configuración (Oculta por defecto) -->
+      <main id="configuracion-content" class="content-view hidden">
+        <h1 class="text-3xl font-bold text-gray-800">Configuración</h1>
+        <p class="mt-2 text-gray-600">Opciones de configuración del portal.</p>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Script para funcionalidad de lucide icons y navegación -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  });
+</script>

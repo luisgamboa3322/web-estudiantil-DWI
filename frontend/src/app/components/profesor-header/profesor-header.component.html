@@ -1,0 +1,20 @@
+<header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+    <button id="menu-button" class="md:hidden"><i data-lucide="menu" class="h-6 w-6"></i></button>
+    <div class="text-xl font-semibold md:hidden text-orange-500">UTP+teacher</div>
+
+    <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+            <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+            <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+
+        <div class="flex items-center space-x-2">
+            <img src="https://placehold.co/40x40/EFEFEF/333333?text=JP" alt="Avatar" class="w-10 h-10 rounded-full">
+            <div class="flex flex-col leading-tight">
+                <p class="font-semibold text-sm">Hola, {{ profesor?.nombre }}</p>
+                <p class="text-xs text-gray-500">Profesor</p>
+            </div>
+            <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+    </div>
+</header>

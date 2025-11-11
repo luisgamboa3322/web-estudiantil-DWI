@@ -1,0 +1,57 @@
+<div class="dashboard-container" *ngIf="!isLoading">
+  <div class="dashboard-header">
+    <h1>Dashboard - {{ getUserTypeName() }}</h1>
+    <div class="user-info">
+      <span class="welcome-text">Bienvenido, {{ currentUser?.userName || 'Usuario' }}</span>
+      <button class="btn btn-secondary" (click)="logout()">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="dashboard-content">
+    <div class="user-profile">
+      <div class="profile-card">
+        <h3>Información del Usuario</h3>
+        <p><strong>Email:</strong> {{ currentUser?.email || 'N/A' }}</p>
+        <p><strong>Tipo:</strong> {{ getUserTypeName() }}</p>
+        <p><strong>Total de Cursos:</strong> {{ getTotalCourses() }}</p>
+        <p *ngIf="currentUser?.roles && currentUser.roles.length > 1" class="multi-role">
+          <span class="badge">Múltiples Roles</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="courses-section">
+      <h3>Mis Cursos</h3>
+      <div class="courses-grid" *ngIf="dashboardData && dashboardData.cursos && dashboardData.cursos.length > 0">
+        <div class="course-card" *ngFor="let course of dashboardData.cursos">
+          <div class="course-header">
+            <h4>{{ course.nombre }}</h4>
+            <span class="course-code">{{ course.codigo }}</span>
+          </div>
+          <p class="course-description">{{ course.descripcion }}</p>
+          <div class="course-footer">
+            <span class="course-status" [class]="getCourseStatusClass(course.estado)">
+              {{ course.estado }}
+            </span>
+            <div class="course-info" *ngIf="course.profesor">
+              <small><strong>Profesor:</strong> {{ course.profesor.nombre }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="no-courses" *ngIf="!dashboardData || !dashboardData.cursos || dashboardData.cursos.length === 0">
+        <p>No tienes cursos asignados.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Cargando dashboard...</p>
+</div>

@@ -1,0 +1,56 @@
+<aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+        <a routerLink="/student/dashboard" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>UTP+class</span>
+        </a>
+        <nav>
+            <ul class="space-y-2">
+                <li>
+                    <a routerLink="/student/dashboard" routerLinkActive="bg-orange-500 text-white font-semibold" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+                        <span>Cursos</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="/student/chat" routerLinkActive="bg-orange-500 text-white font-semibold" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="message-square" class="sidebar-icon"></i>
+                        <span>Chat</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="/student/calendario" routerLinkActive="bg-orange-500 text-white font-semibold" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="calendar" class="sidebar-icon"></i>
+                        <span>Calendario</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="help-circle" class="sidebar-icon"></i>
+                        <span>Ayuda</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="/student/configuracion" routerLinkActive="bg-orange-500 text-white font-semibold" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="sidebar-icon"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div>
+        <nav>
+            <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                <li>
+                    <a routerLink="/logout" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                        <i data-lucide="log-out" class="sidebar-icon"></i>
+                        <span>Cerrar Sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>

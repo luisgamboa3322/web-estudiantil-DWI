@@ -1,0 +1,59 @@
+/* Estilos para student header */
+.sidebar-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Notification badge animation */
+#notification-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Header responsive adjustments */
+@media (max-width: 768px) {
+    .md\\:hidden {
+        display: block;
+    }
+    
+    .hidden.md\\:block {
+        display: none;
+    }
+}
+
+/* User menu hover effects */
+.cursor-pointer:hover {
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    transition: all 0.2s ease;
+}
