@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ public class StudentCurso {
     private Curso curso;
 
     @Column(name = "fecha_asignacion", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaAsignacion = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)

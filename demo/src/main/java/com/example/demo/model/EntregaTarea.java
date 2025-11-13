@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ public class EntregaTarea {
     private String contenido; // Texto o URL del archivo entregado
 
     @NotNull(message = "La fecha de entrega es obligatoria")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaEntrega;
 
     private int calificacion; // -1 = no calificada, 0-100 = calificación

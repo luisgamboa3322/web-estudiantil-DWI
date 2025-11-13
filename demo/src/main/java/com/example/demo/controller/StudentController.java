@@ -269,117 +269,116 @@ public class StudentController {
 
     @GetMapping("/cursos/{cursoId}/semanas")
     @ResponseBody
-    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, Authentication authentication) {
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
+    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student == null) return new ArrayList<>();
+
+            // Verificar que el estudiante está asignado al curso
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return new ArrayList<>();
+            }
+
+            return semanaService.findByCursoId(cursoId);
+        } catch (Exception e) {
+            System.err.println("Error en getSemanasByCurso: " + e.getMessage());
             return new ArrayList<>();
         }
-
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElse(null);
-
-        if (student == null) return new ArrayList<>();
-
-        // Verificar que el estudiante está asignado al curso
-        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
-
-        if (!estaAsignado) {
-            return new ArrayList<>();
-        }
-
-        return semanaService.findByCursoId(cursoId);
     }
 
     @GetMapping("/semanas/{semanaId}/materiales")
     @ResponseBody
-    public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, Authentication authentication) {
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
+    public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student == null) return new ArrayList<>();
+
+            // Verificar que la semana pertenece a un curso asignado al estudiante
+            Semana semana = semanaService.findById(semanaId).orElse(null);
+            if (semana == null) return new ArrayList<>();
+
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+                          && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return new ArrayList<>();
+            }
+
+            return materialService.findBySemanaId(semanaId);
+        } catch (Exception e) {
+            System.err.println("Error en getMaterialesBySemana: " + e.getMessage());
             return new ArrayList<>();
         }
-
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElse(null);
-
-        if (student == null) return new ArrayList<>();
-
-        // Verificar que la semana pertenece a un curso asignado al estudiante
-        Semana semana = semanaService.findById(semanaId).orElse(null);
-        if (semana == null) return new ArrayList<>();
-
-        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
-                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
-
-        if (!estaAsignado) {
-            return new ArrayList<>();
-        }
-
-        return materialService.findBySemanaId(semanaId);
     }
 
     @GetMapping("/semanas/{semanaId}/tareas")
     @ResponseBody
-    public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, Authentication authentication) {
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
+    public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student == null) return new ArrayList<>();
+
+            // Verificar que la semana pertenece a un curso asignado al estudiante
+            Semana semana = semanaService.findById(semanaId).orElse(null);
+            if (semana == null) return new ArrayList<>();
+
+            boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+                .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+                          && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+            if (!estaAsignado) {
+                return new ArrayList<>();
+            }
+
+            return tareaService.findBySemanaId(semanaId);
+        } catch (Exception e) {
+            System.err.println("Error en getTareasBySemana: " + e.getMessage());
             return new ArrayList<>();
         }
-
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElse(null);
-
-        if (student == null) return new ArrayList<>();
-
-        // Verificar que la semana pertenece a un curso asignado al estudiante
-        Semana semana = semanaService.findById(semanaId).orElse(null);
-        if (semana == null) return new ArrayList<>();
-
-        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
-                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
-
-        if (!estaAsignado) {
-            return new ArrayList<>();
-        }
-
-        return tareaService.findBySemanaId(semanaId);
     }
 
     @GetMapping("/tareas/{tareaId}/entrega")
     @ResponseBody
-    public Map<String, Object> getEstadoEntrega(@PathVariable Long tareaId, Authentication authentication) {
+    public Map<String, Object> getEstadoEntrega(@PathVariable Long tareaId, HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         response.put("entregada", false);
 
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
-            return response;
-        }
+        try {
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Student student = studentService.findByEmail(email).orElse(null);
 
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElse(null);
+            if (student == null) return response;
 
-        if (student == null) return response;
+            Optional<EntregaTarea> entregaOpt = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
 
-        Optional<EntregaTarea> entregaOpt = entregaTareaService.findByTareaIdAndStudentId(tareaId, student.getId());
-
-        if (entregaOpt.isPresent()) {
-            EntregaTarea entrega = entregaOpt.get();
-            response.put("entregada", true);
-            response.put("calificada", entrega.isCalificada());
-            if (entrega.isCalificada()) {
-                response.put("calificacion", entrega.getCalificacion());
+            if (entregaOpt.isPresent()) {
+                EntregaTarea entrega = entregaOpt.get();
+                response.put("entregada", true);
+                response.put("calificada", entrega.isCalificada());
+                if (entrega.isCalificada()) {
+                    response.put("calificacion", entrega.getCalificacion());
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error en getEstadoEntrega: " + e.getMessage());
         }
 
         return response;
@@ -389,16 +388,11 @@ public class StudentController {
     @ResponseBody
     public ResponseEntity<?> entregarTarea(@PathVariable Long tareaId,
                                          @RequestBody Map<String, String> payload,
-                                         Authentication authentication) {
+                                         HttpServletRequest request) {
         try {
-            // Verificar permisos
-            boolean hasStudentPermission = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-            if (!hasStudentPermission) {
-                return ResponseEntity.status(403).body("Acceso denegado");
-            }
-
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Student student = studentService.findByEmail(email).orElse(null);
 
             if (student == null) {
@@ -457,16 +451,11 @@ public class StudentController {
 
     @GetMapping("/materiales/{materialId}/download")
     @ResponseBody
-    public ResponseEntity<byte[]> downloadMaterial(@PathVariable Long materialId, Authentication authentication) {
+    public ResponseEntity<byte[]> downloadMaterial(@PathVariable Long materialId, HttpServletRequest request) {
         try {
-            // Verificar permisos
-            boolean hasStudentPermission = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-            if (!hasStudentPermission) {
-                return ResponseEntity.status(403).build();
-            }
-
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Student student = studentService.findByEmail(email).orElse(null);
 
             if (student == null) {
@@ -494,6 +483,145 @@ public class StudentController {
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
+    }
+
+    // ===========================
+    // API PARA CALENDARIO
+    // ===========================
+    
+    @GetMapping("/api/eventos")
+    @ResponseBody
+    public List<Map<String, Object>> getEventos(HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        List<StudentCurso> cursosAsignados = studentCursoService.findByStudentId(student.getId());
+        List<Map<String, Object>> eventos = new ArrayList<>();
+        
+        // Obtener tareas de todos los cursos asignados
+        for (StudentCurso asignacion : cursosAsignados) {
+            if (asignacion.getEstado() == EstadoAsignacion.ACTIVO) {
+                List<Semana> semanas = semanaService.findByCursoId(asignacion.getCurso().getId());
+                for (Semana semana : semanas) {
+                    List<Tarea> tareas = tareaService.findBySemanaId(semana.getId());
+                    for (Tarea tarea : tareas) {
+                        Map<String, Object> evento = new HashMap<>();
+                        evento.put("id", tarea.getId());
+                        evento.put("titulo", tarea.getTitulo());
+                        evento.put("descripcion", tarea.getDescripcion());
+                        evento.put("tipo", "assignment");
+                        evento.put("fecha", tarea.getFechaLimite().toString().substring(0, 10));
+                        evento.put("hora", "11:59 PM");
+                        evento.put("curso", asignacion.getCurso().getNombre());
+                        eventos.add(evento);
+                    }
+                }
+            }
+        }
+        
+        return eventos;
+    }
+
+    // ===========================
+    // API PARA CHAT
+    // ===========================
+    
+    @GetMapping("/api/chats")
+    @ResponseBody
+    public List<Map<String, Object>> getChats(HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        List<Map<String, Object>> chats = new ArrayList<>();
+        
+        // Chat de soporte técnico (siempre disponible)
+        Map<String, Object> soporte = new HashMap<>();
+        soporte.put("id", 1);
+        soporte.put("nombre", "Soporte Técnico");
+        soporte.put("ultimoMensaje", "¡Hola! ¿En qué podemos ayudarte?");
+        soporte.put("hora", "11:30");
+        soporte.put("noLeidos", 0);
+        soporte.put("avatar", "ST");
+        soporte.put("tipo", "soporte");
+        soporte.put("enLinea", true);
+        chats.add(soporte);
+        
+        // Chats de grupos de cursos
+        List<StudentCurso> cursosAsignados = studentCursoService.findByStudentId(student.getId());
+        for (StudentCurso asignacion : cursosAsignados) {
+            if (asignacion.getEstado() == EstadoAsignacion.ACTIVO) {
+                Map<String, Object> chatGrupo = new HashMap<>();
+                chatGrupo.put("id", asignacion.getCurso().getId() + 1000);
+                chatGrupo.put("nombre", "Grupo: " + asignacion.getCurso().getNombre());
+                chatGrupo.put("ultimoMensaje", "Último mensaje del grupo");
+                chatGrupo.put("hora", "10:00");
+                chatGrupo.put("noLeidos", 0);
+                chatGrupo.put("avatar", asignacion.getCurso().getCodigo().substring(0, 2));
+                chatGrupo.put("tipo", "grupo");
+                chats.add(chatGrupo);
+            }
+        }
+        
+        return chats;
+    }
+
+    @GetMapping("/api/chats/{chatId}/mensajes")
+    @ResponseBody
+    public List<Map<String, Object>> getMensajes(@PathVariable Long chatId, HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        List<Map<String, Object>> mensajes = new ArrayList<>();
+        
+        // Mensajes de ejemplo para soporte técnico
+        if (chatId == 1) {
+            Map<String, Object> msg1 = new HashMap<>();
+            msg1.put("id", 1);
+            msg1.put("remitente", "Soporte Técnico");
+            msg1.put("contenido", "¡Hola " + student.getNombre() + "! ¿En qué podemos ayudarte el día de hoy?");
+            msg1.put("hora", "11:28");
+            msg1.put("esMio", false);
+            msg1.put("avatar", "ST");
+            mensajes.add(msg1);
+        }
+        
+        return mensajes;
+    }
+
+    @PostMapping("/api/chats/{chatId}/mensajes")
+    @ResponseBody
+    public ResponseEntity<?> enviarMensaje(@PathVariable Long chatId, 
+                                          @RequestBody Map<String, String> payload,
+                                          HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        String contenido = payload.get("contenido");
+        if (contenido == null || contenido.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El contenido no puede estar vacío");
+        }
+        
+        // En una implementación real, aquí se guardaría el mensaje en la base de datos
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("id", System.currentTimeMillis());
+        respuesta.put("remitente", student.getNombre());
+        respuesta.put("contenido", contenido);
+        respuesta.put("hora", LocalDateTime.now().toString());
+        respuesta.put("esMio", true);
+        
+        return ResponseEntity.ok(respuesta);
     }
 
 }

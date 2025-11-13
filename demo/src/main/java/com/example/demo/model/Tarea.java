@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ public class Tarea {
     private String descripcion;
 
     @NotNull(message = "La fecha límite es obligatoria")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaLimite;
 
     @Min(value = 0, message = "Los puntos máximos no pueden ser negativos")
@@ -36,6 +38,7 @@ public class Tarea {
     private Professor profesor;
 
     @NotNull(message = "La fecha de creación es obligatoria")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fechaCreacion;
 
     // Constructor vacío

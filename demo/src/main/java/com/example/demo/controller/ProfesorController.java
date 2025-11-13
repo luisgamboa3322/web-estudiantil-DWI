@@ -114,6 +114,26 @@ public class ProfesorController {
         return data;
     }
 
+    @GetMapping("/cursos/{cursoId}")
+    @ResponseBody
+    public Curso getCursoDetalle(@PathVariable Long cursoId, HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Professor profesor = service.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+        
+        Curso curso = cursoRepository.findById(cursoId)
+            .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+        
+        // Verificar que el curso pertenece al profesor
+        if (!curso.getProfesor().getId().equals(profesor.getId())) {
+            throw new SecurityException("No tienes permiso para ver este curso");
+        }
+        
+        return curso;
+    }
+
     private void validateJwtTokenFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -206,8 +226,9 @@ public class ProfesorController {
 
     @PutMapping("/profile")
     @ResponseBody
-    public Professor updateProfile(Authentication authentication, @RequestBody Professor changes) {
-        String email = authentication.getName();
+    public Professor updateProfile(HttpServletRequest request, @RequestBody Professor changes) {
+        validateJwtTokenFromRequest(request);
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
         Professor professor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
         return service.update(professor.getId(), changes);
     }
@@ -245,9 +266,10 @@ public class ProfesorController {
     // ===========================
     @PostMapping("/cursos/{cursoId}/semanas")
     @ResponseBody
-    public ResponseEntity<?> createSemana(@PathVariable Long cursoId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+    public ResponseEntity<?> createSemana(@PathVariable Long cursoId, @RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             // Verificar que el curso pertenece al profesor
@@ -269,17 +291,23 @@ public class ProfesorController {
 
     @GetMapping("/cursos/{cursoId}/semanas")
     @ResponseBody
-    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, Authentication authentication) {
-        String email = authentication.getName();
-        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+    public List<Semana> getSemanasByCurso(@PathVariable Long cursoId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
-        // Verificar que el curso pertenece al profesor
-        Curso curso = cursoRepository.findById(cursoId).orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
-        if (!curso.getProfesor().getId().equals(profesor.getId())) {
-            throw new IllegalStateException("No tienes permiso para ver este curso");
+            // Verificar que el curso pertenece al profesor
+            Curso curso = cursoRepository.findById(cursoId).orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+            if (!curso.getProfesor().getId().equals(profesor.getId())) {
+                throw new IllegalStateException("No tienes permiso para ver este curso");
+            }
+
+            return semanaService.findByCursoId(cursoId);
+        } catch (Exception e) {
+            System.err.println("Error en getSemanasByCurso: " + e.getMessage());
+            return new java.util.ArrayList<>();
         }
-
-        return semanaService.findByCursoId(cursoId);
     }
 
     // ===========================
@@ -287,9 +315,10 @@ public class ProfesorController {
     // ===========================
     @PostMapping("/semanas/{semanaId}/materiales")
     @ResponseBody
-    public ResponseEntity<?> createMaterial(@PathVariable Long semanaId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+    public ResponseEntity<?> createMaterial(@PathVariable Long semanaId, @RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
@@ -325,23 +354,30 @@ public class ProfesorController {
 
     @GetMapping("/semanas/{semanaId}/materiales")
     @ResponseBody
-    public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, Authentication authentication) {
-        String email = authentication.getName();
-        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+    public List<Material> getMaterialesBySemana(@PathVariable Long semanaId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
-        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
-        if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
-            throw new IllegalStateException("No tienes permiso para ver esta semana");
+            Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+            if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
+                throw new IllegalStateException("No tienes permiso para ver esta semana");
+            }
+
+            return materialService.findBySemanaId(semanaId);
+        } catch (Exception e) {
+            System.err.println("Error en getMaterialesBySemana: " + e.getMessage());
+            return new java.util.ArrayList<>();
         }
-
-        return materialService.findBySemanaId(semanaId);
     }
 
     @DeleteMapping("/materiales/{materialId}")
     @ResponseBody
-    public ResponseEntity<?> deleteMaterial(@PathVariable Long materialId, Authentication authentication) {
+    public ResponseEntity<?> deleteMaterial(@PathVariable Long materialId, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             Material material = materialService.findById(materialId).orElseThrow(() -> new IllegalArgumentException("Material no encontrado"));
@@ -361,9 +397,10 @@ public class ProfesorController {
     // ===========================
     @PostMapping("/semanas/{semanaId}/tareas")
     @ResponseBody
-    public ResponseEntity<?> createTarea(@PathVariable Long semanaId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+    public ResponseEntity<?> createTarea(@PathVariable Long semanaId, @RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
@@ -385,37 +422,50 @@ public class ProfesorController {
 
     @GetMapping("/semanas/{semanaId}/tareas")
     @ResponseBody
-    public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, Authentication authentication) {
-        String email = authentication.getName();
-        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+    public List<Tarea> getTareasBySemana(@PathVariable Long semanaId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
-        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
-        if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
-            throw new IllegalStateException("No tienes permiso para ver esta semana");
+            Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+            if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
+                throw new IllegalStateException("No tienes permiso para ver esta semana");
+            }
+
+            return tareaService.findBySemanaId(semanaId);
+        } catch (Exception e) {
+            System.err.println("Error en getTareasBySemana: " + e.getMessage());
+            return new java.util.ArrayList<>();
         }
-
-        return tareaService.findBySemanaId(semanaId);
     }
 
     @GetMapping("/tareas/{tareaId}/entregas")
     @ResponseBody
-    public List<EntregaTarea> getEntregasByTarea(@PathVariable Long tareaId, Authentication authentication) {
-        String email = authentication.getName();
-        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+    public List<EntregaTarea> getEntregasByTarea(@PathVariable Long tareaId, HttpServletRequest request) {
+        try {
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
-        Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
-        if (!tarea.getProfesor().getId().equals(profesor.getId())) {
-            throw new IllegalStateException("No tienes permiso para ver esta tarea");
+            Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
+            if (!tarea.getProfesor().getId().equals(profesor.getId())) {
+                throw new IllegalStateException("No tienes permiso para ver esta tarea");
+            }
+
+            return entregaTareaService.findByTareaId(tareaId);
+        } catch (Exception e) {
+            System.err.println("Error en getEntregasByTarea: " + e.getMessage());
+            return new java.util.ArrayList<>();
         }
-
-        return entregaTareaService.findByTareaId(tareaId);
     }
 
     @PutMapping("/entregas/{entregaId}/calificar")
     @ResponseBody
-    public ResponseEntity<?> calificarEntrega(@PathVariable Long entregaId, @RequestBody Map<String, Integer> payload, Authentication authentication) {
+    public ResponseEntity<?> calificarEntrega(@PathVariable Long entregaId, @RequestBody Map<String, Integer> payload, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             EntregaTarea entrega = entregaTareaService.findById(entregaId).orElseThrow(() -> new IllegalArgumentException("Entrega no encontrada"));
@@ -433,9 +483,10 @@ public class ProfesorController {
 
     @DeleteMapping("/tareas/{tareaId}")
     @ResponseBody
-    public ResponseEntity<?> deleteTarea(@PathVariable Long tareaId, Authentication authentication) {
+    public ResponseEntity<?> deleteTarea(@PathVariable Long tareaId, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             Tarea tarea = tareaService.findById(tareaId).orElseThrow(() -> new IllegalArgumentException("Tarea no encontrada"));
@@ -452,9 +503,10 @@ public class ProfesorController {
 
     @GetMapping("/materiales/{materialId}/download")
     @ResponseBody
-    public ResponseEntity<byte[]> downloadMaterial(@PathVariable Long materialId, Authentication authentication) {
+    public ResponseEntity<byte[]> downloadMaterial(@PathVariable Long materialId, HttpServletRequest request) {
         try {
-            String email = authentication.getName();
+            validateJwtTokenFromRequest(request);
+            String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
             Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
 
             Material material = materialService.findById(materialId).orElseThrow(() -> new IllegalArgumentException("Material no encontrado"));
