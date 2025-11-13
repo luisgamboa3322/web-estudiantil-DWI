@@ -76,7 +76,7 @@ export class ProfesorGestionCursoComponent {
   };
 
   ngOnInit() {
-    this.user = this.authService.getCurrentUserValue();
+    this.user = this.authService.getCurrentUser();
     this.loadCurso();
   }
 

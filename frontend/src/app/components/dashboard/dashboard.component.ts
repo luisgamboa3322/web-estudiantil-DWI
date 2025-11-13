@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit {
       next: (data: DashboardData) => {
         this.dashboardData = data;
         // El usuario actual lo obtenemos del servicio de auth
-        this.currentUser = this.authService.getCurrentUserValue();
+        this.currentUser = this.authService.getCurrentUser();
       },
       error: (error) => {
         console.error('Error loading dashboard:', error);

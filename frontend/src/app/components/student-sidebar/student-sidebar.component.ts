@@ -1,22 +1,38 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-student-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
   templateUrl: './student-sidebar.component.html',
-  styleUrl: './student-sidebar.component.css'
+  styleUrls: ['./student-sidebar.component.css']
 })
 export class StudentSidebarComponent {
-  private authService = inject(AuthService);
-  
-  user: any = null;
-  currentPath = window.location.pathname;
+  @Input() currentPath: string = '';
 
-  ngOnInit() {
-    this.user = this.authService.getCurrentUserValue();
+  constructor(private router: Router) {}
+
+  navigateTo(path: string) {
+    this.router.navigate([path]);
+  }
+
+  isActive(path: string): boolean {
+    return this.currentPath.startsWith(path);
+  }
+
+  logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('currentUser');
+    this.router.navigate(['/login']);
+  }
+
+  toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('absolute');
+      sidebar.classList.toggle('z-20');
+      sidebar.classList.toggle('w-full');
+    }
   }
 }

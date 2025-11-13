@@ -1,47 +1,61 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-student-header',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './student-header.component.html',
-  styleUrl: './student-header.component.css'
+  styleUrls: ['./student-header.component.css']
 })
 export class StudentHeaderComponent {
-  private authService = inject(AuthService);
-  
-  user: any = null;
-  showNotifications = false;
-  showUserMenu = false;
+  @Input() student: any;
 
-  ngOnInit() {
-    this.user = this.authService.getCurrentUserValue();
+  showNotifications = false;
+
+  notificaciones = [
+    {
+      id: 1,
+      titulo: "Nueva calificación publicada",
+      mensaje: "Tu calificación para el examen parcial de Herramientas de Desarrollo ha sido publicada.",
+      fecha: "Hace 2 horas",
+      leida: false
+    },
+    {
+      id: 2,
+      titulo: "Recordatorio de entrega",
+      mensaje: "Recuerda que la tarea 2 de Desarrollo Web Integrado vence en 3 días.",
+      fecha: "Hace 1 día",
+      leida: true
+    },
+    {
+      id: 3,
+      titulo: "Nuevo anuncio",
+      mensaje: "El profesor ha publicado un nuevo anuncio en el curso de Diseño de Productos y Servicios.",
+      fecha: "Hace 2 días",
+      leida: true
+    }
+  ];
+
+  toggleNotifications() {
+    this.showNotifications = !this.showNotifications;
+    // Marcar como leídas al abrir
+    if (!this.showNotifications) {
+      this.notificaciones.forEach(n => n.leida = true);
+    }
+  }
+
+  getUnreadCount(): number {
+    return this.notificaciones.filter(n => !n.leida).length;
   }
 
   toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
-      if (sidebar.classList.contains('hidden')) {
-        sidebar.classList.remove('hidden');
-        sidebar.classList.add('absolute', 'z-20', 'w-full');
-      } else {
-        sidebar.classList.add('hidden');
-        sidebar.classList.remove('absolute', 'z-20', 'w-full');
-      }
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('absolute');
+      sidebar.classList.toggle('z-20');
+      sidebar.classList.toggle('w-full');
     }
-  }
-
-  logout() {
-    this.authService.logout().subscribe({
-      next: () => {
-        window.location.href = '/login';
-      },
-      error: (error) => {
-        console.error('Error logging out:', error);
-        window.location.href = '/login';
-      }
-    });
   }
 }

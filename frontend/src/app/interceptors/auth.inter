@@ -19,22 +19,10 @@ export const authInterceptor: HttpInterceptorFn = (
 
   // Función para obtener token con múltiples métodos
   const getToken = (): string | null => {
-    try {
-      const token1 = localStorage.getItem('auth_token');
-      const token2 = sessionStorage.getItem('auth_token');
-      
-      console.log('🔍 AuthInterceptor - LocalStorage token:', token1 ? `${token1.substring(0, 30)}...` : 'null');
-      console.log('🔍 AuthInterceptor - SessionStorage token:', token2 ? `${token2.substring(0, 30)}...` : 'null');
-      
-      const tokens = [token1, token2].filter(token => token && token.length > 100);
-      const finalToken = tokens.length > 0 ? tokens[0] : null;
-      
-      console.log('🔍 AuthInterceptor - Final selected token:', finalToken ? `${finalToken.substring(0, 30)}...` : 'null');
-      return finalToken;
-    } catch (error) {
-      console.error('❌ AuthInterceptor - Error getting token:', error);
-      return null;
-    }
+    const token1 = localStorage.getItem('auth_token');
+    const token2 = sessionStorage.getItem('auth_token');
+    const tokens = [token1, token2].filter(token => token && token.length > 50);
+    return tokens.length > 0 ? tokens[0] : null;
   };
 
   // Función para crear request con token
@@ -62,49 +50,46 @@ export const authInterceptor: HttpInterceptorFn = (
     });
   };
 
-  // Para requests críticas, usar un approach más robusto
-  const isCriticalRequest = req.url.includes('/admin/api/dashboard') ||
+  // Para requests críticas, esperar hasta 3 segundos por el token
+  const isCriticalRequest = req.url.includes('/admin/api/dashboard') || 
                            req.url.includes('/dashboard') ||
                            req.url.includes('/profesor') ||
                            req.url.includes('/student');
 
   if (isCriticalRequest) {
-    console.log('🔄 AuthInterceptor - Critical request, starting token wait cycle...');
+    console.log('🔄 AuthInterceptor - Critical request, waiting for token...');
     
-    // Intentar hasta 50 veces (5 segundos máximo)
-    return timer(0, 100).pipe(
-      take(50),
-      switchMap((attempt) => {
+    return timer(0, 100).pipe( // Verificar cada 100ms
+      take(30), // Máximo 3 segundos
+      switchMap(() => {
         const token = getToken();
         
-        if (token && token.length > 100) {
-          console.log(`✅ AuthInterceptor - Token acquired on attempt ${attempt + 1}`);
+        if (token && token.length > 50) {
+          console.log('✅ AuthInterceptor - Token acquired successfully');
           const authReq = createAuthRequest(token);
           return next(authReq);
-        }
-        
-        if (attempt >= 49) {
-          // Último intento - proceder sin token
-          console.log('⏰ AuthInterceptor - All attempts failed, proceeding without token');
+        } else if (timer(0).toString().includes('timeout')) {
+          // Timeout reached
+          console.log('⏰ AuthInterceptor - Timeout reached, proceeding without token');
           const fallbackReq = createFallbackRequest();
           return next(fallbackReq);
         }
         
-        console.log(`⏳ AuthInterceptor - Attempt ${attempt + 1} failed, continuing...`);
+        console.log('⏳ AuthInterceptor - Still waiting for valid token...');
         return of(null as any); // Continuar esperando
       }),
       catchError((error) => {
-        console.log('❌ AuthInterceptor - Error in wait cycle, proceeding without token:', error);
+        console.log('❌ AuthInterceptor - Error occurred, proceeding without token');
         const fallbackReq = createFallbackRequest();
         return next(fallbackReq);
       })
     );
   }
 
-  // Para requests no críticas, intentar una vez y proceder
+  // Para requests no críticas, usar token si está disponible
   const token = getToken();
   
-  if (token && token.length > 100) {
+  if (token && token.length > 50) {
     console.log('✅ AuthInterceptor - Non-critical request with token');
     const authReq = createAuthRequest(token);
     return next(authReq);

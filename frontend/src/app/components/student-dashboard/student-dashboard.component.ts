@@ -1,23 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgIf, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
-
-interface Curso {
-  id: number;
-  nombre: string;
-  codigo: string;
-  descripcion: string;
-  estado: string;
-  profesor?: {
-    nombre: string;
-  };
-}
+import { StudentHeaderComponent } from '../student-header/student-header.component';
+import { StudentSidebarComponent } from '../student-sidebar/student-sidebar.component';
+import { StudentService } from '../../services/student.service';
 
 interface Asignacion {
-  curso: Curso;
-  fechaAsignacion: Date;
+  id: number;
+  curso: {
+    id: number;
+    nombre: string;
+    codigo: string;
+    descripcion?: string;
+    profesor?: {
+      nombre: string;
+    };
+  };
+  fechaAsignacion: string;
   estado: string;
 }
 
@@ -30,177 +30,159 @@ interface Actividad {
   color: string;
 }
 
-interface Notificacion {
-  id: number;
-  titulo: string;
-  mensaje: string;
-  fecha: string;
-  leida: boolean;
-}
-
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, NgIf, NgFor],
   templateUrl: './student-dashboard.component.html',
   styleUrls: ['./student-dashboard.component.css']
 })
 export class StudentDashboardComponent implements OnInit {
-  private authService = inject(AuthService);
+  private studentService = inject(StudentService);
   private router = inject(Router);
-
-  user: any = null;
-  userName = 'Luis Francisco';
+  
+  // User data
+  student: any = {};
+  studentName: string = '';
   cursosAsignados: Asignacion[] = [];
-  actividades: Actividad[] = [];
-  notificaciones: Notificacion[] = [];
+  mostrarMensajeNoCursos: boolean = false;
+  isLoading: boolean = true;
+  currentPath = '/student/dashboard';
+  
+  // Notification state
   mostrarNotificaciones = false;
-  sidebarVisible = false;
+  notificaciones: any[] = [
+    {
+      id: 1,
+      titulo: "Nueva calificación publicada",
+      mensaje: "Tu calificación para el examen parcial de Herramientas de Desarrollo ha sido publicada.",
+      fecha: "Hace 2 horas",
+      leida: false
+    },
+    {
+      id: 2,
+      titulo: "Recordatorio de entrega",
+      mensaje: "Recuerda que la tarea 2 de Desarrollo Web Integrado vence en 3 días.",
+      fecha: "Hace 1 día",
+      leida: true
+    }
+  ];
+  
+  // Actividades semanales
+  actividades: Actividad[] = [
+    {
+      tipo: "Foro no calificado",
+      titulo: "S05 - Foro de Consultas",
+      curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
+      vencimiento: "13/09/2025 a las 11:59 PM",
+      estado: "Por entregar",
+      color: "orange"
+    },
+    {
+      tipo: "Evaluación no calificada",
+      titulo: "Repasemos lo aprendido: Cuestionario",
+      curso: "SEGURIDAD INFORMATICA", 
+      vencimiento: "14/09/2025 a las 11:59 PM",
+      estado: "Por entregar",
+      color: "orange"
+    },
+    {
+      tipo: "Foro no calificado",
+      titulo: "S04 - Foro de Consultas",
+      curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
+      vencimiento: "08/09/2025 a las 11:59 PM",
+      estado: "Vencida",
+      color: "red"
+    }
+  ];
 
   ngOnInit() {
-    this.loadDashboard();
+    this.loadDashboardData();
+    this.initializeLucideIcons();
   }
 
-  loadDashboard() {
-    // Datos simulados (en producción vendrían del backend)
-    this.user = this.authService.getCurrentUserValue();
-    
-    this.cursosAsignados = [
-      {
-        curso: {
-          id: 1,
-          nombre: 'Desarrollo Web Integrado',
-          codigo: 'DWI101',
-          descripcion: 'Curso de desarrollo web moderno',
-          estado: 'ACTIVO',
-          profesor: { nombre: 'Prof. Juan Pérez' }
-        },
-        fechaAsignacion: new Date('2025-01-15'),
-        estado: 'ACTIVO'
+  loadDashboardData() {
+    this.isLoading = true;
+    this.studentService.getDashboardData().subscribe({
+      next: (data) => {
+        console.log('✅ Datos del dashboard estudiante:', data);
+        this.studentName = data.studentName || 'Estudiante';
+        this.student = data.student || {};
+        this.cursosAsignados = data.cursosAsignados || [];
+        this.mostrarMensajeNoCursos = data.mostrarMensajeNoCursos || false;
+        this.isLoading = false;
       },
-      {
-        curso: {
-          id: 2,
-          nombre: 'Seguridad Informática',
-          codigo: 'SI101',
-          descripcion: 'Fundamentos de seguridad',
-          estado: 'ACTIVO',
-          profesor: { nombre: 'Prof. María García' }
-        },
-        fechaAsignacion: new Date('2025-01-16'),
-        estado: 'ACTIVO'
+      error: (error) => {
+        console.error('❌ Error cargando dashboard:', error);
+        this.isLoading = false;
+        // Mostrar datos de fallback
+        this.studentName = 'Estudiante';
+        this.cursosAsignados = [];
+        this.mostrarMensajeNoCursos = true;
       }
-    ];
-
-    this.actividades = [
-      {
-        tipo: "Foro no calificado",
-        titulo: "S05 - Foro de Consultas",
-        curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
-        vencimiento: "13/09/2025 a las 11:59 PM",
-        estado: "Por entregar",
-        color: "orange"
-      },
-      {
-        tipo: "Evaluación no calificada",
-        titulo: "Repasemos lo aprendido: Cuestion...",
-        curso: "SEGURIDAD INFORMATICA",
-        vencimiento: "14/09/2025 a las 11:59 PM",
-        estado: "Por entregar",
-        color: "orange"
-      },
-      {
-        tipo: "Foro no calificado",
-        titulo: "S04 - Foro de Consultas",
-        curso: "DISEÑO DE PRODUCTOS Y SERVICIOS",
-        vencimiento: "08/09/2025 a las 11:59 PM",
-        estado: "Vencida",
-        color: "red"
-      }
-    ];
-
-    this.notificaciones = [
-      {
-        id: 1,
-        titulo: "Nueva calificación publicada",
-        mensaje: "Tu calificación para el examen parcial de Herramientas de Desarrollo ha sido publicada.",
-        fecha: "Hace 2 horas",
-        leida: false
-      },
-      {
-        id: 2,
-        titulo: "Recordatorio de entrega",
-        mensaje: "Recuerda que la tarea 2 de Desarrollo Web Integrado vence en 3 días.",
-        fecha: "Hace 1 día",
-        leida: true
-      },
-      {
-        id: 3,
-        titulo: "Nuevo anuncio",
-        mensaje: "El profesor ha publicado un nuevo anuncio en el curso de Diseño de Productos y Servicios.",
-        fecha: "Hace 2 días",
-        leida: true
-      }
-    ];
+    });
   }
 
-  // Métodos de UI
+  initializeLucideIcons() {
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }, 100);
+  }
+
+  navigateToCourse(cursoId: number) {
+    // Navegar al detalle del curso usando Angular Router
+    this.router.navigate(['/student/curso', cursoId]);
+  }
+
+  getCourseProgress(): number {
+    // Calcular progreso del curso (placeholder)
+    return Math.floor(Math.random() * 100);
+  }
+
+  getCourseImage(): string {
+    return 'https://placehold.co/600x400/FFDDC1/4A4A4A?text=Curso';
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  // UI State Management
   toggleSidebar() {
-    this.sidebarVisible = !this.sidebarVisible;
     const sidebar = document.getElementById('sidebar');
     if (sidebar) {
-      if (this.sidebarVisible) {
-        sidebar.classList.remove('hidden');
-        sidebar.classList.add('absolute', 'z-20', 'w-full');
-      } else {
-        sidebar.classList.add('hidden');
-        sidebar.classList.remove('absolute', 'z-20', 'w-full');
-      }
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('absolute');
+      sidebar.classList.toggle('z-20');
+      sidebar.classList.toggle('w-full');
     }
   }
 
   toggleNotifications() {
     this.mostrarNotificaciones = !this.mostrarNotificaciones;
-    
-    // Marcar todas las notificaciones como leídas al abrir el modal
-    if (this.mostrarNotificaciones) {
+    // Mark notifications as read when opened
+    if (!this.mostrarNotificaciones) {
       this.notificaciones.forEach(n => n.leida = true);
     }
   }
 
+  // Notification helpers
   get tieneNotificacionesNoLeidas(): boolean {
     return this.notificaciones.some(n => !n.leida);
   }
 
-  // Método de logout
-  logout() {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        console.error('Error logging out:', error);
-        this.router.navigate(['/login']);
-      }
-    });
-  }
-
-  // Métodos específicos del estudiante
+  // Navigation
   irACurso(cursoId: number) {
-    // Navegar al detalle del curso
     this.router.navigate(['/student/curso', cursoId]);
   }
-
-  getUserName(): string {
-    return this.user?.userName || 'Estudiante';
-  }
-
-  // Inicializar iconos cuando se carga el componente
-  ngAfterViewInit() {
-    setTimeout(() => {
-      if (typeof (window as any).lucide !== 'undefined') {
-        (window as any).lucide.createIcons();
-      }
-    }, 100);
-  }
 }
+
+declare const lucide: any;

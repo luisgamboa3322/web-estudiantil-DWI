@@ -1,0 +1,23 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-error-acceso-denegado',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './error-acceso-denegado.component.html',
+  styleUrls: ['./error-acceso-denegado.component.css']
+})
+export class ErrorAccesoDenegadoComponent {
+  currentUserEmail = localStorage.getItem('currentUserEmail') || 'Usuario';
+
+  goHome() {
+    window.location.href = '/';
+  }
+
+  goToLogin() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('currentUser');
+    window.location.href = '/login';
+  }
+}

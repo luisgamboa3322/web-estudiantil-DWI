@@ -1,0 +1,157 @@
+# 🔧 **DIAGNÓSTICO Y SOLUCIÓN - Problema de Login Angular**
+
+## 🚨 **PROBLEMA IDENTIFICADO**
+
+El usuario puede hacer login pero **nunca se dirige al siguiente flujo del sistema**. Esto indica problemas en:
+
+1. **Comunicación CORS** entre Angular (puerto 4200) y Spring Boot (puerto 8083)
+2. **Backend Spring Boot** no está corriendo o no responde
+3. **Configuración de rutas** o manejo de respuestas incorrecto
+4. **Permisos/roles** no se están mapeando correctamente
+
+## 🛠️ **HERRAMIENTAS DE DIAGNÓSTICO CREADAS**
+
+### ✅ **1. Componente Debug (/debug)**
+- **Acceso**: `http://localhost:4200/debug`
+- **Función**: Prueba directa de conectividad con Spring Boot
+- **Test incluidos**: 
+  - Test de conexión general
+  - Test de login con Admin, Teacher, Student
+  - Muestra respuesta completa del servidor
+
+### ✅ **2. Login Mejorado (/login)**
+- **Logging detallado** en consola del navegador
+- **Manejo específico de errores** por código de estado
+- **Botones de prueba** para cada credencial
+- **Debug visual** del flujo de autenticación
+
+## 🎯 **PASOS PARA DIAGNOSTICAR Y SOLUCIONAR**
+
+### **PASO 1: Verificar que Spring Boot esté corriendo**
+```bash
+# En una terminal separada
+cd EstudiaM-s/demo
+mvn spring-boot:run
+```
+
+**Deberías ver:**
+```
+Started DemoApplication in XXXX seconds
+Tomcat started on port 8083
+```
+
+### **PASO 2: Probar endpoints directamente**
+```bash
+# En otra terminal, probar conexión
+curl -X POST http://localhost:8083/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"admin123"}'
+```
+
+**Si Spring Boot está funcionando correctamente, deberías ver una respuesta JSON.**
+
+### **PASO 3: Usar el componente Debug de Angular**
+1. **Abrir navegador** en `http://localhost:4200/debug`
+2. **Hacer clic en "Probar Conexión Backend"**
+3. **Revisar resultado**:
+   - ✅ **Si funciona**: El backend responde correctamente
+   - ❌ **Si falla**: Problema de conectividad o CORS
+
+### **PASO 4: Probar el Login mejorado**
+1. **Ir a** `http://localhost:4200/login`
+2. **Abrir DevTools** del navegador (F12) → pestaña Console
+3. **Usar credenciales** de prueba (botones en la página)
+4. **Revisar logs** en la consola del navegador
+
+### **PASO 5: Verificar logs del backend**
+En la terminal donde corre Spring Boot, revisa si hay errores relacionados con:
+- CORS
+- Autenticación
+- Base de datos
+- Endpoints
+
+## 🔍 **PROBLEMAS MÁS COMUNES Y SOLUCIONES**
+
+### **❌ Error: CORS Policy**
+**Síntoma**: Error en consola del navegador sobre CORS
+**Solución**: Verificar que `WebConfig.java` tiene la configuración CORS correcta
+
+### **❌ Error: Connection Refused**
+**Síntoma**: Error 0, servidor no disponible
+**Solución**: Verificar que Spring Boot esté corriendo en puerto 8083
+
+### **❌ Error: 401 Unauthorized**
+**Síntoma**: Login falla con credenciales correctas
+**Solución**: Verificar credenciales en base de datos
+
+### **❌ Login funciona pero no redirige**
+**Síntoma**: Login exitoso pero se queda en la misma página
+**Solución**: Problema en el mapeo de roles o rutas de Angular
+
+## 🧪 **CREDENCIALES DE PRUEBA CONFIRMADAS**
+
+| Rol | Email | Contraseña | Comportamiento Esperado |
+|-----|-------|------------|-------------------------|
+| Admin | admin@example.com | admin123 | Múltiples roles → Select Dashboard |
+| Teacher | prof@example.com | teacher123 | Múltiples roles → Select Dashboard |
+| Student | student@example.com | student123 | Solo estudiante → Directo a student/dashboard |
+
+## 📊 **FLUJO ESPERADO**
+
+1. **Usuario hace login** → Angular llama a `/api/auth/login`
+2. **Spring Boot responde** → JWT token + datos del usuario
+3. **Angular procesa respuesta** → Mapea roles y permisos
+4. **Redirección automática** → Según roles del usuario:
+   - **Múltiples roles** → `/select-dashboard`
+   - **Un solo rol** → Dashboard específico
+
+## 🚀 **INSTRUCCIONES DE PRUEBA RÁPIDA**
+
+### **Si el backend NO está corriendo:**
+```bash
+# Terminal 1: Backend
+cd EstudiaM-s/demo
+mvn spring-boot:run
+
+# Terminal 2: Frontend  
+cd EstudiaM-s/frontend
+ng serve -o
+```
+
+### **Si el backend ESTÁ corriendo pero el login no funciona:**
+
+1. **Ir a** `http://localhost:4200/debug`
+2. **Hacer clic en "Test Admin Login"**
+3. **Copiar resultado** y enviarlo para análisis
+
+### **Si quieres probar con navegador móvil:**
+La aplicación Angular es responsive, pero el backend Spring Boot debe permitir CORS desde cualquier origen.
+
+## 📱 **ACCESOS DIRECTOS PARA PRUEBAS**
+
+- **Login**: http://localhost:4200/login
+- **Debug**: http://localhost:4200/debug  
+- **Select Dashboard**: http://localhost:4200/select-dashboard
+- **Admin Dashboard**: http://localhost:4200/admin/dashboard
+- **Teacher Dashboard**: http://localhost:4200/profesor/dashboard
+- **Student Dashboard**: http://localhost:4200/student/dashboard
+
+## 🔧 **CONFIGURACIÓN ACTUAL CONFIRMADA**
+
+### **Backend Spring Boot:**
+- **Puerto**: 8083
+- **CORS**: Configurado para Angular
+- **Endpoints**: `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`
+
+### **Frontend Angular:**
+- **Puerto**: 4200
+- **Interceptors**: Configurados para JWT
+- **Rutas**: Mapeadas idénticamente a URLs de Thymeleaf
+
+### **Base de Datos MySQL:**
+- **Host**: localhost
+- **Puerto**: 3306
+- **Credenciales**: root / luis123
+- **Base**: webestudiantil
+
+Con estas herramientas de diagnóstico, deberías poder identificar exactamente dónde está el problema y solucionarlo. 🚀

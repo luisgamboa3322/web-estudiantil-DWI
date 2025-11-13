@@ -21,20 +21,20 @@
     background: #94a3b8;
 }
 
-/* Active link styling */
-.bg-orange-500 {
-    background-color: #f97316;
-}
-
-.text-white {
+.nav-link.active {
+    background-color: #f97316; /* orange-500 */
     color: white;
-}
-
-.font-semibold {
     font-weight: 600;
 }
 
-/* Hover effects */
-.hover\:bg-gray-700:hover {
-    background-color: #374151;
+/* Mobile responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    #sidebar.show {
+        transform: translateX(0);
+    }
 }

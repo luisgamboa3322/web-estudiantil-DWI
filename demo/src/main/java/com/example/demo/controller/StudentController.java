@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import com.example.demo.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/student")
@@ -37,6 +39,9 @@ public class StudentController {
 
     @Autowired
     private EntregaTareaService entregaTareaService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public StudentController(StudentService studentService, StudentCursoService studentCursoService) {
         this.studentService = studentService;
@@ -82,6 +87,116 @@ public class StudentController {
         model.addAttribute("mostrarMensajeNoCursos", mostrarMensajeNoCursos);
 
         return "student/dashboard";
+    }
+
+    // ===========================
+    // API REST PARA ANGULAR
+    // ===========================
+    
+    @GetMapping("/api/dashboard")
+    @ResponseBody
+    public Map<String, Object> getDashboardData(HttpServletRequest request) {
+        System.out.println("🔍 DEBUG: Endpoint /student/api/dashboard llamado");
+        
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        List<StudentCurso> cursosAsignados = studentCursoService.findByStudentId(student.getId());
+        boolean mostrarMensajeNoCursos = cursosAsignados.isEmpty() || 
+            cursosAsignados.stream().noneMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("studentName", student.getNombre());
+        data.put("student", student);
+        data.put("cursosAsignados", cursosAsignados);
+        data.put("mostrarMensajeNoCursos", mostrarMensajeNoCursos);
+        data.put("activePage", "dashboard");
+        
+        System.out.println("✅ Student Dashboard Data - Student: " + student.getNombre() + 
+                          ", Cursos: " + cursosAsignados.size());
+        
+        return data;
+    }
+
+    @GetMapping("/api/cursos-asignados")
+    @ResponseBody
+    public List<StudentCurso> getCursosAsignados(HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+        
+        return studentCursoService.findByStudentId(student.getId());
+    }
+
+    @GetMapping("/api/curso/{cursoId}")
+    @ResponseBody
+    public Map<String, Object> getCursoDetalle(@PathVariable Long cursoId, HttpServletRequest request) {
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Student student = studentService.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+        // Verificar que el estudiante está asignado al curso
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(cursoId) && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            throw new SecurityException("No tienes acceso a este curso");
+        }
+
+        // Obtener información del curso
+        var asignacionOpt = studentCursoService.findByStudentId(student.getId()).stream()
+            .filter(sc -> sc.getCurso().getId().equals(cursoId))
+            .findFirst();
+
+        if (!asignacionOpt.isPresent()) {
+            throw new IllegalStateException("Curso no encontrado");
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("curso", asignacionOpt.get().getCurso());
+        data.put("asignacion", asignacionOpt.get());
+        data.put("studentName", student.getNombre());
+        data.put("activePage", "cursos");
+
+        return data;
+    }
+
+    private void validateJwtTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new SecurityException("Token JWT requerido");
+        }
+        
+        String token = authHeader.substring(7);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Token JWT inválido");
+        }
+        
+        Map<String, Object> authorities = jwtUtil.getAuthoritiesFromToken(token);
+        @SuppressWarnings("unchecked")
+        List<String> permissions = (List<String>) authorities.get("permissions");
+        
+        boolean hasStudentPermission = permissions != null &&
+            permissions.contains("ACCESS_STUDENT_DASHBOARD");
+        
+        if (!hasStudentPermission) {
+            throw new SecurityException("Acceso denegado - Permiso estudiante requerido");
+        }
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        throw new SecurityException("Token JWT no encontrado");
     }
 
     @GetMapping("/chat")

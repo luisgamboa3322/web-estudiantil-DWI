@@ -38,7 +38,7 @@ export class ProfesorConfiguracionComponent {
   };
 
   ngOnInit() {
-    this.user = this.authService.getCurrentUserValue();
+    this.user = this.authService.getCurrentUser();
     this.loadProfile();
   }
 

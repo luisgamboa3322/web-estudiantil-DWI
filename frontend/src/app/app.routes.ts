@@ -1,43 +1,45 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
-import { ProfesorDashboardComponent } from './components/profesor-dashboard/profesor-dashboard.component';
-import { StudentDashboardComponent } from './components/student-dashboard/student-dashboard.component';
-import { SelectDashboardComponent } from './components/select-dashboard/select-dashboard.component';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: '/login',
-    pathMatch: 'full'
-  },
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'dashboard',
-    component: DashboardComponent
-  },
-  {
-    path: 'admin/dashboard',
-    component: AdminDashboardComponent
-  },
-  {
-    path: 'profesor/dashboard',
-    component: ProfesorDashboardComponent
-  },
-  {
-    path: 'student/dashboard',
-    component: StudentDashboardComponent
-  },
-  {
-    path: 'select-dashboard',
-    component: SelectDashboardComponent
-  },
-  {
-    path: '**',
-    redirectTo: '/login'
-  }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  
+  // Rutas de autenticación
+  { path: 'login', loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent) },
+  
+  // Componente de debug para diagnóstico
+  { path: 'debug', loadComponent: () => import('./components/debug.component').then(m => m.DebugComponent) },
+  
+  // Selección de dashboard
+  { path: 'select-dashboard', loadComponent: () => import('./components/select-dashboard/select-dashboard.component').then(m => m.SelectDashboardComponent) },
+  
+  // Dashboards específicos
+  { path: 'admin/dashboard', loadComponent: () => import('./components/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent) },
+  { path: 'profesor/dashboard', loadComponent: () => import('./components/profesor-dashboard/profesor-dashboard.component').then(m => m.ProfesorDashboardComponent) },
+  { path: 'student/dashboard', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  
+  // Rutas de administrador
+  { path: 'redirect/admin', loadComponent: () => import('./components/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent) },
+  
+  // Rutas de profesor
+  { path: 'profesor/calendario', loadComponent: () => import('./components/profesor-calendario/profesor-calendario.component').then(m => m.ProfesorCalendarioComponent) },
+  { path: 'profesor/chat', loadComponent: () => import('./components/profesor-chat/profesor-chat.component').then(m => m.ProfesorChatComponent) },
+  { path: 'profesor/configuracion', loadComponent: () => import('./components/profesor-configuracion/profesor-configuracion.component').then(m => m.ProfesorConfiguracionComponent) },
+  { path: 'profesor/gestion-curso', loadComponent: () => import('./components/profesor-gestion-curso/profesor-gestion-curso.component').then(m => m.ProfesorGestionCursoComponent) },
+  { path: 'redirect/profesor', loadComponent: () => import('./components/profesor-dashboard/profesor-dashboard.component').then(m => m.ProfesorDashboardComponent) },
+  
+  // Rutas de estudiante (componentes temporales hasta que estén listos)
+  { path: 'student/calendario', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  { path: 'student/chat', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  { path: 'student/configuracion', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  { path: 'student/curso/:id', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  { path: 'redirect/student', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  
+  // Ruta de error
+  { path: 'error/acceso-denegado', loadComponent: () => import('./components/error-acceso-denegado/error-acceso-denegado.component').then(m => m.ErrorAccesoDenegadoComponent) },
+  
+  // Ruta de logout
+  { path: 'logout', loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent) },
+  
+  // Ruta por defecto para rutas no encontradas
+  { path: '**', redirectTo: '/login' }
 ];

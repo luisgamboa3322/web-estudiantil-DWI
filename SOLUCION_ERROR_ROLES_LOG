@@ -1,0 +1,99 @@
+# 🔧 **SOLUCIÓN INMEDIATA - Error de Detección de Roles Corregido**
+
+## ✅ **Problema Identificado y Resuelto**
+
+**Error original:** "No se pudo determinar el rol, redirigiendo a /"
+**Causa:** La lógica de detección de roles no manejaba correctamente los arrays opcionales
+**Solución:** Corrección en login.component.ts y agregado de logging detallado
+
+## 🛠️ **Cambios Realizados**
+
+### **1. Lógica de Detección de Roles Mejorada**
+- ✅ **Operador opcional**: `currentUser.roles?.includes()` en lugar de `currentUser.roles.includes()`
+- ✅ **Fallback seguro**: `/select-dashboard` en lugar de `/` (ruta inexistente)
+- ✅ **Logging detallado**: Muestra roles, permisos y múltiples roles recibidos
+
+### **2. Logging Mejorado**
+Ahora en la consola del navegador verás información detallada:
+```
+Roles del usuario: ['admin', 'teacher']
+Permisos del usuario: ['ACCESS_ADMIN_DASHBOARD', 'ACCESS_TEACHER_DASHBOARD']
+Múltiples roles: true
+```
+
+## 🚀 **Instrucciones de Prueba**
+
+### **1. Limpiar caché del navegador**
+- Abrir DevTools (F12)
+- Click en el botón de "Disable cache" en la pestaña Network
+- Recargar la página (Ctrl+F5)
+
+### **2. Probar Login**
+1. **Ir a**: `http://localhost:4200/login`
+2. **Usar credenciales**: admin@example.com / admin123
+3. **Abrir consola**: F12 → Console
+4. **Observar logs** detallados sobre roles y permisos
+5. **Resultado esperado**: Redirección exitosa a `/select-dashboard`
+
+### **3. Verificar en Consola del Navegador**
+
+Deberías ver logs como:
+```
+Login exitoso! Respuesta: {email: "admin@example.com", ...}
+Usuario actual después del login: {email: "admin@example.com", roles: [...]}
+Roles del usuario: ["admin", "teacher", "student"]
+Permisos del usuario: ["ACCESS_ADMIN_DASHBOARD", "ACCESS_TEACHER_DASHBOARD", "ACCESS_STUDENT_DASHBOARD"]
+Redirigiendo a select-dashboard (múltiples roles)
+```
+
+## 📊 **Comportamiento Esperado por Usuario**
+
+### **Admin (admin@example.com):**
+- **Roles**: admin, teacher, student
+- **Permisos**: ACCESS_ADMIN_DASHBOARD, ACCESS_TEACHER_DASHBOARD, ACCESS_STUDENT_DASHBOARD
+- **Redirección**: `/select-dashboard` (múltiples roles)
+
+### **Teacher (prof@example.com):**
+- **Roles**: teacher, student
+- **Permisos**: ACCESS_TEACHER_DASHBOARD, ACCESS_STUDENT_DASHBOARD
+- **Redirección**: `/select-dashboard` (múltiples roles)
+
+### **Student (student@example.com):**
+- **Roles**: student
+- **Permisos**: ACCESS_STUDENT_DASHBOARD
+- **Redirección**: `/student/dashboard` (un solo rol)
+
+## 🔍 **Si el Problema Persiste**
+
+### **Verificar Backend**
+1. **Abrir otra terminal**
+2. **Ejecutar**:
+```bash
+cd EstudiaM-s/demo
+mvn spring-boot:run
+```
+3. **Verificar** que muestre: "Tomcat started on port 8083"
+
+### **Probar Endpoints Directamente**
+En otra terminal:
+```bash
+curl -X POST http://localhost:8083/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"admin123"}'
+```
+
+### **Usar Herramienta Debug**
+1. **Ir a**: `http://localhost:4200/debug`
+2. **Hacer clic en**: "Test Admin Login"
+3. **Revisar respuesta** completa del servidor
+
+## ✅ **Resultado Esperado**
+
+**Con estas correcciones:**
+- ✅ **Login exitoso** con credenciales correctas
+- ✅ **Redirección automática** según roles del usuario
+- ✅ **Select Dashboard** para usuarios con múltiples roles
+- ✅ **Dashboards específicos** para usuarios con un solo rol
+- ✅ **Logging detallado** para diagnosticar cualquier problema
+
+**¡La aplicación ahora debería funcionar correctamente!** 🎉

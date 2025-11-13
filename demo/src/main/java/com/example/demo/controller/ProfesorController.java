@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.example.demo.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/profesor")
@@ -38,6 +41,9 @@ public class ProfesorController {
 
     @Autowired
     private EntregaTareaService entregaTareaService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public ProfesorController(ProfessorService service, com.example.demo.repository.CursoRepository cursoRepository) {
         this.service = service;
@@ -79,6 +85,64 @@ public class ProfesorController {
         }
         // fallback: redirigir al login si no hay autenticación
         return "redirect:/login?error=no_auth";
+    }
+
+    // ===========================
+    // API REST PARA ANGULAR
+    // ===========================
+    
+    @GetMapping("/api/dashboard")
+    @ResponseBody
+    public Map<String, Object> getDashboardData(HttpServletRequest request) {
+        System.out.println("🔍 DEBUG: Endpoint /profesor/api/dashboard llamado");
+        
+        validateJwtTokenFromRequest(request);
+        
+        String email = jwtUtil.getEmailFromToken(extractTokenFromRequest(request));
+        Professor profesor = service.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+        
+        List<Curso> cursos = cursoRepository.findByProfesorId(profesor.getId());
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("profesor", profesor);
+        data.put("cursos", cursos);
+        
+        System.out.println("✅ Profesor Dashboard Data - Profesor: " + profesor.getNombre() + 
+                          ", Cursos: " + cursos.size());
+        
+        return data;
+    }
+
+    private void validateJwtTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new SecurityException("Token JWT requerido");
+        }
+        
+        String token = authHeader.substring(7);
+        if (!jwtUtil.validateToken(token)) {
+            throw new SecurityException("Token JWT inválido");
+        }
+        
+        Map<String, Object> authorities = jwtUtil.getAuthoritiesFromToken(token);
+        @SuppressWarnings("unchecked")
+        List<String> permissions = (List<String>) authorities.get("permissions");
+        
+        boolean hasTeacherPermission = permissions != null &&
+            permissions.contains("ACCESS_TEACHER_DASHBOARD");
+        
+        if (!hasTeacherPermission) {
+            throw new SecurityException("Acceso denegado - Permiso profesor requerido");
+        }
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        throw new SecurityException("Token JWT no encontrado");
     }
 
     @GetMapping("/configuracion")

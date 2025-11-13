@@ -32,12 +32,30 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/login", "/", "/css/**", "/js/**", "/images/**", "/webjars/**",
                     "/static/**", "/favicon.ico", "/error", "/select-dashboard", "/error/acceso-denegado",
-                    "/redirect/admin", "/redirect/profesor", "/redirect/student",
-                    "/api/**" // Permitir todas las requests de API para Angular
+                    "/redirect/admin", "/redirect/profesor", "/redirect/student"
                 ).permitAll()
+                .requestMatchers("/admin/api/**", "/profesor/api/**", "/student/api/**").permitAll() // APIs JWT primero
+                .requestMatchers(
+                    "/admin/students/**",
+                    "/admin/profesores/**",
+                    "/admin/admins/**",
+                    "/admin/cursos/**",
+                    "/admin/asignaciones/**"
+                ).permitAll() // Protegidos manualmente con JWT en los controladores
+                .requestMatchers("/profesor/cursos/**",
+                                 "/profesor/semanas/**",
+                                 "/profesor/tareas/**",
+                                 "/profesor/materiales/**",
+                                 "/profesor/entregas/**").permitAll()
+                .requestMatchers("/student/cursos/**",
+                                 "/student/semanas/**",
+                                 "/student/tareas/**",
+                                 "/student/materiales/**",
+                                 "/student/profile").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ACCESS_ADMIN_DASHBOARD")
                 .requestMatchers("/profesor/**").hasAuthority("ACCESS_TEACHER_DASHBOARD")
                 .requestMatchers("/student/**").hasAuthority("ACCESS_STUDENT_DASHBOARD")
+                .requestMatchers("/api/auth/**", "/api/public/**").permitAll() // APIs públicas para login
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
