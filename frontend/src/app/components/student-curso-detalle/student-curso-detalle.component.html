@@ -1,0 +1,278 @@
+<div class="flex h-screen">
+  <!-- Barra de navegación lateral (Sidebar) -->
+  <aside id="sidebar"
+    class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+      <a routerLink="/student/dashboard"
+        class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="h-8 w-8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>UTP+class</span>
+      </a>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/student/dashboard"
+              class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-700">
+              <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+              <span>Cursos</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/chat"
+              class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-700">
+              <i data-lucide="message-square" class="sidebar-icon"></i>
+              <span>Chat</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/calendario"
+              class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-700">
+              <i data-lucide="calendar" class="sidebar-icon"></i>
+              <span>Calendario</span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="help-circle" class="sidebar-icon"></i>
+              <span>Ayuda</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/configuracion"
+              class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-700">
+              <i data-lucide="settings" class="sidebar-icon"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <nav>
+        <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+          <li>
+            <a href="/logout"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="log-out" class="sidebar-icon"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Cabecera (Header) -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <button (click)="toggleSidebar()" class="md:hidden">
+          <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+        <button (click)="volverADashboard()" 
+                class="flex items-center space-x-2 text-sm font-semibold text-orange-500 hover:text-orange-700">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Volver a cursos</span>
+        </button>
+      </div>
+      <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+          <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+        </button>
+        <div class="flex items-center space-x-2 cursor-pointer">
+          <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario"
+            class="w-10 h-10 rounded-full">
+          <div class="text-right hidden sm:block">
+            <p class="font-semibold text-sm">{{ studentName }}</p>
+            <p class="text-xs text-gray-500">Estudiante</p>
+          </div>
+          <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área de contenido -->
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-4 sm:p-6 lg:p-8">
+      <!-- Información del curso -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{ curso.nombre }}</h1>
+            <p class="text-gray-600 mt-2">{{ curso.descripcion }}</p>
+            <div class="flex items-center space-x-4 mt-4">
+              <span class="text-sm text-gray-500">
+                <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                Profesor: <span class="font-medium">{{ curso.profesor?.nombre || 'Sin profesor' }}</span>
+              </span>
+              <span class="text-sm text-gray-500">
+                <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                Código: <span class="font-medium">{{ curso.codigo }}</span>
+              </span>
+            </div>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div class="text-center">
+                <p class="text-sm text-orange-700">Progreso del curso</p>
+                <p class="text-2xl font-bold text-orange-600">0%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegación por semanas -->
+      <div class="bg-white rounded-lg shadow-sm mb-6">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-800">Contenido del Curso</h2>
+          <p class="text-gray-600 mt-1">Explora las semanas y accede a materiales y tareas</p>
+        </div>
+        <div class="p-4">
+          <div class="flex flex-wrap gap-2 mb-6">
+            <button *ngFor="let semana of semanas" 
+                    (click)="seleccionarSemana(semana)"
+                    class="px-4 py-2 rounded-lg font-medium transition-colors"
+                    [class.bg-orange-500]="semanaSeleccionada?.id === semana.id"
+                    [class.text-white]="semanaSeleccionada?.id === semana.id"
+                    [class.bg-orange-100]="semanaSeleccionada?.id !== semana.id"
+                    [class.text-gray-800]="semanaSeleccionada?.id !== semana.id"
+                    [class.hover:bg-orange-200]="semanaSeleccionada?.id !== semana.id">
+              Semana {{ semana.numeroSemana }}
+            </button>
+          </div>
+          
+          <div class="min-h-96" *ngIf="!isLoading && semanaSeleccionada">
+            <!-- Materiales -->
+            <div *ngIf="materiales.length > 0" class="mb-8">
+              <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
+                Material de Estudio
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let material of materiales" 
+                     class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800">{{ material.nombre }}</h4>
+                      <p *ngIf="material.descripcion" class="text-sm text-gray-600 mt-1">{{ material.descripcion }}</p>
+                      <p class="text-xs text-gray-500 mt-2">
+                        Subido: {{ formatDate(material.fechaCreacion) }}
+                      </p>
+                    </div>
+                    <button *ngIf="material.fileName" 
+                            (click)="descargarMaterial(material.id)"
+                            class="ml-3 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors">
+                      <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
+                      Descargar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tareas -->
+            <div *ngIf="tareas.length > 0">
+              <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i data-lucide="clipboard-check" class="w-5 h-5 mr-2"></i>
+                Tareas
+              </h3>
+              <div class="space-y-4">
+                <div *ngFor="let tarea of tareas" 
+                     class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-800">{{ tarea.titulo }}</h4>
+                      <p *ngIf="tarea.descripcion" class="text-sm text-gray-600 mt-1">{{ tarea.descripcion }}</p>
+                      <div class="flex items-center space-x-4 mt-2">
+                        <span class="text-xs text-gray-500">
+                          <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                          Vence: {{ formatDate(tarea.fechaLimite) }}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                          <i data-lucide="star" class="w-4 h-4 inline mr-1"></i>
+                          Puntos: {{ tarea.puntosMaximos }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <span class="px-3 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="getEstadoTarea(tarea).clase">
+                        {{ getEstadoTarea(tarea).estado }}
+                      </span>
+                      <button *ngIf="getEstadoTarea(tarea).estado === 'Pendiente'" 
+                              (click)="abrirModalEntrega(tarea)"
+                              class="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600 transition-colors">
+                        Entregar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mensaje si no hay contenido -->
+            <div *ngIf="materiales.length === 0 && tareas.length === 0" class="text-center py-12">
+              <i data-lucide="book-open" class="h-16 w-16 text-gray-300 mx-auto mb-4"></i>
+              <h3 class="text-lg font-semibold text-gray-600 mb-2">Esta semana no tiene contenido</h3>
+              <p class="text-gray-500">El profesor aún no ha agregado materiales o tareas</p>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="isLoading" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Cargando contenido...</p>
+          </div>
+
+          <!-- Mensaje inicial -->
+          <div *ngIf="!semanaSeleccionada && !isLoading" class="text-center py-12">
+            <i data-lucide="book-open" class="h-16 w-16 text-gray-300 mx-auto mb-4"></i>
+            <h3 class="text-lg font-semibold text-gray-600 mb-2">Selecciona una semana</h3>
+            <p class="text-gray-500">Haz clic en una semana para ver su contenido</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal para entregar tarea -->
+<div *ngIf="mostrarModalEntrega" 
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+     (click)="cerrarModalEntrega()">
+  <div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-96 overflow-y-auto" (click)="$event.stopPropagation()">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold">Entregar Tarea: {{ tareaSeleccionada?.titulo }}</h3>
+      <button (click)="cerrarModalEntrega()" class="text-gray-500 hover:text-gray-700">
+        <i data-lucide="x" class="h-5 w-5"></i>
+      </button>
+    </div>
+    <form (ngSubmit)="entregarTarea()">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Contenido de la entrega</label>
+        <textarea [(ngModel)]="contenidoEntrega" 
+                  name="contenido"
+                  rows="6"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Escribe aquí tu respuesta o entrega..."></textarea>
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button type="button" 
+                (click)="cerrarModalEntrega()"
+                class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button type="submit" 
+                class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+          Entregar Tarea
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,217 @@
+<div class="flex h-screen">
+  <!-- Barra de navegación lateral (Sidebar) -->
+  <aside id="sidebar"
+    class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+      <a routerLink="/student/dashboard"
+        class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="h-8 w-8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>UTP+class</span>
+      </a>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/student/dashboard"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+              <span>Cursos</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/chat"
+              class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+              <i data-lucide="message-square" class="sidebar-icon"></i>
+              <span>Chat</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/calendario"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="calendar" class="sidebar-icon"></i>
+              <span>Calendario</span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="help-circle" class="sidebar-icon"></i>
+              <span>Ayuda</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/configuracion"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="settings" class="sidebar-icon"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <nav>
+        <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+          <li>
+            <a href="/logout"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="log-out" class="sidebar-icon"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Cabecera (Header) -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+      <button (click)="toggleSidebar()" class="md:hidden">
+        <i data-lucide="menu" class="h-6 w-6"></i>
+      </button>
+      <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
+      <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+          <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+          <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-10 h-10 rounded-full">
+          <div class="text-right hidden sm:block">
+            <p class="font-semibold text-sm">Hola, {{ studentName }}</p>
+            <p class="text-xs text-gray-500">Estudiante</p>
+          </div>
+          <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área de contenido de Chat -->
+    <main class="flex-1 overflow-hidden flex">
+      <!-- Columna de lista de chats -->
+      <div class="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-slate-200 flex flex-col">
+        <div class="p-4 border-b border-slate-200">
+          <h2 class="text-xl font-bold">Chats</h2>
+          <input type="text" 
+                 [(ngModel)]="busquedaChat"
+                 placeholder="Buscar o iniciar un nuevo chat" 
+                 class="w-full mt-3 p-2 border border-slate-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <div *ngFor="let chat of getChatsFiltrados()" 
+               (click)="seleccionarChat(chat)"
+               class="flex items-center p-4 border-b border-slate-200 cursor-pointer transition-colors"
+               [class.bg-orange-50]="chatSeleccionado?.id === chat.id"
+               [class.hover:bg-slate-50]="chatSeleccionado?.id !== chat.id">
+            <img [src]="'https://placehold.co/48x48/3B82F6/FFFFFF?text=' + (chat.avatar || chat.nombre.substring(0, 2))" 
+                 [alt]="chat.nombre" 
+                 class="w-12 h-12 rounded-full mr-4">
+            <div class="flex-1 overflow-hidden">
+              <div class="flex justify-between items-center">
+                <h3 class="font-semibold truncate">{{ chat.nombre }}</h3>
+                <p class="text-xs text-slate-500 flex-shrink-0">{{ chat.hora }}</p>
+              </div>
+              <div class="flex justify-between items-start mt-1">
+                <p class="text-sm text-slate-600 truncate">{{ chat.ultimoMensaje }}</p>
+                <span *ngIf="chat.noLeidos && chat.noLeidos > 0" 
+                      class="bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs ml-2 flex-shrink-0">
+                  {{ chat.noLeidos }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna de la conversación -->
+      <div class="w-full md:w-2/3 lg:w-3/4 flex flex-col bg-slate-50" *ngIf="chatSeleccionado">
+        <!-- Cabecera del chat -->
+        <div class="p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm">
+          <div class="flex items-center">
+            <img [src]="'https://placehold.co/40x40/3B82F6/FFFFFF?text=' + (chatSeleccionado.avatar || chatSeleccionado.nombre.substring(0, 2))" 
+                 [alt]="chatSeleccionado.nombre" 
+                 class="w-10 h-10 rounded-full mr-3">
+            <div>
+              <h3 class="font-semibold">{{ chatSeleccionado.nombre }}</h3>
+              <p class="text-xs" [class.text-green-500]="chatSeleccionado.enLinea" [class.text-gray-500]="!chatSeleccionado.enLinea">
+                {{ chatSeleccionado.enLinea ? 'En línea' : 'Desconectado' }}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button class="text-slate-500 hover:text-slate-800 p-2 rounded-full hover:bg-slate-100">
+              <i data-lucide="phone"></i>
+            </button>
+            <button class="text-slate-500 hover:text-slate-800 p-2 rounded-full hover:bg-slate-100">
+              <i data-lucide="video"></i>
+            </button>
+            <button class="text-slate-500 hover:text-slate-800 p-2 rounded-full hover:bg-slate-100">
+              <i data-lucide="more-vertical"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="flex-1 p-6 overflow-y-auto space-y-4">
+          <div *ngFor="let mensaje of mensajes" 
+               class="flex items-start gap-3"
+               [class.justify-end]="mensaje.esMio">
+            <img *ngIf="!mensaje.esMio" 
+                 [src]="'https://placehold.co/40x40/3B82F6/FFFFFF?text=' + (mensaje.avatar || mensaje.remitente.substring(0, 2))" 
+                 [alt]="mensaje.remitente" 
+                 class="w-10 h-10 rounded-full">
+            <div [class.bg-white]="!mensaje.esMio"
+                 [class.bg-orange-500]="mensaje.esMio"
+                 [class.text-white]="mensaje.esMio"
+                 [class.text-gray-800]="!mensaje.esMio"
+                 [class.rounded-tl-none]="!mensaje.esMio"
+                 [class.rounded-br-none]="mensaje.esMio"
+                 class="p-3 rounded-lg max-w-lg shadow-sm">
+              <p class="text-sm">{{ mensaje.contenido }}</p>
+              <p class="text-xs mt-1 text-right"
+                 [class.text-slate-400]="!mensaje.esMio"
+                 [class.text-orange-200]="mensaje.esMio">
+                {{ mensaje.hora }}
+              </p>
+            </div>
+            <img *ngIf="mensaje.esMio" 
+                 src="https://placehold.co/40x40/EFEFEF/333333?text=LF" 
+                 alt="Avatar de usuario" 
+                 class="w-10 h-10 rounded-full">
+          </div>
+        </div>
+
+        <!-- Input de mensaje -->
+        <div class="p-4 bg-white border-t border-slate-200">
+          <div class="flex items-center space-x-2">
+            <button class="text-slate-500 hover:text-slate-800 p-3 rounded-full hover:bg-slate-100">
+              <i data-lucide="paperclip"></i>
+            </button>
+            <input type="text" 
+                   [(ngModel)]="nuevoMensaje"
+                   (keyup.enter)="enviarMensaje()"
+                   placeholder="Escribe un mensaje..." 
+                   class="flex-1 p-3 border border-slate-300 rounded-full focus:ring-orange-500 focus:border-orange-500">
+            <button (click)="enviarMensaje()" 
+                    class="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600 transition-colors flex-shrink-0">
+              <i data-lucide="send"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje cuando no hay chat seleccionado -->
+      <div *ngIf="!chatSeleccionado" class="w-full md:w-2/3 lg:w-3/4 flex items-center justify-center bg-slate-50">
+        <div class="text-center text-gray-500">
+          <i data-lucide="message-square" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
+          <p>Selecciona un chat para comenzar</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

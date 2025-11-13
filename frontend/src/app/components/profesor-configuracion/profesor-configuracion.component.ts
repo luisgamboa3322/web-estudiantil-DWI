@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfesorSidebarComponent } from '../profesor-sidebar/profesor-sidebar.component';
 import { ProfesorHeaderComponent } from '../profesor-header/profesor-header.component';
-import { AuthService } from '../../services/auth.service';
+import { ProfesorService } from '../../services/profesor.service';
 
 @Component({
   selector: 'app-profesor-configuracion',
@@ -12,10 +12,11 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './profesor-configuracion.component.html',
   styleUrls: ['./profesor-configuracion.component.css']
 })
-export class ProfesorConfiguracionComponent {
-  private authService = inject(AuthService);
+export class ProfesorConfiguracionComponent implements OnInit {
+  private profesorService = inject(ProfesorService);
   
-  user: any = null;
+  profesor: any = {};
+  currentPath = '/profesor/configuracion';
   editing = false;
   
   profile = {
@@ -38,25 +39,44 @@ export class ProfesorConfiguracionComponent {
   };
 
   ngOnInit() {
-    this.user = this.authService.getCurrentUser();
     this.loadProfile();
   }
 
   private loadProfile() {
-    // Simular carga de datos del perfil
-    this.profile = {
-      nombre: this.user?.nombre || 'Profesor',
-      email: this.user?.email || 'profesor@ejemplo.com',
-      codigo: 'PROF001',
-      especialidad: 'Desarrollo Web'
-    };
+    this.profesorService.getDashboardData().subscribe({
+      next: (data) => {
+        this.profesor = data.profesor || {};
+        this.profile = {
+          nombre: this.profesor.nombre || '',
+          email: this.profesor.email || '',
+          codigo: this.profesor.codigo || '',
+          especialidad: this.profesor.especialidad || ''
+        };
+      },
+      error: (error) => {
+        console.error('Error cargando perfil:', error);
+      }
+    });
   }
 
   saveProfile() {
-    // Aquí se implementaría la lógica para guardar el perfil
-    console.log('Guardando perfil:', this.profile);
-    this.editing = false;
-    alert('Perfil actualizado correctamente');
+    this.profesorService.actualizarPerfil(this.profile).subscribe({
+      next: (profesor) => {
+        this.profesor = profesor;
+        this.profile = {
+          nombre: profesor.nombre || '',
+          email: profesor.email || '',
+          codigo: profesor.codigo || '',
+          especialidad: profesor.especialidad || ''
+        };
+        this.editing = false;
+        alert('Perfil actualizado correctamente');
+      },
+      error: (error) => {
+        console.error('Error guardando perfil:', error);
+        alert('Error al actualizar el perfil: ' + (error.error || 'Error desconocido'));
+      }
+    });
   }
 
   changePassword() {

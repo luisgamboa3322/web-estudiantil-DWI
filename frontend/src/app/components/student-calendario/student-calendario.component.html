@@ -1,0 +1,190 @@
+<div class="flex h-screen">
+  <!-- Barra de navegación lateral (Sidebar) -->
+  <aside id="sidebar"
+    class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+      <a routerLink="/student/dashboard"
+        class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="h-8 w-8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>UTP+class</span>
+      </a>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/student/dashboard"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+              <span>Cursos</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/chat"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="message-square" class="sidebar-icon"></i>
+              <span>Chat</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/calendario"
+              class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+              <i data-lucide="calendar" class="sidebar-icon"></i>
+              <span>Calendario</span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="help-circle" class="sidebar-icon"></i>
+              <span>Ayuda</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/configuracion"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="settings" class="sidebar-icon"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <nav>
+        <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+          <li>
+            <a href="/logout"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="log-out" class="sidebar-icon"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Cabecera (Header) -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+      <button (click)="toggleSidebar()" class="md:hidden">
+        <i data-lucide="menu" class="h-6 w-6"></i>
+      </button>
+      <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
+      <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+          <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+          <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-10 h-10 rounded-full">
+          <div class="text-right hidden sm:block">
+            <p class="font-semibold text-sm">Hola, {{ studentName }}</p>
+            <p class="text-xs text-gray-500">Estudiante</p>
+          </div>
+          <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área de contenido del Calendario -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
+      <!-- Columna principal del Calendario -->
+      <div class="flex-1 bg-white rounded-lg shadow-sm p-6">
+        <!-- Cabecera del Calendario -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold text-gray-800">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button (click)="previousMonth()" class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+              <i data-lucide="chevron-left" class="h-5 w-5"></i>
+            </button>
+            <button (click)="goToToday()" class="text-sm font-semibold px-4 py-2 border rounded-lg hover:bg-slate-50">Hoy</button>
+            <button (click)="nextMonth()" class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+              <i data-lucide="chevron-right" class="h-5 w-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid del Calendario -->
+        <div class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200">
+          <!-- Días de la semana -->
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">L</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">J</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">V</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">S</div>
+          <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">D</div>
+
+          <!-- Espacios vacíos al inicio del mes -->
+          <ng-container *ngFor="let i of [].constructor(getFirstDayOfMonth()); let idx = index">
+            <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400"></div>
+          </ng-container>
+
+          <!-- Días del mes -->
+          <ng-container *ngFor="let day of getDaysInMonth()">
+            <div class="h-28 bg-white p-2 text-sm relative"
+                 [class.bg-orange-50]="isToday(day)"
+                 [class.text-white]="isToday(day)">
+              <span class="font-medium"
+                    [class.font-bold]="isToday(day)"
+                    [class.text-white]="isToday(day)"
+                    [class.bg-orange-500]="isToday(day)"
+                    [class.w-6]="isToday(day)"
+                    [class.h-6]="isToday(day)"
+                    [class.flex]="isToday(day)"
+                    [class.items-center]="isToday(day)"
+                    [class.justify-center]="isToday(day)"
+                    [class.rounded-full]="isToday(day)">{{ day }}</span>
+              <div *ngFor="let evento of getEventsForDay(day)" class="mt-1">
+                <div class="text-xs rounded px-1 truncate"
+                     [ngClass]="getEventColorClass(evento.tipo)">
+                  {{ evento.titulo }}
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Espacios vacíos al final del mes -->
+          <ng-container *ngFor="let i of [].constructor(42 - getFirstDayOfMonth() - getDaysInMonth().length); let idx = index">
+            <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400"></div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Columna lateral de eventos -->
+      <aside class="w-full lg:w-80 xl:w-96 flex-shrink-0">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="font-bold text-lg mb-4">Próximos Eventos</h3>
+          <div class="space-y-4">
+            <div *ngFor="let evento of proximosEventos" class="flex items-start gap-3">
+              <div class="w-1.5 h-10 rounded-full"
+                   [ngClass]="{
+                     'bg-red-500': evento.tipo === 'exam',
+                     'bg-orange-500': evento.tipo === 'forum',
+                     'bg-blue-500': evento.tipo === 'assignment',
+                     'bg-green-500': evento.tipo === 'meeting'
+                   }"></div>
+              <div>
+                <p class="font-semibold">{{ evento.titulo }}</p>
+                <p class="text-sm text-slate-500">{{ evento.curso || evento.descripcion }}</p>
+                <p class="text-sm text-slate-500">
+                  {{ evento.hora ? evento.hora + ' - ' : '' }}{{ evento.fecha | date:'dd MMMM' }}
+                </p>
+              </div>
+            </div>
+            <div *ngIf="proximosEventos.length === 0" class="text-center py-8 text-gray-500">
+              <p>No hay eventos próximos</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+</div>

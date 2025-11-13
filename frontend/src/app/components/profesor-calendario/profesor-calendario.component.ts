@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ProfesorService } from '../../services/profesor.service';
 import { AuthService } from '../../services/auth.service';
-import { DashboardService } from '../../services/dashboard.service';
 import { ProfesorSidebarComponent } from '../profesor-sidebar/profesor-sidebar.component';
 import { ProfesorHeaderComponent } from '../profesor-header/profesor-header.component';
 
@@ -42,11 +42,13 @@ interface Notification {
   styleUrls: ['./profesor-calendario.component.css']
 })
 export class ProfesorCalendarioComponent implements OnInit {
-  private authService = inject(AuthService);
-  private dashboardService = inject(DashboardService);
+  private profesorService = inject(ProfesorService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
+  profesor: any = {};
   user: any = null;
+  currentPath = '/profesor/calendario';
   sidebarVisible = false;
   
   // Estado del calendario
@@ -79,66 +81,29 @@ export class ProfesorCalendarioComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.loadUserData();
-    this.loadCursos();
-    this.generateCalendarDays();
-    this.loadEvents();
-    this.loadNotifications();
-  }
-
-  loadUserData() {
     this.user = this.authService.getCurrentUser();
+    this.loadProfesorData();
+    this.loadNotifications();
+    this.generateCalendarDays();
   }
 
-  loadCursos() {
-    // Cargar cursos del profesor desde el backend
-    fetch('http://localhost:8083/profesor/api/cursos', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+  loadProfesorData() {
+    this.profesorService.getDashboardData().subscribe({
+      next: (data) => {
+        this.profesor = data.profesor || {};
+        this.misCursos = data.cursos || [];
+        this.loadEvents();
+      },
+      error: (error) => {
+        console.error('Error cargando datos del profesor:', error);
       }
-    })
-    .then(response => response.json())
-    .then(data => {
-      this.misCursos = data;
-    })
-    .catch(error => {
-      console.error('Error cargando cursos:', error);
     });
   }
 
   loadEvents() {
-    // Cargar eventos del calendario desde el backend
-    const teacherId = this.user?.id;
-    if (teacherId) {
-      fetch(`http://localhost:8083/profesor/api/eventos/${teacherId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        this.events = data;
-        this.generateCalendarDays(); // Regenerar días con eventos
-      })
-      .catch(error => {
-        console.error('Error cargando eventos:', error);
-        // Usar datos de ejemplo si no hay eventos
-        this.events = [
-          {
-            id: 1,
-            title: 'Clase de Matemáticas',
-            description: 'Algebra básica',
-            type: 'class',
-            date: '2025-11-12',
-            time: '09:00'
-          }
-        ];
-      });
-    }
+    // Por ahora usar eventos de ejemplo, pero se pueden cargar desde el backend
+    this.events = [];
+    this.generateCalendarDays();
   }
 
   loadNotifications() {
@@ -527,7 +492,7 @@ export class ProfesorCalendarioComponent implements OnInit {
       next: () => {
         this.router.navigate(['/login']);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error logging out:', error);
         this.router.navigate(['/login']);
       }

@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-profesor-sidebar',
   standalone: true,
+  imports: [RouterModule],
   templateUrl: './profesor-sidebar.component.html',
   styleUrls: ['./profesor-sidebar.component.css']
 })

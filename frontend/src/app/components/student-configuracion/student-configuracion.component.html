@@ -1,0 +1,213 @@
+<div class="flex h-screen">
+  <!-- Barra de navegación lateral (Sidebar) -->
+  <aside id="sidebar"
+    class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+    <div>
+      <a routerLink="/student/dashboard"
+        class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="h-8 w-8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>UTP+class</span>
+      </a>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a routerLink="/student/dashboard"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
+              <span>Cursos</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/chat"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="message-square" class="sidebar-icon"></i>
+              <span>Chat</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/calendario"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="calendar" class="sidebar-icon"></i>
+              <span>Calendario</span>
+            </a>
+          </li>
+          <li>
+            <a href="#"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="help-circle" class="sidebar-icon"></i>
+              <span>Ayuda</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/student/configuracion"
+              class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+              <i data-lucide="settings" class="sidebar-icon"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <nav>
+        <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+          <li>
+            <a href="/logout"
+              class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+              <i data-lucide="log-out" class="sidebar-icon"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Cabecera (Header) -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
+      <button (click)="toggleSidebar()" class="md:hidden">
+        <i data-lucide="menu" class="h-6 w-6"></i>
+      </button>
+      <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
+      <div class="flex items-center space-x-4 ml-auto">
+        <button class="relative">
+          <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
+          <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-10 h-10 rounded-full">
+          <div class="text-right hidden sm:block">
+            <p class="font-semibold text-sm">Hola, {{ studentName }}</p>
+            <p class="text-xs text-gray-500">Estudiante</p>
+          </div>
+          <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área de contenido de Configuración -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Configuración</h1>
+      
+      <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Mensajes de éxito/error -->
+        <div *ngIf="mensajeExito" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {{ mensajeExito }}
+        </div>
+        <div *ngIf="mensajeError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {{ mensajeError }}
+        </div>
+
+        <!-- Información del Perfil -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-bold border-b pb-4 mb-4">Información del Perfil</h2>
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="relative">
+              <img src="https://placehold.co/100x100/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-24 h-24 rounded-full">
+              <button class="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                <input type="text" id="nombre" [(ngModel)]="nombre" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                <input type="email" id="email" [(ngModel)]="email" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+              </div>
+              <div>
+                <label for="codigo" class="block text-sm font-medium text-gray-700">Código de Estudiante</label>
+                <input type="text" id="codigo" [(ngModel)]="codigo" 
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 sm:text-sm" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button (click)="guardarPerfil()" 
+                    [disabled]="isLoading"
+                    class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50">
+              Guardar Cambios
+            </button>
+          </div>
+        </div>
+        
+        <!-- Notificaciones -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-bold border-b pb-4 mb-4">Notificaciones</h2>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium">Nuevas calificaciones</p>
+                <p class="text-sm text-gray-500">Recibir un email cuando se publique una nueva calificación.</p>
+              </div>
+              <label class="relative inline-block w-10 h-6 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="notificacionesCalificaciones" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium">Anuncios del curso</p>
+                <p class="text-sm text-gray-500">Recibir notificaciones sobre nuevos anuncios de tus profesores.</p>
+              </div>
+              <label class="relative inline-block w-10 h-6 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="notificacionesAnuncios" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium">Recordatorios de entregas</p>
+                <p class="text-sm text-gray-500">Enviar recordatorios 24 horas antes de la fecha de vencimiento.</p>
+              </div>
+              <label class="relative inline-block w-10 h-6 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="notificacionesRecordatorios" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seguridad y Contraseña -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-bold border-b pb-4 mb-4">Seguridad y Contraseña</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="current_password" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+              <input type="password" id="current_password" [(ngModel)]="currentPassword" 
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+            </div>
+            <div></div>
+            <div>
+              <label for="new_password" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+              <input type="password" id="new_password" [(ngModel)]="newPassword" 
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+            </div>
+            <div>
+              <label for="confirm_password" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+              <input type="password" id="confirm_password" [(ngModel)]="confirmPassword" 
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+            </div>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button (click)="cambiarPassword()" 
+                    [disabled]="isLoading"
+                    class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50">
+              Cambiar Contraseña
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

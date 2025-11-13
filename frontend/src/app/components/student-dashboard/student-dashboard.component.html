@@ -162,7 +162,7 @@
                   </div>
                   <h3 class="font-bold text-lg">{{ asignacion.curso.nombre }}</h3>
                   <p class="text-sm text-gray-500 mt-1">{{ asignacion.curso.codigo + ' - ' + (asignacion.curso.profesor?.nombre || 'Sin profesor') }}</p>
-                  <p class="text-xs text-gray-400 mt-1">Asignado: {{ asignacion.fechaAsignacion | date:'dd/MM/yyyy' }}</p>
+                  <p class="text-xs text-gray-400 mt-1">Asignado: {{ formatDate(asignacion.fechaAsignacion) }}</p>
                   <div class="mt-3 text-right">
                     <span class="text-xs text-orange-600 font-medium">Haz clic para ver contenido</span>
                   </div>

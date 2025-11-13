@@ -27,11 +27,11 @@ export const routes: Routes = [
   { path: 'profesor/gestion-curso', loadComponent: () => import('./components/profesor-gestion-curso/profesor-gestion-curso.component').then(m => m.ProfesorGestionCursoComponent) },
   { path: 'redirect/profesor', loadComponent: () => import('./components/profesor-dashboard/profesor-dashboard.component').then(m => m.ProfesorDashboardComponent) },
   
-  // Rutas de estudiante (componentes temporales hasta que estén listos)
-  { path: 'student/calendario', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
-  { path: 'student/chat', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
-  { path: 'student/configuracion', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
-  { path: 'student/curso/:id', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
+  // Rutas de estudiante
+  { path: 'student/calendario', loadComponent: () => import('./components/student-calendario/student-calendario.component').then(m => m.StudentCalendarioComponent) },
+  { path: 'student/chat', loadComponent: () => import('./components/student-chat/student-chat.component').then(m => m.StudentChatComponent) },
+  { path: 'student/configuracion', loadComponent: () => import('./components/student-configuracion/student-configuracion.component').then(m => m.StudentConfiguracionComponent) },
+  { path: 'student/curso/:id', loadComponent: () => import('./components/student-curso-detalle/student-curso-detalle.component').then(m => m.StudentCursoDetalleComponent) },
   { path: 'redirect/student', loadComponent: () => import('./components/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent) },
   
   // Ruta de error
