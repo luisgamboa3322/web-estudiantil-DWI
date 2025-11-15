@@ -392,17 +392,21 @@
                                     </td>
                                     <td class="px-6 py-4" th:text="${#temporals.format(asignacion.fechaAsignacion, 'dd/MM/yyyy HH:mm')}">Fecha</td>
                                     <td class="px-6 py-4">
-                                        <span th:if="${asignacion.estado == 'ACTIVO'}" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                        <span th:if="${asignacion.estado.name() == 'ACTIVO'}" class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                                             Activo
                                         </span>
-                                        <span th:if="${asignacion.estado == 'INACTIVO'}" class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                        <span th:if="${asignacion.estado.name() == 'INACTIVO'}" class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                                             Inactivo
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center space-x-2">
-                                        <button class="unassign-course p-2 text-red-600 hover:bg-red-100 rounded-full"
-                                                th:data-id="${asignacion.id}">
+                                        <button th:if="${asignacion.estado.name() == 'ACTIVO'}" class="unassign-course p-2 text-red-600 hover:bg-red-100 rounded-full"
+                                                th:data-id="${asignacion.id}" title="Desasignar">
                                             <i data-lucide="user-x" class="w-4 h-4"></i>
+                                        </button>
+                                        <button th:if="${asignacion.estado.name() == 'INACTIVO'}" class="reactivate-assignment p-2 text-green-600 hover:bg-green-100 rounded-full"
+                                                th:data-id="${asignacion.id}" title="Reactivar">
+                                            <i data-lucide="user-check" class="w-4 h-4"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -1458,6 +1462,28 @@
                                     location.reload();
                                 } else {
                                     alert('Error desasignando curso');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error de conexión');
+                            });
+                    }
+                }
+            });
+
+            // Reactivar asignación
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.reactivate-assignment')) {
+                    const button = e.target.closest('.reactivate-assignment');
+                    const asignacionId = button.getAttribute('data-id');
+                    if (confirm('¿Estás seguro de que quieres reactivar esta asignación?')) {
+                        fetch(`/admin/asignaciones/${asignacionId}/reactivate`, { method: 'POST' })
+                            .then(response => {
+                                if (response.ok) {
+                                    location.reload();
+                                } else {
+                                    alert('Error reactivando asignación');
                                 }
                             })
                             .catch(error => {

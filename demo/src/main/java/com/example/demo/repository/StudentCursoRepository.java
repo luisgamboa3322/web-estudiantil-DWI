@@ -13,7 +13,7 @@ public interface StudentCursoRepository extends JpaRepository<StudentCurso, Long
     List<StudentCurso> findByCursoId(Long cursoId);
     List<StudentCurso> findByEstado(String estado);
 
-    @Query("SELECT sc FROM StudentCurso sc JOIN FETCH sc.student s JOIN FETCH sc.curso c LEFT JOIN FETCH c.profesor p WHERE sc.estado = 'ACTIVO'")
+    @Query("SELECT sc FROM StudentCurso sc JOIN FETCH sc.student s JOIN FETCH sc.curso c LEFT JOIN FETCH c.profesor p")
     List<StudentCurso> findAllWithDetails();
 
     boolean existsByStudentIdAndEstado(Long studentId, EstadoAsignacion estado);

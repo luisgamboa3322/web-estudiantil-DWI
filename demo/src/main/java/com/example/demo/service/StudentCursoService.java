@@ -75,6 +75,18 @@ public class StudentCursoService {
         studentCursoRepository.save(asignacion);
     }
 
+    public void reactivateAsignacion(Long asignacionId) {
+        StudentCurso asignacion = studentCursoRepository.findById(asignacionId)
+                .orElseThrow(() -> new IllegalStateException("Asignación no encontrada"));
+
+        if (asignacion.getEstado() == EstadoAsignacion.INACTIVO) {
+            asignacion.setEstado(EstadoAsignacion.ACTIVO);
+            studentCursoRepository.save(asignacion);
+        } else {
+            throw new IllegalStateException("La asignación ya está activa");
+        }
+    }
+
     public List<StudentCurso> findByStudentId(Long studentId) {
         return studentCursoRepository.findByStudentId(studentId);
     }

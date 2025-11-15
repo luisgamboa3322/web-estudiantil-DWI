@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
 
 
 import jakarta.validation.Valid;
@@ -455,5 +456,16 @@ public class AdminController {
     public ResponseEntity<StudentCurso> getAsignacion(@PathVariable Long id) {
         var asignacion = studentCursoService.findById(id);
         return asignacion.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/asignaciones/{id}/reactivate")
+    @ResponseBody
+    public ResponseEntity<String> reactivateAsignacion(@PathVariable Long id) {
+        try {
+            studentCursoService.reactivateAsignacion(id);
+            return ResponseEntity.ok("Asignación reactivada exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error reactivando asignación: " + e.getMessage());
+        }
     }
 }
