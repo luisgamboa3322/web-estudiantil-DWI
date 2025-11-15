@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realizar Evaluación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+    <div class="min-h-screen">
+        <!-- Header con Timer -->
+        <header class="bg-white shadow-md p-4 sticky top-0 z-10">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800" th:text="${evaluacion.titulo}">Evaluación</h1>
+                    <p class="text-sm text-gray-600" th:text="${evaluacion.tipo}">Tipo</p>
+                </div>
+                <div class="text-right">
+                    <div id="timer" class="text-2xl font-bold" th:if="${evaluacion.tiempoLimiteMinutos != null}">
+                        <span id="timer-display">00:00</span>
+                    </div>
+                    <div class="text-sm text-gray-600" th:unless="${evaluacion.tiempoLimiteMinutos != null}">
+                        Sin límite de tiempo
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <p class="text-gray-700" th:text="${evaluacion.descripcion}">Descripción</p>
+            </div>
+
+            <form id="evaluacion-form">
+                <input type="hidden" id="intento-id" th:value="${intento.id}">
+                <div id="preguntas-container" class="space-y-6">
+                    <!-- Las preguntas se cargarán dinámicamente -->
+                </div>
+
+                <div class="mt-8 flex justify-between items-center bg-white rounded-lg shadow-sm p-6">
+                    <button type="button" onclick="window.history.back()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <div class="flex gap-3">
+                        <button type="button" id="save-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            Guardar Respuestas
+                        </button>
+                        <button type="submit" id="submit-btn" class="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 font-semibold">
+                            Finalizar Evaluación
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const intentoId = /*[[${intento.id}]]*/ 0;
+        const evaluacionId = /*[[${evaluacion.id}]]*/ 0;
+        const preguntas = /*[[${preguntas}]]*/ [];
+        const tiempoLimiteMinutos = /*[[${evaluacion.tiempoLimiteMinutos}]]*/ null;
+        const fechaLimiteIntento = /*[[${intento.fechaLimiteIntento}]]*/ null;
+        /*]]>*/
+
+        let timerInterval = null;
+        let autoSaveInterval = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            console.log('Preguntas cargadas:', preguntas);
+            console.log('Número de preguntas:', preguntas ? preguntas.length : 0);
+            if (preguntas && preguntas.length > 0) {
+                preguntas.forEach((p, i) => {
+                    console.log(`Pregunta ${i + 1}:`, {
+                        id: p.id,
+                        tipo: p.tipo,
+                        enunciado: p.enunciado,
+                        opciones: p.opciones,
+                        numOpciones: p.opciones ? p.opciones.length : 0
+                    });
+                });
+            }
+            renderPreguntas();
+            if (tiempoLimiteMinutos && fechaLimiteIntento) {
+                startTimer();
+            }
+            startAutoSave();
+        });
+
+        function renderPreguntas() {
+            const container = document.getElementById('preguntas-container');
+            container.innerHTML = '';
+
+            if (!preguntas || preguntas.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay preguntas disponibles</p>';
+                return;
+            }
+
+            preguntas.forEach((pregunta, index) => {
+                const preguntaDiv = document.createElement('div');
+                preguntaDiv.className = 'bg-white rounded-lg shadow-sm p-6';
+                
+                // Escapar HTML en el enunciado para evitar problemas
+                const enunciado = escapeHtml(pregunta.enunciado || '');
+                const tipoPregunta = String(pregunta.tipo || '').toUpperCase();
+                
+                preguntaDiv.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            Pregunta ${index + 1} <span class="text-sm text-gray-500">(${pregunta.puntos || 0} puntos)</span>
+                        </h3>
+                        <p class="text-gray-700 mt-2">${enunciado}</p>
+                    </div>
+                    <div class="pregunta-content" data-pregunta-id="${pregunta.id}" data-tipo="${tipoPregunta}">
+                        ${renderPreguntaContent(pregunta, tipoPregunta)}
+                    </div>
+                `;
+                container.appendChild(preguntaDiv);
+            });
+        }
+
+        function renderPreguntaContent(pregunta, tipoPregunta) {
+            // Asegurarse de que el tipo sea string y en mayúsculas
+            const tipo = tipoPregunta || String(pregunta.tipo || '').toUpperCase();
+            
+            console.log('Renderizando pregunta:', pregunta.id, 'Tipo:', tipo, 'Opciones:', pregunta.opciones);
+            
+            switch(tipo) {
+                case 'OPCION_MULTIPLE':
+                    return renderOpcionMultiple(pregunta);
+                case 'VERDADERO_FALSO':
+                    return renderVerdaderoFalso(pregunta);
+                case 'DESARROLLO':
+                    return renderDesarrollo(pregunta);
+                case 'ORDENAR':
+                    return renderOrdenar(pregunta);
+                case 'COMPLETAR':
+                    return renderCompletar(pregunta);
+                default:
+                    console.warn('Tipo de pregunta no reconocido:', tipo, pregunta);
+                    return `<p class="text-red-500">Tipo de pregunta no soportado: ${tipo}</p>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderOpcionMultiple(pregunta) {
+            let html = '<div class="space-y-2">';
+            if (pregunta.opciones && Array.isArray(pregunta.opciones) && pregunta.opciones.length > 0) {
+                pregunta.opciones.forEach(opcion => {
+                    const opcionTexto = escapeHtml(opcion.texto || '');
+                    const opcionId = opcion.id || '';
+                    html += `
+                        <label class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                            <input type="radio" name="pregunta-${pregunta.id}" value="${opcionId}" 
+                                   class="mr-3" onchange="guardarRespuesta(${pregunta.id}, null, ${opcionId}, null)">
+                            <span>${opcionTexto}</span>
+                        </label>
+                    `;
+                });
+            } else {
+                console.warn('Pregunta sin opciones:', pregunta);
+                html += '<p class="text-red-500">No hay opciones disponibles para esta pregunta</p>';
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function renderVerdaderoFalso(pregunta) {
+            // Para verdadero/falso, usar las opciones de la pregunta
+            let html = '<div class="space-y-2">';
+            if (pregunta.opciones && Array.isArray(pregunta.opciones) && pregunta.opciones.length > 0) {
+                pregunta.opciones.forEach(opcion => {
+                    const opcionTexto = escapeHtml(opcion.texto || '');
+                    const opcionId = opcion.id || '';
+                    html += `
+                        <label class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                            <input type="radio" name="pregunta-${pregunta.id}" value="${opcionId}" 
+                                   class="mr-3" onchange="guardarRespuesta(${pregunta.id}, null, ${opcionId}, null)">
+                            <span>${opcionTexto}</span>
+                        </label>
+                    `;
+                });
+            } else {
+                // Fallback si no hay opciones cargadas
+                console.warn('Pregunta verdadero/falso sin opciones, usando fallback:', pregunta);
+                html += `
+                    <label class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="pregunta-${pregunta.id}" value="true" 
+                               class="mr-3" onchange="guardarRespuesta(${pregunta.id}, null, null, null)">
+                        <span>Verdadero</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="pregunta-${pregunta.id}" value="false" 
+                               class="mr-3" onchange="guardarRespuesta(${pregunta.id}, null, null, null)">
+                        <span>Falso</span>
+                    </label>
+                `;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function renderDesarrollo(pregunta) {
+            return `
+                <textarea name="pregunta-${pregunta.id}" rows="6" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          onblur="guardarRespuesta(${pregunta.id}, this.value, null, null)"
+                          placeholder="Escribe tu respuesta aquí..."></textarea>
+            `;
+        }
+
+        function renderOrdenar(pregunta) {
+            let html = '<div class="space-y-2" id="ordenar-container-' + pregunta.id + '">';
+            if (pregunta.opciones && pregunta.opciones.length > 0) {
+                pregunta.opciones.forEach((opcion, index) => {
+                    const opcionTexto = escapeHtml(opcion.texto || '');
+                    html += `
+                        <div class="flex items-center p-3 border border-gray-200 rounded-md cursor-move" 
+                             draggable="true" data-opcion-id="${opcion.id}">
+                            <i data-lucide="grip-vertical" class="w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>${opcionTexto}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p class="text-red-500">No hay opciones disponibles para esta pregunta</p>';
+            }
+            html += '</div>';
+            // Nota: setupDragAndDrop necesita ser implementado
+            return html;
+        }
+
+        function renderCompletar(pregunta) {
+            return `
+                <input type="text" name="pregunta-${pregunta.id}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                       onblur="guardarRespuesta(${pregunta.id}, this.value, null, null)"
+                       placeholder="Completa la respuesta...">
+            `;
+        }
+
+        function startTimer() {
+            if (!fechaLimiteIntento) return;
+            
+            // Parsear fecha límite del intento
+            let fechaLimite;
+            try {
+                if (Array.isArray(fechaLimiteIntento)) {
+                    fechaLimite = new Date(fechaLimiteIntento[0], fechaLimiteIntento[1] - 1, 
+                        fechaLimiteIntento[2], fechaLimiteIntento[3] || 0, 
+                        fechaLimiteIntento[4] || 0, fechaLimiteIntento[5] || 0);
+                } else if (typeof fechaLimiteIntento === 'string') {
+                    let fechaStr = fechaLimiteIntento;
+                    if (fechaStr.length === 16) {
+                        fechaStr += ':00';
+                    }
+                    fechaLimite = new Date(fechaStr);
+                } else {
+                    fechaLimite = new Date(fechaLimiteIntento);
+                }
+            } catch (e) {
+                console.error('Error parseando fecha límite:', e);
+                return;
+            }
+            
+            const updateTimer = () => {
+                const ahora = new Date();
+                const diff = Math.max(0, Math.floor((fechaLimite - ahora) / 1000));
+
+                if (diff === 0) {
+                    clearInterval(timerInterval);
+                    finalizarEvaluacion(true);
+                    return;
+                }
+
+                const minutos = Math.floor(diff / 60);
+                const segundos = diff % 60;
+                const display = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+                
+                document.getElementById('timer-display').textContent = display;
+                
+                // Cambiar color cuando quedan menos de 5 minutos
+                const timerEl = document.getElementById('timer');
+                if (minutos < 5) {
+                    timerEl.classList.add('text-red-600', 'timer-warning');
+                } else {
+                    timerEl.classList.remove('text-red-600', 'timer-warning');
+                }
+            };
+
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                guardarTodasLasRespuestas();
+            }, 30000); // Auto-guardar cada 30 segundos
+        }
+
+        async function guardarRespuesta(preguntaId, respuestaTexto, opcionSeleccionadaId, opcionesOrdenadas) {
+            try {
+                const payload = {
+                    preguntaId: preguntaId,
+                    respuestaTexto: respuestaTexto,
+                    opcionSeleccionadaId: opcionSeleccionadaId,
+                    opcionesOrdenadas: opcionesOrdenadas
+                };
+
+                await fetch(`/student/intentos/${intentoId}/respuestas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                console.error('Error guardando respuesta:', error);
+            }
+        }
+
+        function guardarTodasLasRespuestas() {
+            // Guardar todas las respuestas del formulario
+            const preguntas = document.querySelectorAll('[data-pregunta-id]');
+            
+            preguntas.forEach(preguntaContainer => {
+                const preguntaId = preguntaContainer.getAttribute('data-pregunta-id');
+                const tipo = preguntaContainer.getAttribute('data-tipo');
+                
+                if (tipo === 'OPCION_MULTIPLE' || tipo === 'VERDADERO_FALSO') {
+                    const radio = preguntaContainer.querySelector(`input[name="pregunta-${preguntaId}"]:checked`);
+                    if (radio) {
+                        guardarRespuesta(parseInt(preguntaId), null, parseInt(radio.value), null);
+                    }
+                } else if (tipo === 'DESARROLLO' || tipo === 'COMPLETAR') {
+                    const textarea = preguntaContainer.querySelector(`textarea[name="pregunta-${preguntaId}"], input[name="pregunta-${preguntaId}"]`);
+                    if (textarea && textarea.value) {
+                        guardarRespuesta(parseInt(preguntaId), textarea.value, null, null);
+                    }
+                }
+            });
+        }
+
+        document.getElementById('evaluacion-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (confirm('¿Estás seguro de que quieres finalizar la evaluación? No podrás modificar tus respuestas después.')) {
+                await finalizarEvaluacion(false);
+            }
+        });
+
+        async function finalizarEvaluacion(automatico) {
+            try {
+                const response = await fetch(`/student/intentos/${intentoId}/finalizar`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    if (timerInterval) clearInterval(timerInterval);
+                    if (autoSaveInterval) clearInterval(autoSaveInterval);
+                    
+                    if (automatico) {
+                        alert('El tiempo se ha agotado. Tu evaluación ha sido finalizada automáticamente.');
+                    }
+                    
+                    window.location.href = `/student/evaluacion/resultados/${evaluacionId}`;
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            guardarTodasLasRespuestas();
+            alert('Respuestas guardadas');
+        });
+    </script>
+</body>
+</html>
+

@@ -76,6 +76,10 @@
                                             th:data-semana-id="${semana.id}">
                                         <i data-lucide="clipboard-check" class="w-4 h-4 inline mr-1"></i>Tarea
                                     </button>
+                                    <button class="add-evaluacion-btn bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 transition-colors"
+                                            th:data-semana-id="${semana.id}">
+                                        <i data-lucide="file-question" class="w-4 h-4 inline mr-1"></i>Evaluación
+                                    </button>
                                 </div>
                             </div>
                             <p th:if="${semana.descripcion != null}" class="text-gray-600 mt-2" th:text="${semana.descripcion}"></p>
@@ -90,10 +94,18 @@
                         </div>
 
                         <!-- Tareas de la semana -->
-                        <div class="p-4">
+                        <div class="p-4 border-b border-gray-100">
                             <h4 class="font-semibold mb-3 text-gray-700">Tareas</h4>
                             <div id="tareas-container" th:data-semana-id="${semana.id}" class="space-y-3">
                                 <!-- Tareas se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Evaluaciones de la semana -->
+                        <div class="p-4">
+                            <h4 class="font-semibold mb-3 text-gray-700">Evaluaciones</h4>
+                            <div id="evaluaciones-container" th:data-semana-id="${semana.id}" class="space-y-3">
+                                <!-- Evaluaciones se cargarán aquí dinámicamente -->
                             </div>
                         </div>
                     </div>
@@ -153,6 +165,127 @@
                         <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Añadir Material</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear evaluación -->
+    <div id="evaluacion-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8">
+                <h3 class="text-lg font-bold mb-4">Crear Nueva Evaluación</h3>
+                <form id="evaluacion-form">
+                    <input type="hidden" id="evaluacion-semana-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                            <input type="text" id="evaluacion-titulo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="evaluacion-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                                <option value="EXAMEN">Examen</option>
+                                <option value="PRACTICA">Práctica</option>
+                                <option value="QUIZ">Quiz</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea id="evaluacion-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+                            <input type="datetime-local" id="evaluacion-fecha-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
+                            <input type="datetime-local" id="evaluacion-fecha-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo Límite (minutos)</label>
+                            <input type="number" id="evaluacion-tiempo-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" placeholder="Sin límite">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Intentos Máximos</label>
+                            <input type="number" id="evaluacion-intentos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" value="1" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Puntos Máximos</label>
+                            <input type="number" id="evaluacion-puntos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="0" value="100" required>
+                        </div>
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="evaluacion-mostrar-resultados" class="mr-2">
+                            <span class="text-sm text-gray-700">Mostrar resultados inmediatamente</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="evaluacion-permitir-revisar" class="mr-2">
+                            <span class="text-sm text-gray-700">Permitir revisar respuestas después de completar</span>
+                        </label>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-evaluacion-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">Crear Evaluación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar preguntas -->
+    <div id="preguntas-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">Agregar Preguntas a la Evaluación</h3>
+                    <button id="close-preguntas-modal" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="preguntas-evaluacion-id">
+                <input type="hidden" id="preguntas-evaluacion-tipo">
+                
+                <div id="preguntas-list" class="space-y-4 mb-4">
+                    <!-- Las preguntas existentes se mostrarán aquí -->
+                </div>
+
+                <button id="add-pregunta-btn" class="w-full mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>Agregar Nueva Pregunta
+                </button>
+
+                <div id="nueva-pregunta-form" class="hidden border-t border-gray-200 pt-4 mt-4">
+                    <h4 class="font-semibold mb-4">Nueva Pregunta</h4>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pregunta</label>
+                        <select id="pregunta-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="OPCION_MULTIPLE">Opción Múltiple</option>
+                            <option value="VERDADERO_FALSO">Verdadero/Falso</option>
+                            <option value="DESARROLLO">Desarrollo</option>
+                            <option value="ORDENAR">Ordenar</option>
+                            <option value="COMPLETAR">Completar</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enunciado</label>
+                        <textarea id="pregunta-enunciado" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3" placeholder="Escribe la pregunta aquí..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Puntos</label>
+                        <input type="number" id="pregunta-puntos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" value="10">
+                    </div>
+                    <div id="opciones-container" class="mb-4">
+                        <!-- Las opciones se mostrarán aquí según el tipo -->
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-pregunta-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="button" id="save-pregunta-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Guardar Pregunta</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -220,6 +353,12 @@
             const addTareaBtns = document.querySelectorAll('.add-tarea-btn');
             const cancelTareaBtn = document.getElementById('cancel-tarea-btn');
             const tareaForm = document.getElementById('tarea-form');
+
+            // Modal de evaluación
+            const evaluacionModal = document.getElementById('evaluacion-modal');
+            const addEvaluacionBtns = document.querySelectorAll('.add-evaluacion-btn');
+            const cancelEvaluacionBtn = document.getElementById('cancel-evaluacion-btn');
+            const evaluacionForm = document.getElementById('evaluacion-form');
 
             // Funciones de modal
             function showModal(modal) {
@@ -329,7 +468,73 @@
                 }
             }
 
-            // Cargar materiales y tareas al cargar la página
+            // Función para cargar evaluaciones de una semana
+            async function loadEvaluaciones(semanaId) {
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/evaluaciones`);
+                    if (response.ok) {
+                        const evaluaciones = await response.json();
+                        const container = document.querySelector(`#evaluaciones-container[data-semana-id="${semanaId}"]`);
+                        container.innerHTML = '';
+
+                        if (evaluaciones.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center text-gray-500 py-4">
+                                    <i data-lucide="file-question" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                    <p>No hay evaluaciones para esta semana</p>
+                                </div>
+                            `;
+                        } else {
+                            evaluaciones.forEach(evaluacion => {
+                                const estadoClass = {
+                                    'BORRADOR': 'bg-gray-100 text-gray-600',
+                                    'PUBLICADA': 'bg-green-100 text-green-600',
+                                    'EN_CURSO': 'bg-blue-100 text-blue-600',
+                                    'CERRADA': 'bg-red-100 text-red-600'
+                                }[evaluacion.estado] || 'bg-gray-100 text-gray-600';
+
+                                const evaluacionElement = document.createElement('div');
+                                evaluacionElement.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-md';
+                                evaluacionElement.innerHTML = `
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="file-question" class="text-purple-500"></i>
+                                        <div>
+                                            <span class="font-medium">${evaluacion.titulo}</span>
+                                            <span class="text-sm text-gray-500 ml-2">(${evaluacion.tipo} - ${evaluacion.puntosMaximos} pts)</span>
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium ml-2 ${estadoClass}">${evaluacion.estado}</span>
+                                            ${evaluacion.descripcion ? `<p class="text-sm text-gray-600">${evaluacion.descripcion}</p>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="p-1 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-100 agregar-preguntas-btn"
+                                                data-evaluacion-id="${evaluacion.id}" 
+                                                data-evaluacion-tipo="${evaluacion.tipo}" 
+                                                title="Agregar Preguntas">
+                                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                        </button>
+                                        ${evaluacion.estado === 'BORRADOR' ? `
+                                            <button class="p-1 text-green-500 hover:text-green-700 rounded-full hover:bg-green-100 publicar-evaluacion-btn"
+                                                    data-evaluacion-id="${evaluacion.id}" title="Publicar">
+                                                <i data-lucide="send" class="w-4 h-4"></i>
+                                            </button>
+                                        ` : ''}
+                                        <button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100 delete-evaluacion-btn"
+                                                data-evaluacion-id="${evaluacion.id}" title="Eliminar">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                container.appendChild(evaluacionElement);
+                            });
+                        }
+                        lucide.createIcons();
+                    }
+                } catch (error) {
+                    console.error('Error cargando evaluaciones:', error);
+                }
+            }
+
+            // Cargar materiales, tareas y evaluaciones al cargar la página
             document.querySelectorAll('#materiales-container').forEach(container => {
                 const semanaId = container.getAttribute('data-semana-id');
                 loadMateriales(semanaId);
@@ -338,6 +543,11 @@
             document.querySelectorAll('#tareas-container').forEach(container => {
                 const semanaId = container.getAttribute('data-semana-id');
                 loadTareas(semanaId);
+            });
+
+            document.querySelectorAll('#evaluaciones-container').forEach(container => {
+                const semanaId = container.getAttribute('data-semana-id');
+                loadEvaluaciones(semanaId);
             });
 
             // Eventos de semana
@@ -537,8 +747,376 @@
                 }
             });
 
+            // Eventos de evaluación
+            addEvaluacionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('evaluacion-semana-id').value = btn.dataset.semanaId;
+                    showModal(evaluacionModal);
+                });
+            });
+            cancelEvaluacionBtn.addEventListener('click', () => hideModal(evaluacionModal));
+
+            evaluacionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const semanaId = document.getElementById('evaluacion-semana-id').value;
+                const formData = {
+                    titulo: document.getElementById('evaluacion-titulo').value,
+                    descripcion: document.getElementById('evaluacion-descripcion').value,
+                    tipo: document.getElementById('evaluacion-tipo').value,
+                    fechaInicio: document.getElementById('evaluacion-fecha-inicio').value,
+                    fechaLimite: document.getElementById('evaluacion-fecha-limite').value,
+                    tiempoLimiteMinutos: document.getElementById('evaluacion-tiempo-limite').value || null,
+                    intentosMaximos: parseInt(document.getElementById('evaluacion-intentos-maximos').value),
+                    puntosMaximos: parseInt(document.getElementById('evaluacion-puntos-maximos').value),
+                    mostrarResultadosInmediatos: document.getElementById('evaluacion-mostrar-resultados').checked,
+                    permitirRevisarRespuestas: document.getElementById('evaluacion-permitir-revisar').checked
+                };
+
+                try {
+                    const response = await fetch(`/profesor/semanas/${semanaId}/evaluaciones`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        alert('Evaluación creada exitosamente');
+                        hideModal(evaluacionModal);
+                        evaluacionForm.reset();
+                        loadEvaluaciones(semanaId);
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            // Event listeners para eliminar evaluaciones
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.delete-evaluacion-btn')) {
+                    const button = e.target.closest('.delete-evaluacion-btn');
+                    const evaluacionId = button.getAttribute('data-evaluacion-id');
+                    const semanaId = button.closest('#evaluaciones-container').getAttribute('data-semana-id');
+
+                    if (confirm('¿Estás seguro de que quieres eliminar esta evaluación?')) {
+                        try {
+                            const response = await fetch(`/profesor/evaluaciones/${evaluacionId}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                alert('Evaluación eliminada exitosamente');
+                                loadEvaluaciones(semanaId);
+                            } else {
+                                const error = await response.json();
+                                alert('Error: ' + (error.error || 'Error desconocido'));
+                            }
+                        } catch (error) {
+                            alert('Error de conexión: ' + error.message);
+                        }
+                    }
+                }
+
+                if (e.target.closest('.publicar-evaluacion-btn')) {
+                    const button = e.target.closest('.publicar-evaluacion-btn');
+                    const evaluacionId = button.getAttribute('data-evaluacion-id');
+                    const semanaId = button.closest('#evaluaciones-container').getAttribute('data-semana-id');
+
+                    if (confirm('¿Estás seguro de que quieres publicar esta evaluación? Los estudiantes podrán verla y realizarla.')) {
+                        try {
+                            const response = await fetch(`/profesor/evaluaciones/${evaluacionId}/publicar`, {
+                                method: 'POST'
+                            });
+
+                    if (response.ok) {
+                        alert('Evaluación publicada exitosamente');
+                        loadEvaluaciones(semanaId);
+                    } else {
+                        const errorData = await response.json();
+                        alert('Error: ' + (errorData.error || errorData.message || 'Error desconocido'));
+                    }
+                        } catch (error) {
+                            alert('Error de conexión: ' + error.message);
+                        }
+                    }
+                }
+            });
+
+            // Modal de preguntas
+            const preguntasModal = document.getElementById('preguntas-modal');
+            const closePreguntasModal = document.getElementById('close-preguntas-modal');
+            const addPreguntaBtn = document.getElementById('add-pregunta-btn');
+            const nuevaPreguntaForm = document.getElementById('nueva-pregunta-form');
+            const cancelPreguntaBtn = document.getElementById('cancel-pregunta-btn');
+            const savePreguntaBtn = document.getElementById('save-pregunta-btn');
+
+            // Event listeners para agregar preguntas
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.agregar-preguntas-btn')) {
+                    const button = e.target.closest('.agregar-preguntas-btn');
+                    const evaluacionId = button.getAttribute('data-evaluacion-id');
+                    const evaluacionTipo = button.getAttribute('data-evaluacion-tipo');
+                    document.getElementById('preguntas-evaluacion-id').value = evaluacionId;
+                    document.getElementById('preguntas-evaluacion-tipo').value = evaluacionTipo;
+                    configurarModalSegunTipo(evaluacionTipo);
+                    cargarPreguntas(evaluacionId);
+                    showModal(preguntasModal);
+                }
+            });
+
+            closePreguntasModal.addEventListener('click', () => {
+                hideModal(preguntasModal);
+                nuevaPreguntaForm.classList.add('hidden');
+                document.getElementById('pregunta-enunciado').value = '';
+                document.getElementById('pregunta-puntos').value = '10';
+            });
+            
+            // Event listener para el cambio de tipo de pregunta
+            document.getElementById('pregunta-tipo').addEventListener('change', cambiarTipoPregunta);
+            
+            cancelPreguntaBtn.addEventListener('click', () => {
+                nuevaPreguntaForm.classList.add('hidden');
+                document.getElementById('pregunta-enunciado').value = '';
+                document.getElementById('pregunta-puntos').value = '10';
+            });
+
+            addPreguntaBtn.addEventListener('click', () => {
+                nuevaPreguntaForm.classList.remove('hidden');
+                const evaluacionTipo = document.getElementById('preguntas-evaluacion-tipo').value;
+                configurarModalSegunTipo(evaluacionTipo);
+            });
+
+            savePreguntaBtn.addEventListener('click', async () => {
+                const evaluacionId = document.getElementById('preguntas-evaluacion-id').value;
+                const evaluacionTipo = document.getElementById('preguntas-evaluacion-tipo').value;
+                const tipo = document.getElementById('pregunta-tipo').value;
+                const enunciado = document.getElementById('pregunta-enunciado').value;
+                const puntos = parseInt(document.getElementById('pregunta-puntos').value);
+
+                if (!enunciado.trim()) {
+                    alert('Por favor escribe el enunciado de la pregunta');
+                    return;
+                }
+
+                const payload = {
+                    enunciado: enunciado,
+                    tipo: tipo,
+                    puntos: puntos
+                };
+
+                // Agregar opciones según el tipo
+                if (tipo === 'OPCION_MULTIPLE' || tipo === 'ORDENAR') {
+                    const opciones = [];
+                    document.querySelectorAll('#opciones-container .opcion-item').forEach((item, index) => {
+                        const texto = item.querySelector('.opcion-texto').value;
+                        const esCorrecta = item.querySelector('.opcion-correcta').checked;
+                        if (texto.trim()) {
+                            opciones.push({ texto: texto, esCorrecta: esCorrecta, orden: index + 1 });
+                        }
+                    });
+                    if (opciones.length < 2) {
+                        alert('Debes agregar al menos 2 opciones');
+                        return;
+                    }
+                    payload.opciones = opciones;
+                } else if (tipo === 'VERDADERO_FALSO') {
+                    payload.opciones = [
+                        { texto: 'Verdadero', esCorrecta: true, orden: 1 },
+                        { texto: 'Falso', esCorrecta: false, orden: 2 }
+                    ];
+                } else if (tipo === 'DESARROLLO' && evaluacionTipo === 'EXAMEN') {
+                    // Para preguntas de desarrollo en examen, incluir información sobre archivo
+                    const archivoInput = document.getElementById('pregunta-archivo-respuesta');
+                    if (archivoInput && archivoInput.files.length > 0) {
+                        // Nota: El manejo de archivos se hará en el backend si es necesario
+                        payload.permiteArchivo = true;
+                    }
+                }
+
+                try {
+                    const response = await fetch(`/profesor/evaluaciones/${evaluacionId}/preguntas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        alert('Pregunta agregada exitosamente');
+                        nuevaPreguntaForm.classList.add('hidden');
+                        document.getElementById('pregunta-enunciado').value = '';
+                        document.getElementById('pregunta-puntos').value = '10';
+                        cargarPreguntas(evaluacionId);
+                    } else {
+                        const error = await response.json();
+                        alert('Error: ' + (error.error || 'Error desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error de conexión: ' + error.message);
+                }
+            });
+
+            function configurarModalSegunTipo(tipoEvaluacion) {
+                const tipoSelect = document.getElementById('pregunta-tipo');
+                const evaluacionTipo = tipoEvaluacion || document.getElementById('preguntas-evaluacion-tipo').value;
+                
+                // Limpiar opciones actuales
+                tipoSelect.innerHTML = '';
+                
+                if (evaluacionTipo === 'EXAMEN') {
+                    // Para EXAMEN: solo DESARROLLO
+                    tipoSelect.innerHTML = '<option value="DESARROLLO">Desarrollo</option>';
+                    tipoSelect.value = 'DESARROLLO';
+                } else if (evaluacionTipo === 'QUIZ') {
+                    // Para QUIZ: solo opciones múltiples (sin DESARROLLO)
+                    tipoSelect.innerHTML = `
+                        <option value="OPCION_MULTIPLE">Opción Múltiple</option>
+                        <option value="VERDADERO_FALSO">Verdadero/Falso</option>
+                        <option value="ORDENAR">Ordenar</option>
+                        <option value="COMPLETAR">Completar</option>
+                    `;
+                    tipoSelect.value = 'OPCION_MULTIPLE';
+                } else {
+                    // Para otros tipos (PRACTICA): todas las opciones
+                    tipoSelect.innerHTML = `
+                        <option value="OPCION_MULTIPLE">Opción Múltiple</option>
+                        <option value="VERDADERO_FALSO">Verdadero/Falso</option>
+                        <option value="DESARROLLO">Desarrollo</option>
+                        <option value="ORDENAR">Ordenar</option>
+                        <option value="COMPLETAR">Completar</option>
+                    `;
+                }
+                
+                // Actualizar el contenedor de opciones
+                cambiarTipoPregunta();
+            }
+
+            function cambiarTipoPregunta() {
+                const tipo = document.getElementById('pregunta-tipo').value;
+                const evaluacionTipo = document.getElementById('preguntas-evaluacion-tipo').value;
+                const container = document.getElementById('opciones-container');
+                container.innerHTML = '';
+
+                if (tipo === 'OPCION_MULTIPLE' || tipo === 'ORDENAR') {
+                    container.innerHTML = `
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Opciones de Respuesta</label>
+                        <div id="opciones-list" class="space-y-2 mb-2"></div>
+                        <button type="button" onclick="agregarOpcion()" class="text-sm text-blue-500 hover:text-blue-700">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>Agregar Opción
+                        </button>
+                    `;
+                    agregarOpcion();
+                    agregarOpcion();
+                } else if (tipo === 'VERDADERO_FALSO') {
+                    container.innerHTML = `
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-sm text-gray-600">Esta pregunta tendrá dos opciones: Verdadero y Falso</p>
+                        </div>
+                    `;
+                } else if (tipo === 'DESARROLLO') {
+                    // Para preguntas de desarrollo en EXAMEN, agregar campo de archivo
+                    if (evaluacionTipo === 'EXAMEN') {
+                        container.innerHTML = `
+                            <div class="bg-gray-50 p-3 rounded mb-4">
+                                <p class="text-sm text-gray-600 mb-2">Esta pregunta permite al estudiante subir un archivo con su respuesta.</p>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Archivo de respuesta (opcional)</label>
+                                <input type="file" id="pregunta-archivo-respuesta" class="w-full px-3 py-2 border border-gray-300 rounded-md" accept=".pdf,.doc,.docx,.txt">
+                                <p class="text-xs text-gray-500 mt-1">Formatos permitidos: PDF, DOC, DOCX, TXT</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="bg-gray-50 p-3 rounded">
+                                <p class="text-sm text-gray-600">Esta pregunta no requiere opciones predefinidas</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-sm text-gray-600">Esta pregunta no requiere opciones predefinidas</p>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+            }
+
+            window.agregarOpcion = function() {
+                const container = document.getElementById('opciones-list');
+                const opcionDiv = document.createElement('div');
+                opcionDiv.className = 'opcion-item flex items-center gap-2';
+                opcionDiv.innerHTML = `
+                    <input type="text" class="opcion-texto flex-1 px-3 py-2 border border-gray-300 rounded-md" placeholder="Texto de la opción">
+                    <label class="flex items-center">
+                        <input type="radio" name="opcion-correcta" class="opcion-correcta mr-1">
+                        <span class="text-sm text-gray-700">Correcta</span>
+                    </label>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                container.appendChild(opcionDiv);
+                lucide.createIcons();
+            };
+
+            async function cargarPreguntas(evaluacionId) {
+                try {
+                    const response = await fetch(`/profesor/evaluaciones/${evaluacionId}/preguntas`);
+                    const preguntas = await response.ok ? await response.json() : [];
+                    
+                    const container = document.getElementById('preguntas-list');
+                    if (preguntas.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay preguntas agregadas. Agrega la primera pregunta.</p>';
+                    } else {
+                        container.innerHTML = preguntas.map((p, index) => {
+                            let opcionesHtml = '';
+                            if (p.opciones && p.opciones.length > 0) {
+                                opcionesHtml = '<div class="mt-2 space-y-1">';
+                                p.opciones.forEach((opcion, idx) => {
+                                    const correctaBadge = opcion.esCorrecta ? '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-2">Correcta</span>' : '';
+                                    opcionesHtml += `<div class="text-sm text-gray-600 ml-4">${idx + 1}. ${opcion.texto}${correctaBadge}</div>`;
+                                });
+                                opcionesHtml += '</div>';
+                            }
+                            return `
+                            <div class="border border-gray-200 rounded p-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold">Pregunta ${index + 1}: ${p.tipo}</h4>
+                                        <p class="text-gray-700 mt-1">${p.enunciado}</p>
+                                        <p class="text-sm text-gray-500 mt-1">${p.puntos} puntos</p>
+                                        ${opcionesHtml}
+                                    </div>
+                                    <button onclick="eliminarPregunta(${p.id}, ${evaluacionId})" class="text-red-500 hover:text-red-700">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        }).join('');
+                        lucide.createIcons();
+                    }
+                } catch (error) {
+                    console.error('Error cargando preguntas:', error);
+                }
+            }
+
+            window.eliminarPregunta = async function(preguntaId, evaluacionId) {
+                if (confirm('¿Estás seguro de eliminar esta pregunta?')) {
+                    // Implementar eliminación
+                    alert('Funcionalidad de eliminación pendiente');
+                }
+            };
+
+            preguntasModal.addEventListener('click', (e) => {
+                if (e.target === preguntasModal) {
+                    hideModal(preguntasModal);
+                }
+            });
+
             // Cerrar modales al hacer clic fuera
-            [semanaModal, materialModal, tareaModal].forEach(modal => {
+            [semanaModal, materialModal, tareaModal, evaluacionModal, preguntasModal].forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         hideModal(modal);

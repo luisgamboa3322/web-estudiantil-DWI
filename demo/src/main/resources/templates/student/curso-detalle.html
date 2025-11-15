@@ -323,15 +323,17 @@
                 // Mostrar loading
                 weekContent.innerHTML = '<div class="text-center py-12"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div><p class="mt-4 text-gray-600">Cargando contenido...</p></div>';
 
-                const [materialesResponse, tareasResponse] = await Promise.all([
+                const [materialesResponse, tareasResponse, evaluacionesResponse] = await Promise.all([
                     fetch(`/student/semanas/${semanaId}/materiales`),
-                    fetch(`/student/semanas/${semanaId}/tareas`)
+                    fetch(`/student/semanas/${semanaId}/tareas`),
+                    fetch(`/student/semanas/${semanaId}/evaluaciones`)
                 ]);
 
                 const materiales = materialesResponse.ok ? await materialesResponse.json() : [];
                 const tareas = tareasResponse.ok ? await tareasResponse.json() : [];
+                const evaluaciones = evaluacionesResponse.ok ? await evaluacionesResponse.json() : [];
 
-                renderSemanaContent(materiales, tareas, semanaId);
+                renderSemanaContent(materiales, tareas, evaluaciones, semanaId);
             } catch (error) {
                 console.error('Error cargando contenido:', error);
                 weekContent.innerHTML = '<div class="text-center py-12"><p class="text-red-500">Error cargando el contenido</p></div>';
@@ -339,7 +341,7 @@
         }
 
         // Renderizar contenido de la semana
-        async function renderSemanaContent(materiales, tareas, semanaId) {
+        async function renderSemanaContent(materiales, tareas, evaluaciones, semanaId) {
             let html = '';
 
             // Materiales
@@ -452,7 +454,154 @@
                 html += '</div></div>';
             }
 
-            if (materiales.length === 0 && tareas.length === 0) {
+            // Evaluaciones
+            if (evaluaciones.length > 0) {
+                html += `
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="file-question" class="w-5 h-5 mr-2"></i>
+                            Evaluaciones
+                        </h3>
+                        <div class="space-y-4">
+                `;
+
+                for (const evaluacion of evaluaciones) {
+                    const intentos = await getIntentosEvaluacion(evaluacion.id);
+                    const intentosCompletados = intentos.filter(i => i.estado === 'COMPLETADO' || i.estado === 'CALIFICADO');
+                    const intentosEnProgreso = intentos.filter(i => i.estado === 'EN_PROGRESO');
+                    const puedeIniciar = evaluacion.estado === 'PUBLICADA' || evaluacion.estado === 'EN_CURSO';
+                    
+                    // Parsear fechas correctamente (formato ISO de LocalDateTime: "2024-01-15T10:30:00")
+                    let fechaInicio, fechaLimite;
+                    try {
+                        // Jackson puede serializar LocalDateTime como array [año, mes, día, hora, minuto, segundo] o como string
+                        if (Array.isArray(evaluacion.fechaInicio)) {
+                            // Formato array: [2024, 1, 15, 10, 30, 0]
+                            fechaInicio = new Date(evaluacion.fechaInicio[0], evaluacion.fechaInicio[1] - 1, 
+                                evaluacion.fechaInicio[2], evaluacion.fechaInicio[3] || 0, 
+                                evaluacion.fechaInicio[4] || 0, evaluacion.fechaInicio[5] || 0);
+                        } else if (typeof evaluacion.fechaInicio === 'string') {
+                            // Formato string ISO: "2024-01-15T10:30:00" o "2024-01-15T10:30"
+                            let fechaStr = evaluacion.fechaInicio;
+                            // Asegurar que tenga segundos si no los tiene
+                            if (fechaStr.length === 16) {
+                                fechaStr += ':00';
+                            }
+                            fechaInicio = new Date(fechaStr);
+                        } else {
+                            fechaInicio = new Date(evaluacion.fechaInicio);
+                        }
+                        
+                        if (Array.isArray(evaluacion.fechaLimite)) {
+                            fechaLimite = new Date(evaluacion.fechaLimite[0], evaluacion.fechaLimite[1] - 1, 
+                                evaluacion.fechaLimite[2], evaluacion.fechaLimite[3] || 0, 
+                                evaluacion.fechaLimite[4] || 0, evaluacion.fechaLimite[5] || 0);
+                        } else if (typeof evaluacion.fechaLimite === 'string') {
+                            let fechaStr = evaluacion.fechaLimite;
+                            if (fechaStr.length === 16) {
+                                fechaStr += ':00';
+                            }
+                            fechaLimite = new Date(fechaStr);
+                        } else {
+                            fechaLimite = new Date(evaluacion.fechaLimite);
+                        }
+                        
+                        // Validar que las fechas sean válidas
+                        if (isNaN(fechaInicio.getTime()) || isNaN(fechaLimite.getTime())) {
+                            console.error('Fechas inválidas:', evaluacion.fechaInicio, evaluacion.fechaLimite);
+                            throw new Error('Fechas inválidas');
+                        }
+                    } catch (e) {
+                        console.error('Error parseando fechas:', e, evaluacion);
+                        // Usar fechas por defecto (hoy y mañana) para que no se rompa la UI
+                        fechaInicio = new Date();
+                        fechaLimite = new Date();
+                        fechaLimite.setDate(fechaLimite.getDate() + 1);
+                    }
+                    
+                    const ahora = new Date();
+                    // Comparar fechas correctamente
+                    const disponible = ahora >= fechaInicio && ahora <= fechaLimite;
+                    const aunNoInicia = ahora < fechaInicio;
+                    const yaVencida = ahora > fechaLimite;
+
+                    let statusClass = 'bg-gray-100 text-gray-600';
+                    let statusText = 'No disponible';
+                    let puedeRealizar = false;
+
+                    if (evaluacion.estado === 'CERRADA') {
+                        statusClass = 'bg-red-100 text-red-600';
+                        statusText = 'Cerrada';
+                    } else if (aunNoInicia) {
+                        statusClass = 'bg-yellow-100 text-yellow-600';
+                        statusText = `Disponible desde ${fechaInicio.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                    } else if (yaVencida) {
+                        statusClass = 'bg-red-100 text-red-600';
+                        statusText = 'Vencida';
+                    } else if (intentosCompletados.length >= evaluacion.intentosMaximos) {
+                        statusClass = 'bg-blue-100 text-blue-600';
+                        statusText = `Completada (${intentosCompletados.length}/${evaluacion.intentosMaximos} intentos)`;
+                    } else if (intentosEnProgreso.length > 0) {
+                        statusClass = 'bg-yellow-100 text-yellow-600';
+                        statusText = 'En progreso';
+                        puedeRealizar = true;
+                    } else if (puedeIniciar && disponible) {
+                        statusClass = 'bg-green-100 text-green-600';
+                        statusText = `Disponible (${intentosCompletados.length}/${evaluacion.intentosMaximos} intentos)`;
+                        puedeRealizar = true;
+                    } else if (puedeIniciar && !yaVencida && !aunNoInicia) {
+                        // Si está publicada y no está vencida ni pendiente, permitir iniciar
+                        statusClass = 'bg-green-100 text-green-600';
+                        statusText = 'Disponible';
+                        puedeRealizar = true;
+                    }
+
+                    html += `
+                        <div class="task-card bg-white border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">${evaluacion.titulo}</h4>
+                                    <span class="text-sm text-gray-500">${evaluacion.tipo} - ${evaluacion.puntosMaximos} pts</span>
+                                    ${evaluacion.descripcion ? `<p class="text-sm text-gray-600 mt-1">${evaluacion.descripcion}</p>` : ''}
+                                    <div class="flex items-center space-x-4 mt-2">
+                                        <span class="text-xs text-gray-500">
+                                            <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                                            Disponible: ${!isNaN(fechaInicio.getTime()) ? fechaInicio.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Fecha inválida'} - ${!isNaN(fechaLimite.getTime()) ? fechaLimite.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Fecha inválida'}
+                                        </span>
+                                        ${evaluacion.tiempoLimiteMinutos ? `
+                                            <span class="text-xs text-gray-500">
+                                                <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i>
+                                                Tiempo: ${evaluacion.tiempoLimiteMinutos} min
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium ${statusClass}">
+                                        ${statusText}
+                                    </span>
+                                    ${puedeRealizar ? `
+                                        <button onclick="iniciarEvaluacion(${evaluacion.id}, ${intentosEnProgreso.length > 0 ? intentosEnProgreso[0].id : 'null'})"
+                                            class="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600 transition-colors">
+                                            ${intentosEnProgreso.length > 0 ? 'Continuar' : 'Iniciar'}
+                                        </button>
+                                    ` : ''}
+                                    ${intentosCompletados.length > 0 ? `
+                                        <button onclick="verResultados(${evaluacion.id})"
+                                            class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors">
+                                            Ver Resultados
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div></div>';
+            }
+
+            if (materiales.length === 0 && tareas.length === 0 && evaluaciones.length === 0) {
                 html = `
                     <div class="text-center py-12">
                         <i data-lucide="book-open" class="h-16 w-16 text-gray-300 mx-auto mb-4"></i>
@@ -565,6 +714,51 @@
                 alert('Error de conexión');
             }
         });
+
+        // Obtener intentos de evaluación
+        async function getIntentosEvaluacion(evaluacionId) {
+            try {
+                const response = await fetch(`/student/evaluaciones/${evaluacionId}/intentos`);
+                if (response.ok) {
+                    return await response.json();
+                }
+                return [];
+            } catch (error) {
+                console.error('Error obteniendo intentos:', error);
+                return [];
+            }
+        }
+
+        // Iniciar evaluación
+        async function iniciarEvaluacion(evaluacionId, intentoId) {
+            try {
+                if (intentoId && intentoId !== 'null') {
+                    // Continuar intento existente
+                    window.location.href = `/student/evaluacion/${intentoId}`;
+                } else {
+                    // Iniciar nuevo intento
+                    const response = await fetch(`/student/evaluaciones/${evaluacionId}/iniciar`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        const intento = await response.json();
+                        window.location.href = `/student/evaluacion/${intento.id}`;
+                    } else {
+                        const error = await response.text();
+                        alert('Error: ' + error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+
+        // Ver resultados
+        function verResultados(evaluacionId) {
+            window.location.href = `/student/evaluacion/resultados/${evaluacionId}`;
+        }
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {

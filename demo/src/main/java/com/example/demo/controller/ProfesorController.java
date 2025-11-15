@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/profesor")
@@ -38,6 +39,9 @@ public class ProfesorController {
 
     @Autowired
     private EntregaTareaService entregaTareaService;
+
+    @Autowired
+    private EvaluacionService evaluacionService;
 
     public ProfesorController(ProfessorService service, com.example.demo.repository.CursoRepository cursoRepository) {
         this.service = service;
@@ -404,6 +408,223 @@ public class ProfesorController {
                 .body(material.getFileData());
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ===========================
+    // API PARA GESTIÓN DE EVALUACIONES
+    // ===========================
+    @PostMapping("/semanas/{semanaId}/evaluaciones")
+    @ResponseBody
+    public ResponseEntity<?> createEvaluacion(@PathVariable Long semanaId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+            Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+            if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
+                return ResponseEntity.status(403).body("No tienes permiso para gestionar esta semana");
+            }
+
+            String titulo = (String) payload.get("titulo");
+            String descripcion = (String) payload.get("descripcion");
+            TipoEvaluacion tipo = TipoEvaluacion.valueOf((String) payload.get("tipo"));
+            // Parsear fechas: datetime-local devuelve formato "YYYY-MM-DDTHH:mm"
+            String fechaInicioStr = (String) payload.get("fechaInicio");
+            String fechaLimiteStr = (String) payload.get("fechaLimite");
+            LocalDateTime fechaInicio = LocalDateTime.parse(fechaInicioStr.length() == 16 ? fechaInicioStr + ":00" : fechaInicioStr);
+            LocalDateTime fechaLimite = LocalDateTime.parse(fechaLimiteStr.length() == 16 ? fechaLimiteStr + ":00" : fechaLimiteStr);
+            Integer tiempoLimiteMinutos = payload.get("tiempoLimiteMinutos") != null ? 
+                Integer.parseInt(payload.get("tiempoLimiteMinutos").toString()) : null;
+            Integer intentosMaximos = payload.get("intentosMaximos") != null ? 
+                Integer.parseInt(payload.get("intentosMaximos").toString()) : 1;
+            int puntosMaximos = Integer.parseInt(payload.get("puntosMaximos").toString());
+
+            Evaluacion evaluacion = evaluacionService.createEvaluacion(titulo, descripcion, tipo, fechaInicio, 
+                fechaLimite, tiempoLimiteMinutos, intentosMaximos, puntosMaximos, semana, profesor);
+            
+            if (payload.containsKey("mostrarResultadosInmediatos")) {
+                evaluacion.setMostrarResultadosInmediatos((Boolean) payload.get("mostrarResultadosInmediatos"));
+            }
+            if (payload.containsKey("permitirRevisarRespuestas")) {
+                evaluacion.setPermitirRevisarRespuestas((Boolean) payload.get("permitirRevisarRespuestas"));
+            }
+            
+            return ResponseEntity.ok(evaluacionService.save(evaluacion));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creando evaluación: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/semanas/{semanaId}/evaluaciones")
+    @ResponseBody
+    public List<Evaluacion> getEvaluacionesBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        String email = authentication.getName();
+        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+        Semana semana = semanaService.findById(semanaId).orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+        if (!semana.getCurso().getProfesor().getId().equals(profesor.getId())) {
+            throw new IllegalStateException("No tienes permiso para ver esta semana");
+        }
+
+        return evaluacionService.findBySemanaId(semanaId);
+    }
+
+    @GetMapping("/evaluaciones/{evaluacionId}/preguntas")
+    @ResponseBody
+    public List<Pregunta> getPreguntasByEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
+        String email = authentication.getName();
+        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+        Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+        if (!evaluacion.getProfesor().getId().equals(profesor.getId())) {
+            throw new IllegalStateException("No tienes permiso para ver esta evaluación");
+        }
+
+        // Cargar preguntas con sus opciones
+        List<Pregunta> preguntas = evaluacionService.getPreguntasByEvaluacionId(evaluacionId);
+        for (Pregunta pregunta : preguntas) {
+            pregunta.setOpciones(evaluacionService.getOpcionesByPreguntaId(pregunta.getId()));
+        }
+        return preguntas;
+    }
+
+    @PostMapping("/evaluaciones/{evaluacionId}/preguntas")
+    @ResponseBody
+    public ResponseEntity<?> agregarPregunta(@PathVariable Long evaluacionId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+            Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+            if (!evaluacion.getProfesor().getId().equals(profesor.getId())) {
+                return ResponseEntity.status(403).body("No tienes permiso para gestionar esta evaluación");
+            }
+
+            String enunciado = (String) payload.get("enunciado");
+            TipoPregunta tipo = TipoPregunta.valueOf((String) payload.get("tipo"));
+            int puntos = Integer.parseInt(payload.get("puntos").toString());
+
+            Pregunta pregunta = evaluacionService.agregarPregunta(evaluacionId, enunciado, tipo, puntos);
+            
+            // Agregar opciones si es necesario
+            if (payload.containsKey("opciones") && (tipo == TipoPregunta.OPCION_MULTIPLE || 
+                tipo == TipoPregunta.VERDADERO_FALSO || tipo == TipoPregunta.ORDENAR)) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> opciones = (List<Map<String, Object>>) payload.get("opciones");
+                for (int i = 0; i < opciones.size(); i++) {
+                    Map<String, Object> opcionData = opciones.get(i);
+                    String texto = (String) opcionData.get("texto");
+                    Boolean esCorrecta = opcionData.get("esCorrecta") instanceof Boolean ? 
+                        (Boolean) opcionData.get("esCorrecta") : 
+                        Boolean.parseBoolean(opcionData.get("esCorrecta").toString());
+                    evaluacionService.agregarOpcion(pregunta.getId(), texto, esCorrecta, i + 1);
+                }
+            } else if (tipo == TipoPregunta.VERDADERO_FALSO) {
+                // Para verdadero/falso, crear las opciones automáticamente si no se enviaron
+                evaluacionService.agregarOpcion(pregunta.getId(), "Verdadero", true, 1);
+                evaluacionService.agregarOpcion(pregunta.getId(), "Falso", false, 2);
+            }
+            
+            if (payload.containsKey("retroalimentacionCorrecta")) {
+                pregunta.setRetroalimentacionCorrecta((String) payload.get("retroalimentacionCorrecta"));
+            }
+            if (payload.containsKey("retroalimentacionIncorrecta")) {
+                pregunta.setRetroalimentacionIncorrecta((String) payload.get("retroalimentacionIncorrecta"));
+            }
+
+            return ResponseEntity.ok(pregunta);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error agregando pregunta: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/evaluaciones/{evaluacionId}/publicar")
+    @ResponseBody
+    public ResponseEntity<?> publicarEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+            Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+            if (!evaluacion.getProfesor().getId().equals(profesor.getId())) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "No tienes permiso para publicar esta evaluación");
+                return ResponseEntity.status(403).body(error);
+            }
+
+            Evaluacion publicada = evaluacionService.publicarEvaluacion(evaluacionId);
+            return ResponseEntity.ok(publicada);
+        } catch (IllegalStateException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error publicando evaluación: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/evaluaciones/{evaluacionId}/intentos")
+    @ResponseBody
+    public List<IntentoEvaluacion> getIntentosByEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
+        String email = authentication.getName();
+        Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+        Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+        if (!evaluacion.getProfesor().getId().equals(profesor.getId())) {
+            throw new IllegalStateException("No tienes permiso para ver esta evaluación");
+        }
+
+        return evaluacionService.findById(evaluacionId).map(Evaluacion::getIntentos).orElse(List.of());
+    }
+
+    @PutMapping("/intentos/{intentoId}/calificar")
+    @ResponseBody
+    public ResponseEntity<?> calificarIntento(@PathVariable Long intentoId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+            IntentoEvaluacion intento = evaluacionService.findIntentoById(intentoId)
+                .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+            
+            if (!intento.getEvaluacion().getProfesor().getId().equals(profesor.getId())) {
+                return ResponseEntity.status(403).body("No tienes permiso para calificar este intento");
+            }
+
+            Double calificacion = Double.parseDouble(payload.get("calificacion").toString());
+            String comentarios = (String) payload.get("comentarios");
+
+            Calificacion cal = evaluacionService.calificarIntentoManual(intentoId, calificacion, comentarios);
+            return ResponseEntity.ok(cal);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error calificando intento: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/evaluaciones/{evaluacionId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Professor profesor = service.findByEmail(email).orElseThrow(() -> new IllegalStateException("Profesor no encontrado"));
+
+            Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+            if (!evaluacion.getProfesor().getId().equals(profesor.getId())) {
+                return ResponseEntity.status(403).body("No tienes permiso para eliminar esta evaluación");
+            }
+
+            evaluacionService.delete(evaluacionId);
+            return ResponseEntity.ok("Evaluación eliminada exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error eliminando evaluación: " + e.getMessage());
         }
     }
 }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Evaluación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100">
+    <div class="min-h-screen">
+        <header class="bg-white shadow-md p-4">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800" th:text="${evaluacion.titulo}">Resultados</h1>
+                    <p class="text-sm text-gray-600" th:text="${evaluacion.tipo}">Tipo</p>
+                </div>
+                <button onclick="window.history.back()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                    Volver
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4">Historial de Intentos</h2>
+                <div id="intentos-container" class="space-y-4">
+                    <!-- Los intentos se mostrarán aquí -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const evaluacion = /*[[${evaluacion}]]*/ {};
+        const intentos = /*[[${intentos}]]*/ [];
+        /*]]>*/
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderIntentos();
+        });
+
+        function renderIntentos() {
+            const container = document.getElementById('intentos-container');
+            container.innerHTML = '';
+
+            if (intentos.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay intentos registrados</p>';
+                return;
+            }
+
+            intentos.forEach((intento, index) => {
+                const calificacion = intento.calificacion;
+                const calificacionNum = calificacion ? calificacion.calificacion : null;
+                const estadoClass = {
+                    'EN_PROGRESO': 'bg-yellow-100 text-yellow-600',
+                    'COMPLETADO': 'bg-blue-100 text-blue-600',
+                    'EXPIRADO': 'bg-red-100 text-red-600',
+                    'CALIFICADO': 'bg-green-100 text-green-600'
+                }[intento.estado] || 'bg-gray-100 text-gray-600';
+
+                const intentoDiv = document.createElement('div');
+                intentoDiv.className = 'border border-gray-200 rounded-lg p-4';
+                intentoDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-semibold text-lg">Intento ${intento.numeroIntento}</h3>
+                            <p class="text-sm text-gray-600">
+                                Iniciado: ${new Date(intento.fechaInicio).toLocaleString()}
+                                ${intento.fechaFin ? ` | Finalizado: ${new Date(intento.fechaFin).toLocaleString()}` : ''}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium ${estadoClass}">
+                                ${intento.estado}
+                            </span>
+                            ${calificacionNum !== null ? `
+                                <div class="mt-2">
+                                    <span class="text-2xl font-bold ${calificacionNum >= 70 ? 'text-green-600' : calificacionNum >= 50 ? 'text-yellow-600' : 'text-red-600'}">
+                                        ${calificacionNum.toFixed(1)}%
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ${calificacion && calificacion.comentarios ? `
+                        <div class="bg-gray-50 rounded p-3 mb-4">
+                            <p class="text-sm text-gray-700"><strong>Comentarios:</strong> ${calificacion.comentarios}</p>
+                        </div>
+                    ` : ''}
+                    ${intento.estado === 'CALIFICADO' || intento.estado === 'COMPLETADO' ? `
+                        <button onclick="verDetalleIntento(${intento.id})" 
+                                class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                            Ver detalles del intento →
+                        </button>
+                    ` : ''}
+                `;
+                container.appendChild(intentoDiv);
+            });
+        }
+
+        function verDetalleIntento(intentoId) {
+            // Implementar vista detallada del intento
+            alert('Vista detallada del intento (por implementar)');
+        }
+    </script>
+</body>
+</html>
+
