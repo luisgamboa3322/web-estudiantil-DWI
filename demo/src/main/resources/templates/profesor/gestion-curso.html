@@ -169,127 +169,6 @@
         </div>
     </div>
 
-    <!-- Modal para crear evaluación -->
-    <div id="evaluacion-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8">
-                <h3 class="text-lg font-bold mb-4">Crear Nueva Evaluación</h3>
-                <form id="evaluacion-form">
-                    <input type="hidden" id="evaluacion-semana-id">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                            <input type="text" id="evaluacion-titulo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                            <select id="evaluacion-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                                <option value="EXAMEN">Examen</option>
-                                <option value="PRACTICA">Práctica</option>
-                                <option value="QUIZ">Quiz</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                        <textarea id="evaluacion-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
-                            <input type="datetime-local" id="evaluacion-fecha-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
-                            <input type="datetime-local" id="evaluacion-fecha-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo Límite (minutos)</label>
-                            <input type="number" id="evaluacion-tiempo-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" placeholder="Sin límite">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Intentos Máximos</label>
-                            <input type="number" id="evaluacion-intentos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" value="1" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Puntos Máximos</label>
-                            <input type="number" id="evaluacion-puntos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="0" value="100" required>
-                        </div>
-                    </div>
-                    <div class="mb-4 space-y-2">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="evaluacion-mostrar-resultados" class="mr-2">
-                            <span class="text-sm text-gray-700">Mostrar resultados inmediatamente</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="evaluacion-permitir-revisar" class="mr-2">
-                            <span class="text-sm text-gray-700">Permitir revisar respuestas después de completar</span>
-                        </label>
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancel-evaluacion-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
-                        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">Crear Evaluación</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para agregar preguntas -->
-    <div id="preguntas-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold">Agregar Preguntas a la Evaluación</h3>
-                    <button id="close-preguntas-modal" class="text-gray-500 hover:text-gray-700">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <input type="hidden" id="preguntas-evaluacion-id">
-                <input type="hidden" id="preguntas-evaluacion-tipo">
-                
-                <div id="preguntas-list" class="space-y-4 mb-4">
-                    <!-- Las preguntas existentes se mostrarán aquí -->
-                </div>
-
-                <button id="add-pregunta-btn" class="w-full mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                    <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>Agregar Nueva Pregunta
-                </button>
-
-                <div id="nueva-pregunta-form" class="hidden border-t border-gray-200 pt-4 mt-4">
-                    <h4 class="font-semibold mb-4">Nueva Pregunta</h4>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pregunta</label>
-                        <select id="pregunta-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="OPCION_MULTIPLE">Opción Múltiple</option>
-                            <option value="VERDADERO_FALSO">Verdadero/Falso</option>
-                            <option value="DESARROLLO">Desarrollo</option>
-                            <option value="ORDENAR">Ordenar</option>
-                            <option value="COMPLETAR">Completar</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enunciado</label>
-                        <textarea id="pregunta-enunciado" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3" placeholder="Escribe la pregunta aquí..."></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Puntos</label>
-                        <input type="number" id="pregunta-puntos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" value="10">
-                    </div>
-                    <div id="opciones-container" class="mb-4">
-                        <!-- Las opciones se mostrarán aquí según el tipo -->
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancel-pregunta-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
-                        <button type="button" id="save-pregunta-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Guardar Pregunta</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal para crear tarea -->
     <div id="tarea-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
@@ -316,6 +195,127 @@
                     <div class="flex justify-end space-x-3">
                         <button type="button" id="cancel-tarea-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
                         <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Crear Tarea</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear evaluación -->
+    <div id="evaluacion-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
+                <h3 class="text-lg font-bold mb-4">Crear Nueva Evaluación</h3>
+                <form id="evaluacion-form">
+                    <input type="hidden" id="evaluacion-semana-id">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título de la Evaluación</label>
+                        <input type="text" id="evaluacion-titulo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea id="evaluacion-descripcion" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Evaluación</label>
+                        <select id="evaluacion-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                            <option value="EXAMEN">Examen</option>
+                            <option value="QUIZ">Quiz</option>
+                            <option value="PRACTICA">Práctica</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+                            <input type="datetime-local" id="evaluacion-fecha-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite</label>
+                            <input type="datetime-local" id="evaluacion-fecha-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo Límite (minutos, opcional)</label>
+                            <input type="number" id="evaluacion-tiempo-limite" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" placeholder="Sin límite">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Intentos Máximos</label>
+                            <input type="number" id="evaluacion-intentos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" value="1" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Puntos Máximos</label>
+                        <input type="number" id="evaluacion-puntos-maximos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="0" value="100" required>
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="evaluacion-mostrar-resultados" class="mr-2">
+                            <span class="text-sm text-gray-700">Mostrar resultados inmediatamente</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="evaluacion-permitir-revisar" class="mr-2">
+                            <span class="text-sm text-gray-700">Permitir revisar respuestas después de completar</span>
+                        </label>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-evaluacion-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">Crear Evaluación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para gestionar preguntas -->
+    <div id="preguntas-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">Gestionar Preguntas</h3>
+                    <button id="close-preguntas-modal" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="preguntas-evaluacion-id">
+                <input type="hidden" id="preguntas-evaluacion-tipo">
+                
+                <div class="mb-4">
+                    <button id="add-pregunta-btn" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600">
+                        <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>Agregar Pregunta
+                    </button>
+                </div>
+
+                <div id="preguntas-list" class="space-y-4 mb-6">
+                    <!-- Las preguntas se cargarán aquí -->
+                </div>
+
+                <form id="nueva-pregunta-form" class="hidden border-t pt-4 mt-4">
+                    <h4 class="font-semibold mb-4">Nueva Pregunta</h4>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pregunta</label>
+                        <select id="pregunta-tipo" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                            <option value="OPCION_MULTIPLE">Opción Múltiple</option>
+                            <option value="VERDADERO_FALSO">Verdadero/Falso</option>
+                            <option value="DESARROLLO">Desarrollo</option>
+                            <option value="ORDENAR">Ordenar</option>
+                            <option value="COMPLETAR">Completar</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enunciado</label>
+                        <textarea id="pregunta-enunciado" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Puntos</label>
+                        <input type="number" id="pregunta-puntos" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="0" value="10" required>
+                    </div>
+                    <div id="opciones-container" class="mb-4">
+                        <!-- Las opciones se agregarán aquí dinámicamente -->
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-pregunta-btn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancelar</button>
+                        <button type="button" id="save-pregunta-btn" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">Guardar Pregunta</button>
                     </div>
                 </form>
             </div>
@@ -486,40 +486,49 @@
                             `;
                         } else {
                             evaluaciones.forEach(evaluacion => {
-                                const estadoClass = {
-                                    'BORRADOR': 'bg-gray-100 text-gray-600',
-                                    'PUBLICADA': 'bg-green-100 text-green-600',
-                                    'EN_CURSO': 'bg-blue-100 text-blue-600',
-                                    'CERRADA': 'bg-red-100 text-red-600'
-                                }[evaluacion.estado] || 'bg-gray-100 text-gray-600';
-
                                 const evaluacionElement = document.createElement('div');
                                 evaluacionElement.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-md';
+                                
+                                const estadoBadge = evaluacion.estado === 'PUBLICADA' 
+                                    ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Publicada</span>'
+                                    : evaluacion.estado === 'EN_CURSO'
+                                    ? '<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">En Curso</span>'
+                                    : '<span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">Borrador</span>';
+                                
                                 evaluacionElement.innerHTML = `
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-3 flex-1">
                                         <i data-lucide="file-question" class="text-purple-500"></i>
-                                        <div>
-                                            <span class="font-medium">${evaluacion.titulo}</span>
-                                            <span class="text-sm text-gray-500 ml-2">(${evaluacion.tipo} - ${evaluacion.puntosMaximos} pts)</span>
-                                            <span class="px-2 py-1 rounded-full text-xs font-medium ml-2 ${estadoClass}">${evaluacion.estado}</span>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-medium">${evaluacion.titulo}</span>
+                                                ${estadoBadge}
+                                                <span class="text-sm text-gray-500">(${evaluacion.tipo} - ${evaluacion.puntosMaximos} pts)</span>
+                                            </div>
                                             ${evaluacion.descripcion ? `<p class="text-sm text-gray-600">${evaluacion.descripcion}</p>` : ''}
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="p-1 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-100 agregar-preguntas-btn"
-                                                data-evaluacion-id="${evaluacion.id}" 
-                                                data-evaluacion-tipo="${evaluacion.tipo}" 
-                                                title="Agregar Preguntas">
+                                        <button class="agregar-preguntas-btn p-1 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-100"
+                                                data-evaluacion-id="${evaluacion.id}"
+                                                data-evaluacion-tipo="${evaluacion.tipo}"
+                                                title="Agregar preguntas">
                                             <i data-lucide="plus-circle" class="w-4 h-4"></i>
                                         </button>
+                                        <button class="ver-estudiantes-btn p-1 text-green-500 hover:text-green-700 rounded-full hover:bg-green-100"
+                                                data-evaluacion-id="${evaluacion.id}"
+                                                title="Ver estudiantes">
+                                            <i data-lucide="users" class="w-4 h-4"></i>
+                                        </button>
                                         ${evaluacion.estado === 'BORRADOR' ? `
-                                            <button class="p-1 text-green-500 hover:text-green-700 rounded-full hover:bg-green-100 publicar-evaluacion-btn"
-                                                    data-evaluacion-id="${evaluacion.id}" title="Publicar">
+                                            <button class="publicar-evaluacion-btn p-1 text-orange-500 hover:text-orange-700 rounded-full hover:bg-orange-100"
+                                                    data-evaluacion-id="${evaluacion.id}"
+                                                    title="Publicar evaluación">
                                                 <i data-lucide="send" class="w-4 h-4"></i>
                                             </button>
                                         ` : ''}
-                                        <button class="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-100 delete-evaluacion-btn"
-                                                data-evaluacion-id="${evaluacion.id}" title="Eliminar">
+                                        <button class="delete-evaluacion-btn p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100"
+                                                data-evaluacion-id="${evaluacion.id}"
+                                                title="Eliminar evaluación">
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
@@ -1104,8 +1113,21 @@
 
             window.eliminarPregunta = async function(preguntaId, evaluacionId) {
                 if (confirm('¿Estás seguro de eliminar esta pregunta?')) {
-                    // Implementar eliminación
-                    alert('Funcionalidad de eliminación pendiente');
+                    try {
+                        const response = await fetch(`/profesor/preguntas/${preguntaId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            alert('Pregunta eliminada exitosamente');
+                            cargarPreguntas(evaluacionId);
+                        } else {
+                            const error = await response.json();
+                            alert('Error: ' + (error.error || 'Error desconocido'));
+                        }
+                    } catch (error) {
+                        alert('Error de conexión: ' + error.message);
+                    }
                 }
             };
 
@@ -1115,8 +1137,112 @@
                 }
             });
 
+            // Event listener para ver estudiantes
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.ver-estudiantes-btn')) {
+                    const button = e.target.closest('.ver-estudiantes-btn');
+                    const evaluacionId = button.getAttribute('data-evaluacion-id');
+                    await mostrarEstudiantes(evaluacionId);
+                }
+            });
+
+            // Función para mostrar estudiantes que completaron el examen
+            async function mostrarEstudiantes(evaluacionId) {
+                try {
+                    const response = await fetch(`/profesor/evaluaciones/${evaluacionId}/estudiantes`);
+                    if (!response.ok) {
+                        alert('Error cargando estudiantes');
+                        return;
+                    }
+
+                    const estudiantes = await response.json();
+                    
+                    // Crear modal dinámicamente
+                    let modalHtml = `
+                        <div id="estudiantes-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+                            <div class="flex items-center justify-center min-h-screen p-4">
+                                <div class="bg-white rounded-lg max-w-4xl w-full p-6 my-8">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="text-lg font-bold">Estudiantes - Estado de Evaluación</h3>
+                                        <button onclick="document.getElementById('estudiantes-modal').remove()" class="text-gray-500 hover:text-gray-700">
+                                            <i data-lucide="x" class="w-6 h-6"></i>
+                                        </button>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estudiante</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intentos</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mejor Calificación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                    `;
+
+                    estudiantes.forEach(estudiante => {
+                        const completados = estudiante.intentosCompletados || 0;
+                        const enProgreso = estudiante.intentosEnProgreso || 0;
+                        const total = estudiante.intentos || 0;
+                        
+                        let estadoBadge = '';
+                        if (completados > 0) {
+                            estadoBadge = '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Completado</span>';
+                        } else if (enProgreso > 0) {
+                            estadoBadge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En Progreso</span>';
+                        } else {
+                            estadoBadge = '<span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">No Iniciado</span>';
+                        }
+
+                        const calificacion = estudiante.mejorCalificacion !== null 
+                            ? estudiante.mejorCalificacion.toFixed(2) + '%'
+                            : 'N/A';
+
+                        modalHtml += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">${estudiante.nombre}</div>
+                                    <div class="text-sm text-gray-500">${estudiante.email}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${estudiante.codigo || 'N/A'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    ${completados}/${total} completados
+                                    ${enProgreso > 0 ? `(${enProgreso} en progreso)` : ''}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">${estadoBadge}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${calificacion}</td>
+                            </tr>
+                        `;
+                    });
+
+                    modalHtml += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Remover modal anterior si existe
+                    const modalAnterior = document.getElementById('estudiantes-modal');
+                    if (modalAnterior) {
+                        modalAnterior.remove();
+                    }
+
+                    // Agregar nuevo modal
+                    document.body.insertAdjacentHTML('beforeend', modalHtml);
+                    lucide.createIcons();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error cargando estudiantes: ' + error.message);
+                }
+            }
+
             // Cerrar modales al hacer clic fuera
-            [semanaModal, materialModal, tareaModal, evaluacionModal, preguntasModal].forEach(modal => {
+            [semanaModal, materialModal, tareaModal].forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         hideModal(modal);

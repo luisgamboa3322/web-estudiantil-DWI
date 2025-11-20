@@ -33,8 +33,50 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const evaluacion = /*[[${evaluacion}]]*/ {};
-        const intentos = /*[[${intentos}]]*/ [];
+        // Usar JSON serializado desde el servidor para evitar problemas con Thymeleaf
+        const evaluacionData = /*[[${evaluacion}]]*/ {};
+        const intentosJson = /*[[${intentosJson}]]*/ '[]';
+        
+        // Convertir a objetos JavaScript simples
+        const evaluacion = {
+            id: evaluacionData?.id || null,
+            titulo: evaluacionData?.titulo || '',
+            tipo: evaluacionData?.tipo || '',
+            descripcion: evaluacionData?.descripcion || ''
+        };
+        
+        // Parsear JSON de intentos
+        let intentos = [];
+        try {
+            if (intentosJson && intentosJson !== '[]' && intentosJson.trim() !== '') {
+                intentos = JSON.parse(intentosJson);
+                console.log('Intentos parseados desde JSON:', intentos);
+            } else {
+                // Fallback: intentar usar los datos directamente de Thymeleaf
+                const intentosData = /*[[${intentos}]]*/ [];
+                if (Array.isArray(intentosData) && intentosData.length > 0) {
+                    intentos = intentosData.map(intento => ({
+                        intentoId: intento?.intentoId || intento?.id || null,
+                        numeroIntento: intento?.numeroIntento || null,
+                        estado: intento?.estado || null,
+                        fechaInicio: intento?.fechaInicio || null,
+                        fechaFin: intento?.fechaFin || null,
+                        calificacion: intento?.calificacion !== undefined && intento?.calificacion !== null ? Number(intento.calificacion) : null,
+                        comentarios: intento?.comentarios || null
+                    }));
+                    console.log('Intentos obtenidos desde Thymeleaf (fallback):', intentos);
+                } else {
+                    console.log('No hay intentos disponibles');
+                }
+            }
+        } catch (e) {
+            console.error('Error parseando JSON de intentos:', e);
+            intentos = [];
+        }
+        
+        console.log('Evaluación cargada:', evaluacion);
+        console.log('Intentos cargados:', intentos);
+        console.log('Número de intentos:', intentos.length);
         /*]]>*/
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -44,54 +86,149 @@
 
         function renderIntentos() {
             const container = document.getElementById('intentos-container');
+            if (!container) {
+                console.error('No se encontró el contenedor de intentos');
+                return;
+            }
+            
             container.innerHTML = '';
 
-            if (intentos.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No hay intentos registrados</p>';
+            console.log('Renderizando intentos. Total:', intentos.length);
+            console.log('Datos de intentos:', JSON.stringify(intentos, null, 2));
+            console.log('Tipo de intentos:', typeof intentos, Array.isArray(intentos));
+
+            if (!intentos || !Array.isArray(intentos) || intentos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="file-question" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p class="text-lg font-medium mb-2">No hay intentos registrados</p>
+                        <p class="text-sm">Aún no has realizado ningún intento para esta evaluación.</p>
+                    </div>
+                `;
+                lucide.createIcons();
                 return;
             }
 
             intentos.forEach((intento, index) => {
-                const calificacion = intento.calificacion;
-                const calificacionNum = calificacion ? calificacion.calificacion : null;
+                console.log(`Procesando intento ${index + 1}:`, intento);
+                
+                // Acceder a las propiedades del intento de forma segura
+                const calificacionNum = intento.calificacion !== null && intento.calificacion !== undefined 
+                    ? parseFloat(intento.calificacion) 
+                    : null;
+                const comentarios = intento.comentarios || null;
+                const estado = intento.estado || 'N/A';
+                const numeroIntento = intento.numeroIntento || 'N/A';
+                const intentoId = intento.intentoId || intento.id || null;
+                
                 const estadoClass = {
                     'EN_PROGRESO': 'bg-yellow-100 text-yellow-600',
                     'COMPLETADO': 'bg-blue-100 text-blue-600',
                     'EXPIRADO': 'bg-red-100 text-red-600',
                     'CALIFICADO': 'bg-green-100 text-green-600'
-                }[intento.estado] || 'bg-gray-100 text-gray-600';
+                }[estado] || 'bg-gray-100 text-gray-600';
+
+                // Formatear fechas de forma segura (parsear desde formato ISO o array)
+                let fechaInicioStr = 'Fecha no disponible';
+                let fechaFinStr = null;
+                
+                if (intento.fechaInicio) {
+                    try {
+                        // Manejar diferentes formatos de fecha
+                        let fechaInicio;
+                        if (Array.isArray(intento.fechaInicio)) {
+                            // Formato array [año, mes, día, hora, minuto, segundo]
+                            const [year, month, day, hour, minute, second] = intento.fechaInicio;
+                            fechaInicio = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
+                        } else if (typeof intento.fechaInicio === 'string') {
+                            // Formato string ISO
+                            fechaInicio = new Date(intento.fechaInicio);
+                        } else {
+                            fechaInicio = new Date(intento.fechaInicio);
+                        }
+                        
+                        if (!isNaN(fechaInicio.getTime())) {
+                            fechaInicioStr = fechaInicio.toLocaleString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } else {
+                            console.warn('Fecha de inicio inválida:', intento.fechaInicio);
+                        }
+                    } catch (e) {
+                        console.error('Error parseando fechaInicio:', e, intento.fechaInicio);
+                    }
+                }
+                
+                if (intento.fechaFin) {
+                    try {
+                        // Manejar diferentes formatos de fecha
+                        let fechaFin;
+                        if (Array.isArray(intento.fechaFin)) {
+                            // Formato array [año, mes, día, hora, minuto, segundo]
+                            const [year, month, day, hour, minute, second] = intento.fechaFin;
+                            fechaFin = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
+                        } else if (typeof intento.fechaFin === 'string') {
+                            // Formato string ISO
+                            fechaFin = new Date(intento.fechaFin);
+                        } else {
+                            fechaFin = new Date(intento.fechaFin);
+                        }
+                        
+                        if (!isNaN(fechaFin.getTime())) {
+                            fechaFinStr = fechaFin.toLocaleString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } else {
+                            console.warn('Fecha de fin inválida:', intento.fechaFin);
+                        }
+                    } catch (e) {
+                        console.error('Error parseando fechaFin:', e, intento.fechaFin);
+                    }
+                }
 
                 const intentoDiv = document.createElement('div');
-                intentoDiv.className = 'border border-gray-200 rounded-lg p-4';
+                intentoDiv.className = 'border border-gray-200 rounded-lg p-4 mb-4';
                 intentoDiv.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-semibold text-lg">Intento ${intento.numeroIntento}</h3>
-                            <p class="text-sm text-gray-600">
-                                Iniciado: ${new Date(intento.fechaInicio).toLocaleString()}
-                                ${intento.fechaFin ? ` | Finalizado: ${new Date(intento.fechaFin).toLocaleString()}` : ''}
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg text-gray-800">Intento ${numeroIntento}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Iniciado: ${fechaInicioStr}
+                                ${fechaFinStr ? `<br>Finalizado: ${fechaFinStr}` : ''}
                             </p>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right ml-4">
                             <span class="px-3 py-1 rounded-full text-xs font-medium ${estadoClass}">
-                                ${intento.estado}
+                                ${estado}
                             </span>
-                            ${calificacionNum !== null ? `
+                            ${calificacionNum !== null && !isNaN(calificacionNum) ? `
                                 <div class="mt-2">
                                     <span class="text-2xl font-bold ${calificacionNum >= 70 ? 'text-green-600' : calificacionNum >= 50 ? 'text-yellow-600' : 'text-red-600'}">
                                         ${calificacionNum.toFixed(1)}%
                                     </span>
                                 </div>
+                            ` : estado === 'CALIFICADO' ? `
+                                <div class="mt-2">
+                                    <span class="text-sm text-gray-500">Calificación pendiente</span>
+                                </div>
                             ` : ''}
                         </div>
                     </div>
-                    ${calificacion && calificacion.comentarios ? `
-                        <div class="bg-gray-50 rounded p-3 mb-4">
-                            <p class="text-sm text-gray-700"><strong>Comentarios:</strong> ${calificacion.comentarios}</p>
+                    ${comentarios ? `
+                        <div class="bg-gray-50 rounded p-3 mb-3">
+                            <p class="text-sm text-gray-700"><strong>Comentarios:</strong> ${comentarios}</p>
                         </div>
                     ` : ''}
-                    ${intento.estado === 'CALIFICADO' || intento.estado === 'COMPLETADO' ? `
-                        <button onclick="verDetalleIntento(${intento.id})" 
+                    ${estado === 'CALIFICADO' || estado === 'COMPLETADO' ? `
+                        <button onclick="verDetalleIntento(${intentoId || ''})" 
                                 class="text-blue-500 hover:text-blue-700 text-sm font-medium">
                             Ver detalles del intento →
                         </button>
@@ -99,6 +236,10 @@
                 `;
                 container.appendChild(intentoDiv);
             });
+            
+            // Actualizar iconos de Lucide después de agregar los elementos
+            lucide.createIcons();
+            console.log('Intentos renderizados correctamente');
         }
 
         function verDetalleIntento(intentoId) {
@@ -108,4 +249,3 @@
     </script>
 </body>
 </html>
-

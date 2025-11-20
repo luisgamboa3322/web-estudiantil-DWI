@@ -15,3 +15,6 @@ public interface OpcionRespuestaRepository extends JpaRepository<OpcionRespuesta
     List<OpcionRespuesta> findByPreguntaAndEsCorrectaTrue(Pregunta pregunta);
 }
 
+
+
+

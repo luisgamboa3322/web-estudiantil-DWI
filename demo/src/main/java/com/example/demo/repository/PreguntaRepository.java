@@ -15,3 +15,6 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Long> {
     List<Pregunta> findByTipo(TipoPregunta tipo);
 }
 
+
+
+

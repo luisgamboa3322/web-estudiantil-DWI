@@ -20,6 +20,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.example.demo.dto.IntentoEvaluacionResumenDTO;
 
 @Controller
 @RequestMapping("/student")
@@ -243,6 +246,36 @@ public class StudentController {
         return tareaService.findBySemanaId(semanaId);
     }
 
+    @GetMapping("/semanas/{semanaId}/evaluaciones")
+    @ResponseBody
+    public List<Evaluacion> getEvaluacionesBySemana(@PathVariable Long semanaId, Authentication authentication) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return new ArrayList<>();
+        }
+
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElse(null);
+
+        if (student == null) return new ArrayList<>();
+
+        // Verificar que la semana pertenece a un curso asignado al estudiante
+        Semana semana = semanaService.findById(semanaId).orElse(null);
+        if (semana == null) return new ArrayList<>();
+
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            return new ArrayList<>();
+        }
+
+        return evaluacionService.findBySemanaId(semanaId);
+    }
+
     @GetMapping("/tareas/{tareaId}/entrega")
     @ResponseBody
     public Map<String, Object> getEstadoEntrega(@PathVariable Long tareaId, Authentication authentication) {
@@ -386,12 +419,89 @@ public class StudentController {
         }
     }
 
-    // ===========================
-    // API PARA GESTIÓN DE EVALUACIONES (ESTUDIANTE)
-    // ===========================
-    @GetMapping("/semanas/{semanaId}/evaluaciones")
+    @GetMapping("/evaluacion/resultados/{evaluacionId}")
+    @Transactional(readOnly = true)
+    public String verResultados(@PathVariable Long evaluacionId, Authentication authentication, Model model) {
+        // Verificar permisos
+        boolean hasStudentPermission = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+        if (!hasStudentPermission) {
+            return "redirect:/error/acceso-denegado";
+        }
+
+        String email = authentication.getName();
+        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+        Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+
+        // Inicializar relaciones lazy necesarias para evitar errores de serialización
+        Hibernate.initialize(evaluacion.getSemana());
+        if (evaluacion.getSemana() != null) {
+            Hibernate.initialize(evaluacion.getSemana().getCurso());
+        }
+        Hibernate.initialize(evaluacion.getProfesor());
+
+        // Verificar que el estudiante está asignado al curso
+        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
+            .anyMatch(sc -> sc.getCurso().getId().equals(evaluacion.getSemana().getCurso().getId())
+                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
+
+        if (!estaAsignado) {
+            return "redirect:/error/acceso-denegado";
+        }
+
+        // Obtener intentos del estudiante para esta evaluación
+        List<IntentoEvaluacion> intentosEntidad = evaluacionService.getIntentosByEvaluacionIdAndEstudianteId(evaluacionId, student.getId());
+        
+        // Convertir a DTOs
+        List<IntentoEvaluacionResumenDTO> intentos = new ArrayList<>();
+        for (IntentoEvaluacion intento : intentosEntidad) {
+            Hibernate.initialize(intento.getEstudiante());
+            Hibernate.initialize(intento.getCalificacion());
+            
+            Calificacion calificacion = intento.getCalificacion();
+            Student estudiante = intento.getEstudiante();
+            
+            IntentoEvaluacionResumenDTO dto = new IntentoEvaluacionResumenDTO(
+                intento.getId(),
+                intento.getEvaluacion() != null ? intento.getEvaluacion().getId() : null,
+                estudiante != null ? estudiante.getId() : null,
+                estudiante != null ? estudiante.getNombre() : null,
+                estudiante != null ? estudiante.getEmail() : null,
+                intento.getNumeroIntento(),
+                intento.getEstado(),
+                intento.getFechaInicio(),
+                intento.getFechaFin(),
+                calificacion != null ? calificacion.getCalificacion() : null,
+                calificacion != null ? calificacion.getCalificacionAutomatica() : null,
+                calificacion != null ? calificacion.getComentarios() : null
+            );
+            intentos.add(dto);
+        }
+
+        // Serializar a JSON para evitar problemas con la serialización de Thymeleaf
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String intentosJson = objectMapper.writeValueAsString(intentos);
+            model.addAttribute("intentosJson", intentosJson);
+        } catch (Exception e) {
+            System.err.println("Error serializando intentos a JSON: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("intentosJson", "[]");
+        }
+
+        model.addAttribute("evaluacion", evaluacion);
+        model.addAttribute("intentos", intentos);
+        model.addAttribute("studentName", student.getNombre());
+
+        return "student/resultados-evaluacion";
+    }
+
+    @GetMapping("/evaluaciones/{evaluacionId}/intentos")
     @ResponseBody
-    public List<Evaluacion> getEvaluacionesBySemana(@PathVariable Long semanaId, Authentication authentication) {
+    public List<IntentoEvaluacion> getIntentosEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
         // Verificar permisos
         boolean hasStudentPermission = authentication.getAuthorities().stream()
             .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
@@ -404,24 +514,24 @@ public class StudentController {
 
         if (student == null) return new ArrayList<>();
 
-        // Verificar que la semana pertenece a un curso asignado al estudiante
-        Semana semana = semanaService.findById(semanaId).orElse(null);
-        if (semana == null) return new ArrayList<>();
+        // Verificar que el estudiante está asignado al curso de la evaluación
+        Evaluacion evaluacion = evaluacionService.findById(evaluacionId).orElse(null);
+        if (evaluacion == null) return new ArrayList<>();
 
         boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(semana.getCurso().getId())
+            .anyMatch(sc -> sc.getCurso().getId().equals(evaluacion.getSemana().getCurso().getId())
                       && sc.getEstado() == EstadoAsignacion.ACTIVO);
 
         if (!estaAsignado) {
             return new ArrayList<>();
         }
 
-        return evaluacionService.findBySemanaId(semanaId);
+        return evaluacionService.getIntentosByEvaluacionIdAndEstudianteId(evaluacionId, student.getId());
     }
 
     @PostMapping("/evaluaciones/{evaluacionId}/iniciar")
     @ResponseBody
-    public ResponseEntity<?> iniciarIntento(@PathVariable Long evaluacionId, Authentication authentication) {
+    public ResponseEntity<?> iniciarEvaluacion(@PathVariable Long evaluacionId, Authentication authentication) {
         try {
             // Verificar permisos
             boolean hasStudentPermission = authentication.getAuthorities().stream()
@@ -437,11 +547,9 @@ public class StudentController {
                 return ResponseEntity.status(404).body("Estudiante no encontrado");
             }
 
-            // Verificar que la evaluación pertenece a un curso asignado al estudiante
-            Evaluacion evaluacion = evaluacionService.findById(evaluacionId).orElse(null);
-            if (evaluacion == null) {
-                return ResponseEntity.status(404).body("Evaluación no encontrada");
-            }
+            // Verificar que el estudiante está asignado al curso de la evaluación
+            Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
 
             boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
                 .anyMatch(sc -> sc.getCurso().getId().equals(evaluacion.getSemana().getCurso().getId())
@@ -453,112 +561,11 @@ public class StudentController {
 
             IntentoEvaluacion intento = evaluacionService.iniciarIntento(evaluacionId, student.getId());
             return ResponseEntity.ok(intento);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error iniciando intento: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
-    }
-
-    @GetMapping("/intentos/{intentoId}")
-    @ResponseBody
-    public ResponseEntity<?> getIntento(@PathVariable Long intentoId, Authentication authentication) {
-        try {
-            // Verificar permisos
-            boolean hasStudentPermission = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-            if (!hasStudentPermission) {
-                return ResponseEntity.status(403).body("Acceso denegado");
-            }
-
-            String email = authentication.getName();
-            Student student = studentService.findByEmail(email).orElse(null);
-
-            if (student == null) {
-                return ResponseEntity.status(404).body("Estudiante no encontrado");
-            }
-
-            // Buscar el intento (necesitamos buscar en todas las evaluaciones)
-            // Por simplicidad, asumimos que el intento pertenece al estudiante
-            // En producción, deberías tener un método en el servicio para buscar por ID
-            return ResponseEntity.ok().body("Intento encontrado");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error obteniendo intento: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/intentos/{intentoId}/respuestas")
-    @ResponseBody
-    public ResponseEntity<?> guardarRespuesta(@PathVariable Long intentoId, @RequestBody Map<String, Object> payload, Authentication authentication) {
-        try {
-            // Verificar permisos
-            boolean hasStudentPermission = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-            if (!hasStudentPermission) {
-                return ResponseEntity.status(403).body("Acceso denegado");
-            }
-
-            String email = authentication.getName();
-            Student student = studentService.findByEmail(email).orElse(null);
-
-            if (student == null) {
-                return ResponseEntity.status(404).body("Estudiante no encontrado");
-            }
-
-            Long preguntaId = Long.parseLong(payload.get("preguntaId").toString());
-            String respuestaTexto = (String) payload.get("respuestaTexto");
-            Long opcionSeleccionadaId = payload.get("opcionSeleccionadaId") != null ? 
-                Long.parseLong(payload.get("opcionSeleccionadaId").toString()) : null;
-            String opcionesOrdenadas = (String) payload.get("opcionesOrdenadas");
-
-            RespuestaEstudiante respuesta = evaluacionService.guardarRespuesta(intentoId, preguntaId, 
-                respuestaTexto, opcionSeleccionadaId, opcionesOrdenadas);
-            
-            return ResponseEntity.ok(respuesta);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error guardando respuesta: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/intentos/{intentoId}/finalizar")
-    @ResponseBody
-    public ResponseEntity<?> finalizarIntento(@PathVariable Long intentoId, Authentication authentication) {
-        try {
-            // Verificar permisos
-            boolean hasStudentPermission = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-            if (!hasStudentPermission) {
-                return ResponseEntity.status(403).body("Acceso denegado");
-            }
-
-            String email = authentication.getName();
-            Student student = studentService.findByEmail(email).orElse(null);
-
-            if (student == null) {
-                return ResponseEntity.status(404).body("Estudiante no encontrado");
-            }
-
-            IntentoEvaluacion intento = evaluacionService.finalizarIntento(intentoId);
-            return ResponseEntity.ok(intento);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error finalizando intento: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/evaluaciones/{evaluacionId}/intentos")
-    @ResponseBody
-    public List<IntentoEvaluacion> getMisIntentos(@PathVariable Long evaluacionId, Authentication authentication) {
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
-            return new ArrayList<>();
-        }
-
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElse(null);
-
-        if (student == null) return new ArrayList<>();
-
-        return evaluacionService.getIntentosByEvaluacionIdAndEstudianteId(evaluacionId, student.getId());
     }
 
     @GetMapping("/evaluacion/{intentoId}")
@@ -583,64 +590,109 @@ public class StudentController {
         }
 
         // Verificar que el intento está en progreso
-        if (intento.isCompletado() || intento.isExpirado()) {
+        if (intento.getEstado() != EstadoIntento.EN_PROGRESO) {
             return "redirect:/student/evaluacion/resultados/" + intento.getEvaluacion().getId();
         }
 
-        // Cargar preguntas con sus opciones
-        List<Pregunta> preguntas = evaluacionService.getPreguntasByEvaluacionId(intento.getEvaluacion().getId());
-        // Cargar opciones para cada pregunta e inicializar para serialización
-        for (Pregunta pregunta : preguntas) {
-            List<OpcionRespuesta> opciones = evaluacionService.getOpcionesByPreguntaId(pregunta.getId());
-            pregunta.setOpciones(opciones);
-            // Inicializar opciones para asegurar serialización correcta
+        Evaluacion evaluacion = intento.getEvaluacion();
+        
+        // Inicializar relaciones lazy
+        Hibernate.initialize(evaluacion.getPreguntas());
+        for (Pregunta pregunta : evaluacion.getPreguntas()) {
             Hibernate.initialize(pregunta.getOpciones());
         }
-        
-        // Inicializar relaciones lazy de Evaluacion para evitar errores de serialización
-        Evaluacion evaluacion = intento.getEvaluacion();
-        Hibernate.initialize(evaluacion.getSemana());
-        Hibernate.initialize(evaluacion.getProfesor());
-        
-        model.addAttribute("intento", intento);
+        Hibernate.initialize(intento.getRespuestas());
+
+        // Cargar respuestas guardadas
+        List<RespuestaEstudiante> respuestasGuardadas = intento.getRespuestas();
+
         model.addAttribute("evaluacion", evaluacion);
-        model.addAttribute("preguntas", preguntas);
+        model.addAttribute("intento", intento);
+        model.addAttribute("preguntas", evaluacion.getPreguntas());
+        model.addAttribute("respuestasGuardadas", respuestasGuardadas);
         model.addAttribute("studentName", student.getNombre());
 
         return "student/realizar-evaluacion";
     }
 
-    @GetMapping("/evaluacion/resultados/{evaluacionId}")
-    public String verResultados(@PathVariable Long evaluacionId, Authentication authentication, Model model) {
-        // Verificar permisos
-        boolean hasStudentPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
-        if (!hasStudentPermission) {
-            return "redirect:/error/acceso-denegado";
+    @PostMapping("/intentos/{intentoId}/respuestas")
+    @ResponseBody
+    public ResponseEntity<?> guardarRespuesta(@PathVariable Long intentoId,
+                                            @RequestBody Map<String, Object> payload,
+                                            Authentication authentication) {
+        try {
+            // Verificar permisos
+            boolean hasStudentPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+            if (!hasStudentPermission) {
+                return ResponseEntity.status(403).body("Acceso denegado");
+            }
+
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student == null) {
+                return ResponseEntity.status(404).body("Estudiante no encontrado");
+            }
+
+            // Verificar que el intento pertenece al estudiante
+            IntentoEvaluacion intento = evaluacionService.findIntentoById(intentoId)
+                .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+
+            if (!intento.getEstudiante().getId().equals(student.getId())) {
+                return ResponseEntity.status(403).body("No tienes acceso a este intento");
+            }
+
+            Long preguntaId = Long.parseLong(payload.get("preguntaId").toString());
+            String respuestaTexto = payload.containsKey("respuestaTexto") ? (String) payload.get("respuestaTexto") : null;
+            Long opcionSeleccionadaId = payload.containsKey("opcionSeleccionadaId") && payload.get("opcionSeleccionadaId") != null 
+                ? Long.parseLong(payload.get("opcionSeleccionadaId").toString()) : null;
+            String opcionesOrdenadas = payload.containsKey("opcionesOrdenadas") ? (String) payload.get("opcionesOrdenadas") : null;
+
+            RespuestaEstudiante respuesta = evaluacionService.guardarRespuesta(
+                intentoId, preguntaId, respuestaTexto, opcionSeleccionadaId, opcionesOrdenadas);
+
+            return ResponseEntity.ok(respuesta);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
+    }
 
-        String email = authentication.getName();
-        Student student = studentService.findByEmail(email).orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+    @PostMapping("/intentos/{intentoId}/finalizar")
+    @ResponseBody
+    public ResponseEntity<?> finalizarIntento(@PathVariable Long intentoId, Authentication authentication) {
+        try {
+            // Verificar permisos
+            boolean hasStudentPermission = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_STUDENT_DASHBOARD"));
+            if (!hasStudentPermission) {
+                return ResponseEntity.status(403).body("Acceso denegado");
+            }
 
-        Evaluacion evaluacion = evaluacionService.findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElse(null);
 
-        // Verificar que el estudiante está asignado al curso
-        boolean estaAsignado = studentCursoService.findByStudentId(student.getId()).stream()
-            .anyMatch(sc -> sc.getCurso().getId().equals(evaluacion.getSemana().getCurso().getId())
-                      && sc.getEstado() == EstadoAsignacion.ACTIVO);
+            if (student == null) {
+                return ResponseEntity.status(404).body("Estudiante no encontrado");
+            }
 
-        if (!estaAsignado) {
-            return "redirect:/error/acceso-denegado";
+            // Verificar que el intento pertenece al estudiante
+            IntentoEvaluacion intento = evaluacionService.findIntentoById(intentoId)
+                .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+
+            if (!intento.getEstudiante().getId().equals(student.getId())) {
+                return ResponseEntity.status(403).body("No tienes acceso a este intento");
+            }
+
+            IntentoEvaluacion intentoFinalizado = evaluacionService.finalizarIntento(intentoId);
+            return ResponseEntity.ok(intentoFinalizado);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
-
-        List<IntentoEvaluacion> intentos = evaluacionService.getIntentosByEvaluacionIdAndEstudianteId(evaluacionId, student.getId());
-
-        model.addAttribute("evaluacion", evaluacion);
-        model.addAttribute("intentos", intentos);
-        model.addAttribute("studentName", student.getNombre());
-
-        return "student/resultados-evaluacion";
     }
 
 }

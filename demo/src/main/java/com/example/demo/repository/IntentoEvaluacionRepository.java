@@ -23,3 +23,6 @@ public interface IntentoEvaluacionRepository extends JpaRepository<IntentoEvalua
     Integer countByEvaluacionIdAndEstudianteId(Long evaluacionId, Long estudianteId);
 }
 
+
+
+

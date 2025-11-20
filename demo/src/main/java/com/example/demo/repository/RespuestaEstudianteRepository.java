@@ -18,3 +18,6 @@ public interface RespuestaEstudianteRepository extends JpaRepository<RespuestaEs
     Optional<RespuestaEstudiante> findByIntentoIdAndPreguntaId(Long intentoId, Long preguntaId);
 }
 
+
+
+

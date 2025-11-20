@@ -2,13 +2,16 @@ package com.example.demo.service;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EvaluacionService {
@@ -17,13 +20,10 @@ public class EvaluacionService {
     private EvaluacionRepository evaluacionRepository;
 
     @Autowired
-    private PreguntaRepository preguntaRepository;
-
-    @Autowired
-    private OpcionRespuestaRepository opcionRespuestaRepository;
-
-    @Autowired
     private IntentoEvaluacionRepository intentoEvaluacionRepository;
+
+    @Autowired
+    private PreguntaRepository preguntaRepository;
 
     @Autowired
     private RespuestaEstudianteRepository respuestaEstudianteRepository;
@@ -32,378 +32,331 @@ public class EvaluacionService {
     private CalificacionRepository calificacionRepository;
 
     @Autowired
-    private com.example.demo.repository.StudentRepository studentRepository;
+    private OpcionRespuestaRepository opcionRespuestaRepository;
 
-    // ===========================
-    // CRUD EVALUACIONES
-    // ===========================
-    public List<Evaluacion> findAll() {
-        return evaluacionRepository.findAll();
-    }
+    @Autowired
+    private SemanaService semanaService;
+
+    @Autowired
+    private ProfessorService professorService;
+
+    @Autowired
+    private StudentService studentService;
 
     public Optional<Evaluacion> findById(Long id) {
         return evaluacionRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<Evaluacion> findBySemanaId(Long semanaId) {
         return evaluacionRepository.findBySemanaIdOrderByFechaCreacion(semanaId);
     }
 
-    public List<Evaluacion> findByProfesor(Professor profesor) {
-        return evaluacionRepository.findByProfesor(profesor);
-    }
-
-    public List<Evaluacion> findByEstado(EstadoEvaluacion estado) {
-        return evaluacionRepository.findByEstado(estado);
+    @Transactional(readOnly = true)
+    public List<IntentoEvaluacion> getIntentosByEvaluacionIdAndEstudianteId(Long evaluacionId, Long estudianteId) {
+        List<IntentoEvaluacion> intentos = intentoEvaluacionRepository.findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
+        // Inicializar relaciones lazy
+        for (IntentoEvaluacion intento : intentos) {
+            Hibernate.initialize(intento.getEstudiante());
+            Hibernate.initialize(intento.getCalificacion());
+            Hibernate.initialize(intento.getEvaluacion());
+        }
+        return intentos;
     }
 
     @Transactional
-    public Evaluacion save(Evaluacion evaluacion) {
+    public Evaluacion createEvaluacion(Long semanaId, String titulo, String descripcion, TipoEvaluacion tipo,
+                                      LocalDateTime fechaInicio, LocalDateTime fechaLimite,
+                                      Integer tiempoLimiteMinutos, Integer intentosMaximos,
+                                      int puntosMaximos, Boolean mostrarResultadosInmediatos,
+                                      Boolean permitirRevisarRespuestas, Long profesorId) {
+        Semana semana = semanaService.findById(semanaId)
+            .orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+        Professor profesor = professorService.getById(profesorId)
+            .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado"));
+
+        Evaluacion evaluacion = new Evaluacion();
+        evaluacion.setTitulo(titulo);
+        evaluacion.setDescripcion(descripcion);
+        evaluacion.setTipo(tipo);
+        evaluacion.setFechaInicio(fechaInicio);
+        evaluacion.setFechaLimite(fechaLimite);
+        evaluacion.setTiempoLimiteMinutos(tiempoLimiteMinutos);
+        evaluacion.setIntentosMaximos(intentosMaximos != null ? intentosMaximos : 1);
+        evaluacion.setPuntosMaximos(puntosMaximos);
+        evaluacion.setMostrarResultadosInmediatos(mostrarResultadosInmediatos != null ? mostrarResultadosInmediatos : false);
+        evaluacion.setPermitirRevisarRespuestas(permitirRevisarRespuestas != null ? permitirRevisarRespuestas : false);
+        evaluacion.setSemana(semana);
+        evaluacion.setProfesor(profesor);
+        evaluacion.setEstado(EstadoEvaluacion.BORRADOR);
+
         return evaluacionRepository.save(evaluacion);
     }
 
     @Transactional
-    public Evaluacion createEvaluacion(String titulo, String descripcion, TipoEvaluacion tipo,
-                                      LocalDateTime fechaInicio, LocalDateTime fechaLimite,
-                                      Integer tiempoLimiteMinutos, Integer intentosMaximos,
-                                      int puntosMaximos, Semana semana, Professor profesor) {
-        Evaluacion evaluacion = new Evaluacion(titulo, descripcion, tipo, fechaInicio, fechaLimite,
-                                               tiempoLimiteMinutos, intentosMaximos, puntosMaximos,
-                                               semana, profesor);
-        return save(evaluacion);
-    }
-
-    @Transactional
-    public Evaluacion update(Long id, Evaluacion evaluacionDetails) {
-        Evaluacion evaluacion = findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
-        
-        evaluacion.setTitulo(evaluacionDetails.getTitulo());
-        evaluacion.setDescripcion(evaluacionDetails.getDescripcion());
-        evaluacion.setTipo(evaluacionDetails.getTipo());
-        evaluacion.setFechaInicio(evaluacionDetails.getFechaInicio());
-        evaluacion.setFechaLimite(evaluacionDetails.getFechaLimite());
-        evaluacion.setTiempoLimiteMinutos(evaluacionDetails.getTiempoLimiteMinutos());
-        evaluacion.setIntentosMaximos(evaluacionDetails.getIntentosMaximos());
-        evaluacion.setPuntosMaximos(evaluacionDetails.getPuntosMaximos());
-        evaluacion.setMostrarResultadosInmediatos(evaluacionDetails.getMostrarResultadosInmediatos());
-        evaluacion.setPermitirRevisarRespuestas(evaluacionDetails.getPermitirRevisarRespuestas());
-        
-        return save(evaluacion);
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        if (!evaluacionRepository.existsById(id)) {
-            throw new IllegalArgumentException("Evaluación no encontrada");
-        }
-        evaluacionRepository.deleteById(id);
-    }
-
-    @Transactional
-    public Evaluacion publicarEvaluacion(Long id) {
-        Evaluacion evaluacion = findById(id)
+    public Evaluacion publicarEvaluacion(Long evaluacionId) {
+        Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
             .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
         
         if (evaluacion.getPreguntas().isEmpty()) {
             throw new IllegalStateException("No se puede publicar una evaluación sin preguntas");
         }
-        
+
         evaluacion.setEstado(EstadoEvaluacion.PUBLICADA);
-        return save(evaluacion);
+        return evaluacionRepository.save(evaluacion);
     }
 
     @Transactional
-    public Evaluacion cerrarEvaluacion(Long id) {
-        Evaluacion evaluacion = findById(id)
+    public void deleteEvaluacion(Long evaluacionId) {
+        Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
             .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
-        
-        evaluacion.setEstado(EstadoEvaluacion.CERRADA);
-        return save(evaluacion);
+        evaluacionRepository.delete(evaluacion);
     }
 
-    // ===========================
-    // GESTIÓN DE PREGUNTAS
-    // ===========================
-    @Transactional
-    public Pregunta agregarPregunta(Long evaluacionId, String enunciado, TipoPregunta tipo, int puntos) {
-        Evaluacion evaluacion = findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
-        
-        Pregunta pregunta = new Pregunta(enunciado, tipo, puntos, evaluacion);
-        pregunta.setOrden(evaluacion.getPreguntas().size() + 1);
-        
-        Pregunta saved = preguntaRepository.save(pregunta);
-        evaluacion.getPreguntas().add(saved);
-        
-        return saved;
-    }
-
-    @Transactional
-    public OpcionRespuesta agregarOpcion(Long preguntaId, String texto, Boolean esCorrecta, Integer orden) {
-        Pregunta pregunta = preguntaRepository.findById(preguntaId)
-            .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
-        
-        OpcionRespuesta opcion = new OpcionRespuesta(texto, esCorrecta, orden, pregunta);
-        OpcionRespuesta saved = opcionRespuestaRepository.save(opcion);
-        pregunta.getOpciones().add(saved);
-        
-        return saved;
-    }
-
-    public List<Pregunta> getPreguntasByEvaluacionId(Long evaluacionId) {
-        return preguntaRepository.findByEvaluacionIdOrderByOrden(evaluacionId);
-    }
-
-    public List<OpcionRespuesta> getOpcionesByPreguntaId(Long preguntaId) {
-        return opcionRespuestaRepository.findByPreguntaIdOrderByOrden(preguntaId);
-    }
-
-    @Transactional
-    public void eliminarPregunta(Long preguntaId) {
-        preguntaRepository.deleteById(preguntaId);
-    }
-
-    // ===========================
-    // GESTIÓN DE INTENTOS
-    // ===========================
     @Transactional
     public IntentoEvaluacion iniciarIntento(Long evaluacionId, Long estudianteId) {
-        Evaluacion evaluacion = findById(evaluacionId)
+        Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
             .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
-        
-        Student estudiante = studentRepository.findById(estudianteId)
-            .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
-        
-        // Verificar si puede iniciar un nuevo intento
-        int intentosActuales = intentoEvaluacionRepository.countByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
-        if (intentosActuales >= evaluacion.getIntentosMaximos()) {
-            throw new IllegalStateException("Has alcanzado el número máximo de intentos permitidos");
+
+        // Verificar que la evaluación esté publicada o en curso
+        if (evaluacion.getEstado() != EstadoEvaluacion.PUBLICADA && 
+            evaluacion.getEstado() != EstadoEvaluacion.EN_CURSO) {
+            throw new IllegalStateException("La evaluación no está disponible");
         }
-        
-        // Verificar si hay un intento en progreso
+
+        // Verificar fechas
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(evaluacion.getFechaInicio())) {
+            throw new IllegalStateException("La evaluación aún no ha comenzado");
+        }
+        if (now.isAfter(evaluacion.getFechaLimite())) {
+            throw new IllegalStateException("La evaluación ya ha vencido");
+        }
+
+        // Buscar intentos en progreso
         List<IntentoEvaluacion> intentosEnProgreso = intentoEvaluacionRepository
             .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
             .stream()
             .filter(i -> i.getEstado() == EstadoIntento.EN_PROGRESO)
-            .toList();
-        
+            .collect(Collectors.toList());
+
         if (!intentosEnProgreso.isEmpty()) {
-            throw new IllegalStateException("Ya tienes un intento en progreso");
+            return intentosEnProgreso.get(0); // Retornar el intento en progreso
         }
-        
-        // Verificar que la evaluación esté disponible
-        if (!evaluacion.puedeIniciar()) {
-            throw new IllegalStateException("La evaluación no está disponible en este momento");
+
+        // Contar intentos completados
+        List<IntentoEvaluacion> intentosCompletados = intentoEvaluacionRepository
+            .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
+            .stream()
+            .filter(i -> i.getEstado() == EstadoIntento.COMPLETADO || i.getEstado() == EstadoIntento.CALIFICADO)
+            .collect(Collectors.toList());
+
+        if (intentosCompletados.size() >= evaluacion.getIntentosMaximos()) {
+            throw new IllegalStateException("Has alcanzado el número máximo de intentos");
         }
+
+        // Crear nuevo intento
+        Integer numeroIntento = intentosCompletados.size() + 1;
+        Student estudiante = studentService.findById(estudianteId)
+            .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
         
-        Integer numeroIntento = intentosActuales + 1;
-        IntentoEvaluacion intento = new IntentoEvaluacion(numeroIntento, evaluacion, estudiante);
+        IntentoEvaluacion intento = new IntentoEvaluacion();
+        intento.setNumeroIntento(numeroIntento);
+        intento.setEvaluacion(evaluacion);
+        intento.setEstudiante(estudiante);
+        intento.setEstado(EstadoIntento.EN_PROGRESO);
+        intento.setFechaInicio(LocalDateTime.now());
         
+        // Calcular fecha límite del intento si hay tiempo límite
+        if (evaluacion.getTiempoLimiteMinutos() != null) {
+            intento.setFechaLimiteIntento(intento.getFechaInicio().plusMinutes(evaluacion.getTiempoLimiteMinutos()));
+        }
+
         return intentoEvaluacionRepository.save(intento);
     }
 
-    public List<IntentoEvaluacion> getIntentosByEvaluacionIdAndEstudianteId(Long evaluacionId, Long estudianteId) {
-        return intentoEvaluacionRepository.findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
-    }
-
-    public Optional<IntentoEvaluacion> getIntentoEnProgreso(Long evaluacionId, Long estudianteId) {
-        return intentoEvaluacionRepository
-            .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
-            .stream()
-            .filter(i -> i.getEstado() == EstadoIntento.EN_PROGRESO)
-            .findFirst();
-    }
-
+    @Transactional(readOnly = true)
     public Optional<IntentoEvaluacion> findIntentoById(Long intentoId) {
-        return intentoEvaluacionRepository.findById(intentoId);
+        Optional<IntentoEvaluacion> intento = intentoEvaluacionRepository.findById(intentoId);
+        if (intento.isPresent()) {
+            Hibernate.initialize(intento.get().getEvaluacion());
+            Hibernate.initialize(intento.get().getEvaluacion().getPreguntas());
+            for (Pregunta pregunta : intento.get().getEvaluacion().getPreguntas()) {
+                Hibernate.initialize(pregunta.getOpciones());
+            }
+            Hibernate.initialize(intento.get().getRespuestas());
+        }
+        return intento;
+    }
+
+    @Transactional
+    public RespuestaEstudiante guardarRespuesta(Long intentoId, Long preguntaId, String respuestaTexto,
+                                                Long opcionSeleccionadaId, String opcionesOrdenadas) {
+        IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
+            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+
+        if (intento.getEstado() != EstadoIntento.EN_PROGRESO) {
+            throw new IllegalStateException("No se puede modificar un intento que ya está completado");
+        }
+
+        Pregunta pregunta = preguntaRepository.findById(preguntaId)
+            .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
+
+        // Buscar respuesta existente o crear nueva
+        Optional<RespuestaEstudiante> respuestaOpt = respuestaEstudianteRepository
+            .findByIntentoIdAndPreguntaId(intentoId, preguntaId);
+
+        RespuestaEstudiante respuesta;
+        if (respuestaOpt.isPresent()) {
+            respuesta = respuestaOpt.get();
+        } else {
+            respuesta = new RespuestaEstudiante(intento, pregunta);
+        }
+
+        respuesta.setRespuestaTexto(respuestaTexto);
+        respuesta.setOpcionSeleccionadaId(opcionSeleccionadaId);
+        respuesta.setOpcionesOrdenadas(opcionesOrdenadas);
+        respuesta.setFechaRespuesta(LocalDateTime.now());
+
+        return respuestaEstudianteRepository.save(respuesta);
     }
 
     @Transactional
     public IntentoEvaluacion finalizarIntento(Long intentoId) {
         IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
             .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
-        
-        if (intento.isExpirado()) {
-            intento.setEstado(EstadoIntento.EXPIRADO);
-        } else {
-            intento.setEstado(EstadoIntento.COMPLETADO);
+
+        if (intento.getEstado() != EstadoIntento.EN_PROGRESO) {
+            throw new IllegalStateException("El intento ya está finalizado");
         }
-        
+
+        intento.setEstado(EstadoIntento.COMPLETADO);
         intento.setFechaFin(LocalDateTime.now());
-        
+
         // Calificar automáticamente si es posible
-        calificarIntentoAutomaticamente(intentoId);
-        
+        calificarIntentoAutomaticamente(intento);
+
         return intentoEvaluacionRepository.save(intento);
     }
 
-    // ===========================
-    // GESTIÓN DE RESPUESTAS
-    // ===========================
     @Transactional
-    public RespuestaEstudiante guardarRespuesta(Long intentoId, Long preguntaId, 
-                                                String respuestaTexto, Long opcionSeleccionadaId,
-                                                String opcionesOrdenadas) {
-        IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
-            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
-        
-        if (intento.isCompletado() || intento.isExpirado()) {
-            throw new IllegalStateException("No se puede modificar un intento completado o expirado");
+    private void calificarIntentoAutomaticamente(IntentoEvaluacion intento) {
+        List<RespuestaEstudiante> respuestas = respuestaEstudianteRepository.findByIntentoId(intento.getId());
+
+        int puntosTotales = 0;
+        int puntosMaximos = 0;
+
+        for (RespuestaEstudiante respuesta : respuestas) {
+            Pregunta pregunta = respuesta.getPregunta();
+            puntosMaximos += pregunta.getPuntos();
+
+            // Calificar según el tipo de pregunta
+            if (pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 
+                pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
+                
+                if (respuesta.getOpcionSeleccionadaId() != null) {
+                    Optional<OpcionRespuesta> opcionOpt = opcionRespuestaRepository.findById(respuesta.getOpcionSeleccionadaId());
+                    if (opcionOpt.isPresent() && opcionOpt.get().getEsCorrecta()) {
+                        respuesta.setEsCorrecta(true);
+                        respuesta.setPuntosObtenidos(pregunta.getPuntos());
+                        puntosTotales += pregunta.getPuntos();
+                    } else {
+                        respuesta.setEsCorrecta(false);
+                        respuesta.setPuntosObtenidos(0);
+                    }
+                }
+            } else if (pregunta.getTipo() == TipoPregunta.COMPLETAR) {
+                // Para completar, comparar texto (case-insensitive, sin espacios extra)
+                if (respuesta.getRespuestaTexto() != null && pregunta.getOpciones().size() > 0) {
+                    String respuestaNormalizada = respuesta.getRespuestaTexto().trim().toLowerCase();
+                    String respuestaCorrecta = pregunta.getOpciones().get(0).getTexto().trim().toLowerCase();
+                    if (respuestaNormalizada.equals(respuestaCorrecta)) {
+                        respuesta.setEsCorrecta(true);
+                        respuesta.setPuntosObtenidos(pregunta.getPuntos());
+                        puntosTotales += pregunta.getPuntos();
+                    } else {
+                        respuesta.setEsCorrecta(false);
+                        respuesta.setPuntosObtenidos(0);
+                    }
+                }
+            }
+            // Para DESARROLLO y ORDENAR, no se califica automáticamente
+
+            respuestaEstudianteRepository.save(respuesta);
         }
-        
+
+        // Calcular calificación final
+        double calificacionFinal = puntosMaximos > 0 
+            ? (double) puntosTotales / puntosMaximos * 100.0 
+            : 0.0;
+
+        // Crear o actualizar calificación
+        Optional<Calificacion> calificacionOpt = calificacionRepository.findByIntentoId(intento.getId());
+        Calificacion calificacion;
+        if (calificacionOpt.isPresent()) {
+            calificacion = calificacionOpt.get();
+        } else {
+            calificacion = new Calificacion();
+            calificacion.setIntento(intento);
+        }
+
+        calificacion.setCalificacion(calificacionFinal);
+        calificacion.setCalificacionAutomatica(true);
+        calificacion.setFechaCalificacion(LocalDateTime.now());
+
+        calificacionRepository.save(calificacion);
+
+        // Actualizar estado del intento
+        intento.setEstado(EstadoIntento.CALIFICADO);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Pregunta> getPreguntasByEvaluacionId(Long evaluacionId) {
+        List<Pregunta> preguntas = preguntaRepository.findByEvaluacionIdOrderByOrden(evaluacionId);
+        for (Pregunta pregunta : preguntas) {
+            Hibernate.initialize(pregunta.getOpciones());
+        }
+        return preguntas;
+    }
+
+    @Transactional
+    public Pregunta createPregunta(Long evaluacionId, String enunciado, TipoPregunta tipo, int puntos, 
+                                   List<Map<String, Object>> opcionesData) {
+        Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
+            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+
+        // Obtener el siguiente orden
+        List<Pregunta> preguntasExistentes = preguntaRepository.findByEvaluacionIdOrderByOrden(evaluacionId);
+        int siguienteOrden = preguntasExistentes.size() + 1;
+
+        Pregunta pregunta = new Pregunta();
+        pregunta.setEnunciado(enunciado);
+        pregunta.setTipo(tipo);
+        pregunta.setPuntos(puntos);
+        pregunta.setEvaluacion(evaluacion);
+        pregunta.setOrden(siguienteOrden);
+
+        pregunta = preguntaRepository.save(pregunta);
+
+        // Crear opciones si es necesario
+        if (opcionesData != null && !opcionesData.isEmpty()) {
+            for (Map<String, Object> opcionData : opcionesData) {
+                OpcionRespuesta opcion = new OpcionRespuesta();
+                opcion.setTexto((String) opcionData.get("texto"));
+                opcion.setEsCorrecta((Boolean) opcionData.get("esCorrecta"));
+                opcion.setOrden((Integer) opcionData.get("orden"));
+                opcion.setPregunta(pregunta);
+                opcionRespuestaRepository.save(opcion);
+            }
+        }
+
+        return pregunta;
+    }
+
+    @Transactional
+    public void deletePregunta(Long preguntaId) {
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
             .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
-        
-        // Buscar respuesta existente o crear nueva
-        RespuestaEstudiante respuesta = respuestaEstudianteRepository
-            .findByIntentoIdAndPreguntaId(intentoId, preguntaId)
-            .orElse(new RespuestaEstudiante(intento, pregunta));
-        
-        respuesta.setRespuestaTexto(respuestaTexto);
-        respuesta.setOpcionSeleccionadaId(opcionSeleccionadaId);
-        respuesta.setOpcionesOrdenadas(opcionesOrdenadas);
-        respuesta.setFechaRespuesta(LocalDateTime.now());
-        
-        // Calificar automáticamente si es posible
-        calificarRespuestaAutomaticamente(respuesta, pregunta);
-        
-        return respuestaEstudianteRepository.save(respuesta);
-    }
-
-    public List<RespuestaEstudiante> getRespuestasByIntentoId(Long intentoId) {
-        return respuestaEstudianteRepository.findByIntentoId(intentoId);
-    }
-
-    // ===========================
-    // CALIFICACIÓN AUTOMÁTICA
-    // ===========================
-    @Transactional
-    private void calificarRespuestaAutomaticamente(RespuestaEstudiante respuesta, Pregunta pregunta) {
-        if (pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 
-            pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
-            
-            if (respuesta.getOpcionSeleccionadaId() != null) {
-                OpcionRespuesta opcionSeleccionada = opcionRespuestaRepository
-                    .findById(respuesta.getOpcionSeleccionadaId())
-                    .orElse(null);
-                
-                if (opcionSeleccionada != null) {
-                    respuesta.setEsCorrecta(opcionSeleccionada.getEsCorrecta());
-                    respuesta.setPuntosObtenidos(opcionSeleccionada.getEsCorrecta() ? pregunta.getPuntos() : 0);
-                }
-            }
-        } else if (pregunta.getTipo() == TipoPregunta.ORDENAR) {
-            // Verificar orden correcto
-            List<OpcionRespuesta> opcionesCorrectas = opcionRespuestaRepository
-                .findByPreguntaIdOrderByOrden(pregunta.getId());
-            
-            if (respuesta.getOpcionesOrdenadas() != null && !opcionesCorrectas.isEmpty()) {
-                // Comparar orden (simplificado - se puede mejorar)
-                boolean ordenCorrecto = verificarOrdenCorrecto(respuesta.getOpcionesOrdenadas(), opcionesCorrectas);
-                respuesta.setEsCorrecta(ordenCorrecto);
-                respuesta.setPuntosObtenidos(ordenCorrecto ? pregunta.getPuntos() : 0);
-            }
-        }
-        // DESARROLLO y COMPLETAR requieren calificación manual
-    }
-
-    private boolean verificarOrdenCorrecto(String opcionesOrdenadas, List<OpcionRespuesta> opcionesCorrectas) {
-        try {
-            // Parsear JSON array de IDs
-            String[] ids = opcionesOrdenadas.replace("[", "").replace("]", "").replace("\"", "").split(",");
-            if (ids.length != opcionesCorrectas.size()) return false;
-            
-            for (int i = 0; i < ids.length; i++) {
-                Long id = Long.parseLong(ids[i].trim());
-                if (!opcionesCorrectas.get(i).getId().equals(id)) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Transactional
-    private void calificarIntentoAutomaticamente(Long intentoId) {
-        IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
-            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
-        
-        List<RespuestaEstudiante> respuestas = respuestaEstudianteRepository.findByIntentoId(intentoId);
-        
-        int puntosTotales = 0;
-        int puntosMaximos = intento.getEvaluacion().getPuntosMaximos();
-        
-        for (RespuestaEstudiante respuesta : respuestas) {
-            if (respuesta.getPuntosObtenidos() != null) {
-                puntosTotales += respuesta.getPuntosObtenidos();
-            }
-        }
-        
-        // Calcular calificación (0-100)
-        double calificacion = puntosMaximos > 0 ? (puntosTotales * 100.0) / puntosMaximos : 0;
-        
-        // Crear o actualizar calificación
-        Calificacion cal = calificacionRepository.findByIntentoId(intentoId)
-            .orElse(new Calificacion(calificacion, intento, true));
-        
-        cal.setCalificacion(calificacion);
-        cal.setCalificacionAutomatica(true);
-        calificacionRepository.save(cal);
-        
-        intento.setEstado(EstadoIntento.CALIFICADO);
-        intentoEvaluacionRepository.save(intento);
-    }
-
-    // ===========================
-    // CALIFICACIÓN MANUAL
-    // ===========================
-    @Transactional
-    public Calificacion calificarIntentoManual(Long intentoId, Double calificacion, String comentarios) {
-        IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
-            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
-        
-        Calificacion cal = calificacionRepository.findByIntentoId(intentoId)
-            .orElse(new Calificacion(calificacion, intento, false));
-        
-        cal.setCalificacion(calificacion);
-        cal.setComentarios(comentarios);
-        cal.setCalificacionAutomatica(false);
-        
-        Calificacion saved = calificacionRepository.save(cal);
-        intento.setEstado(EstadoIntento.CALIFICADO);
-        intentoEvaluacionRepository.save(intento);
-        
-        return saved;
-    }
-
-    @Transactional
-    public RespuestaEstudiante calificarRespuestaManual(Long respuestaId, Integer puntosObtenidos, String retroalimentacion) {
-        RespuestaEstudiante respuesta = respuestaEstudianteRepository.findById(respuestaId)
-            .orElseThrow(() -> new IllegalArgumentException("Respuesta no encontrada"));
-        
-        respuesta.setPuntosObtenidos(puntosObtenidos);
-        respuesta.setRetroalimentacion(retroalimentacion);
-        
-        return respuestaEstudianteRepository.save(respuesta);
-    }
-
-    // ===========================
-    // VERIFICACIÓN DE TIEMPO
-    // ===========================
-    @Transactional
-    public void verificarIntentosExpirados() {
-        List<IntentoEvaluacion> intentosEnProgreso = intentoEvaluacionRepository.findAll()
-            .stream()
-            .filter(i -> i.getEstado() == EstadoIntento.EN_PROGRESO)
-            .filter(IntentoEvaluacion::isExpirado)
-            .toList();
-        
-        for (IntentoEvaluacion intento : intentosEnProgreso) {
-            finalizarIntento(intento.getId());
-        }
+        preguntaRepository.delete(pregunta);
     }
 }
-

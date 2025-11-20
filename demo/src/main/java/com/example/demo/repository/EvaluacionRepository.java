@@ -23,3 +23,6 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Long> {
     List<Evaluacion> findByFechaLimiteAfter(LocalDateTime fecha);
 }
 
+
+
+
