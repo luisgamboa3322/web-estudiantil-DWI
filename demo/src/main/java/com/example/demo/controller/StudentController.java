@@ -662,6 +662,7 @@ public class StudentController {
 
     @PostMapping("/intentos/{intentoId}/finalizar")
     @ResponseBody
+    @Transactional
     public ResponseEntity<?> finalizarIntento(@PathVariable Long intentoId, Authentication authentication) {
         try {
             // Verificar permisos
@@ -687,10 +688,25 @@ public class StudentController {
             }
 
             IntentoEvaluacion intentoFinalizado = evaluacionService.finalizarIntento(intentoId);
-            return ResponseEntity.ok(intentoFinalizado);
+            
+            // Inicializar relaciones necesarias para evitar problemas de serialización
+            Hibernate.initialize(intentoFinalizado.getEvaluacion());
+            if (intentoFinalizado.getEvaluacion() != null) {
+                Hibernate.initialize(intentoFinalizado.getEvaluacion().getId());
+            }
+            
+            // Devolver solo la información necesaria en lugar del objeto completo
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", intentoFinalizado.getId());
+            response.put("estado", intentoFinalizado.getEstado());
+            response.put("evaluacionId", intentoFinalizado.getEvaluacion() != null ? intentoFinalizado.getEvaluacion().getId() : null);
+            response.put("fechaFin", intentoFinalizado.getFechaFin());
+            
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
     }

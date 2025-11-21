@@ -33,17 +33,14 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // Usar JSON serializado desde el servidor para evitar problemas con Thymeleaf
-        const evaluacionData = /*[[${evaluacion}]]*/ {};
-        const intentosJson = /*[[${intentosJson}]]*/ '[]';
-        
-        // Convertir a objetos JavaScript simples
+        // Usar solo los campos necesarios en lugar del objeto completo para evitar problemas con proxies de Hibernate
         const evaluacion = {
-            id: evaluacionData?.id || null,
-            titulo: evaluacionData?.titulo || '',
-            tipo: evaluacionData?.tipo || '',
-            descripcion: evaluacionData?.descripcion || ''
+            id: /*[[${evaluacion.id}]]*/ null,
+            titulo: /*[[${evaluacion.titulo}]]*/ '',
+            tipo: /*[[${evaluacion.tipo}]]*/ '',
+            descripcion: /*[[${evaluacion.descripcion}]]*/ ''
         };
+        const intentosJson = /*[[${intentosJson}]]*/ '[]';
         
         // Parsear JSON de intentos
         let intentos = [];

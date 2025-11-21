@@ -230,13 +230,22 @@ public class EvaluacionService {
             throw new IllegalStateException("El intento ya está finalizado");
         }
 
+        // Inicializar relaciones necesarias antes de procesar
+        Hibernate.initialize(intento.getEvaluacion());
+        Hibernate.initialize(intento.getEstudiante());
+        Hibernate.initialize(intento.getRespuestas());
+
         intento.setEstado(EstadoIntento.COMPLETADO);
         intento.setFechaFin(LocalDateTime.now());
 
         // Calificar automáticamente si es posible
         calificarIntentoAutomaticamente(intento);
 
-        return intentoEvaluacionRepository.save(intento);
+        // Guardar y refrescar para asegurar que todas las relaciones estén cargadas
+        IntentoEvaluacion intentoGuardado = intentoEvaluacionRepository.save(intento);
+        intentoEvaluacionRepository.flush(); // Forzar flush para asegurar que se guarde
+        
+        return intentoGuardado;
     }
 
     @Transactional
@@ -247,8 +256,19 @@ public class EvaluacionService {
         int puntosMaximos = 0;
 
         for (RespuestaEstudiante respuesta : respuestas) {
+            // Inicializar relaciones lazy para evitar problemas
+            Hibernate.initialize(respuesta.getPregunta());
             Pregunta pregunta = respuesta.getPregunta();
+            if (pregunta == null) continue;
+            
             puntosMaximos += pregunta.getPuntos();
+            
+            // Inicializar opciones si es necesario
+            if (pregunta.getTipo() == TipoPregunta.COMPLETAR || 
+                pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 
+                pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
+                Hibernate.initialize(pregunta.getOpciones());
+            }
 
             // Calificar según el tipo de pregunta
             if (pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 

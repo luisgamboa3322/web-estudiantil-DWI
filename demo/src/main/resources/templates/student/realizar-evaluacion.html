@@ -368,11 +368,24 @@
 
         async function finalizarEvaluacion(automatico) {
             try {
+                // Mostrar indicador de carga
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Finalizando...';
+                }
+                
                 const response = await fetch(`/student/intentos/${intentoId}/finalizar`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
+                    console.log('Evaluación finalizada:', data);
+                    
                     if (timerInterval) clearInterval(timerInterval);
                     if (autoSaveInterval) clearInterval(autoSaveInterval);
                     
@@ -380,14 +393,28 @@
                         alert('El tiempo se ha agotado. Tu evaluación ha sido finalizada automáticamente.');
                     }
                     
-                    window.location.href = `/student/evaluacion/resultados/${evaluacionId}`;
+                    // Redirigir a resultados usando el evaluacionId del response o el del contexto
+                    const evalId = data.evaluacionId || evaluacionId;
+                    window.location.href = `/student/evaluacion/resultados/${evalId}`;
                 } else {
                     const error = await response.text();
-                    alert('Error: ' + error);
+                    console.error('Error al finalizar:', error);
+                    alert('Error al finalizar la evaluación: ' + error);
+                    
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Finalizar Evaluación';
+                    }
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión');
+                console.error('Error de conexión:', error);
+                alert('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
+                
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Finalizar Evaluación';
+                }
             }
         }
 
