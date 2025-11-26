@@ -1,54 +1,129 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Profesor</title>
+    <title>Chat - Portal Docente</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .sidebar-icon {
             width: 24px;
             height: 24px;
         }
-        /* Custom scrollbar for webkit browsers */
+
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Simple toggle switch style */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #f97316;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #f97316;
-        }
     </style>
 </head>
+
 <body class="bg-slate-100 text-slate-800">
     <div class="flex h-screen">
-        <div th:replace="~{fragments/profesor-fragments :: sidebar}"></div>
+        <aside id="sidebar"
+            class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex">
+            <div>
+                <a href="#" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-8 w-8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>UTP+teacher</span>
+                </a>
+                <nav>
+                    <ul class="space-y-2">
+                        <li><a href="/profesor/dashboard"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg"><i
+                                    data-lucide="layout-dashboard" class="sidebar-icon"></i><span>Mis Cursos</span></a>
+                        </li>
+                        <li><a href="/profesor/chat"
+                                class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg"><i
+                                    data-lucide="message-square" class="sidebar-icon"></i><span>Chat</span></a></li>
+                        <li><a href="/profesor/calendario"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg"><i
+                                    data-lucide="calendar" class="sidebar-icon"></i><span>Calendario</span></a></li>
+                        <li><a href="/profesor/configuracion"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg"><i
+                                    data-lucide="settings" class="sidebar-icon"></i><span>Configuración</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div>
+                <nav>
+                    <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
+                        <li><a href="/logout"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg"><i
+                                    data-lucide="log-out" class="sidebar-icon"></i><span>Cerrar Sesión</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
         <div class="flex-1 flex flex-col overflow-hidden">
-            <div th:replace="~{fragments/profesor-fragments :: header}"></div>
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-6">Chat</h1>
-                <div class="bg-white rounded-lg shadow-sm p-6">Espacio de chat (placeholder)</div>
+            <header class="bg-white shadow-md p-4 flex justify-between items-center">
+                <button id="menu-button" class="md:hidden"><i data-lucide="menu" class="h-6 w-6"></i></button>
+                <div class="text-xl font-semibold md:hidden text-orange-500">UTP+teacher</div>
+                <div class="flex items-center space-x-4 ml-auto">
+                    <button class="relative"><i data-lucide="bell" class="h-6 w-6 text-gray-600"></i><span
+                            class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span></button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://placehold.co/40x40/EFEFEF/333?text=PR" alt="Avatar"
+                            class="w-10 h-10 rounded-full">
+                        <div class="text-right hidden sm:block">
+                            <p class="font-semibold text-sm" th:text="${profesorNombre}">Profesor</p>
+                            <p class="text-xs text-gray-500">Profesor</p>
+                        </div>
+                        <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
+                    </div>
+                </div>
+            </header>
+            <main class="flex-1 overflow-hidden flex">
+                <div class="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-slate-200 flex flex-col">
+                    <div class="p-4 border-b border-slate-200">
+                        <h2 class="text-xl font-bold mb-3">Chats</h2>
+                        <select id="cursoSelector"
+                            class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">Selecciona un curso...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 overflow-y-auto" id="contactosList">
+                        <div class="p-4 text-center text-gray-500">Selecciona un curso para ver los estudiantes</div>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3 lg:w-3/4 flex flex-col bg-slate-50" id="conversacionArea">
+                    <div class="flex-1 flex items-center justify-center text-gray-400">
+                        <div class="text-center"><i data-lucide="message-circle" class="h-16 w-16 mx-auto mb-4"></i>
+                            <p class="text-lg">Selecciona un estudiante para iniciar una conversación</p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
-    <script>lucide.createIcons();</script>
+    <script th:inline="javascript">
+        const USUARIO_ID =/*[[${profesorId}]]*/1; const USUARIO_NOMBRE =/*[[${profesorNombre}]]*/'Profesor'; const TIPO_USUARIO = 'PROFESOR'; let stompClient = null, conversacionActual = null, contactoActual = null, cursoActual = null; document.addEventListener('DOMContentLoaded', function () { console.log('Profesor:', USUARIO_ID, USUARIO_NOMBRE); lucide.createIcons(); conectarWebSocket(); cargarCursos(); document.getElementById('cursoSelector').addEventListener('change', onCursoChange); document.getElementById('menu-button').addEventListener('click', toggleSidebar); }); function conectarWebSocket() { const socket = new SockJS('/ws-chat'); stompClient = new StompJs.Client({ webSocketFactory: () => socket, debug: (str) => console.log(str), reconnectDelay: 5000, heartbeatIncoming: 4000, heartbeatOutgoing: 4000 }); stompClient.onConnect = function (frame) { console.log('WebSocket conectado'); const userQueue = USUARIO_ID + '_' + TIPO_USUARIO; stompClient.subscribe('/user/' + userQueue + '/queue/messages', function (mensaje) { onMensajeRecibido(JSON.parse(mensaje.body)); }); }; stompClient.onStompError = function (frame) { console.error('Error WebSocket:', frame); }; stompClient.activate(); } async function cargarCursos() { try { const response = await fetch(`/api/chat/cursos?usuarioId=${USUARIO_ID}&tipo=${TIPO_USUARIO}`); const cursos = await response.json(); const selector = document.getElementById('cursoSelector'); selector.innerHTML = '<option value="">Selecciona un curso...</option>'; cursos.forEach(curso => { const option = document.createElement('option'); option.value = curso.id; option.textContent = curso.nombre + ' (' + curso.codigo + ')'; selector.appendChild(option); }); } catch (error) { console.error('Error al cargar cursos:', error); } } async function onCursoChange(event) { const cursoId = event.target.value; if (!cursoId) { document.getElementById('contactosList').innerHTML = '<div class="p-4 text-center text-gray-500">Selecciona un curso</div>'; return; } cursoActual = cursoId; await cargarContactos(cursoId); } async function cargarContactos(cursoId) { try { const response = await fetch(`/api/chat/contactos/${cursoId}?usuarioId=${USUARIO_ID}&tipo=${TIPO_USUARIO}`); const contactos = await response.json(); const lista = document.getElementById('contactosList'); lista.innerHTML = ''; if (contactos.length === 0) { lista.innerHTML = '<div class="p-4 text-center text-gray-500">No hay estudiantes inscritos</div>'; return; } contactos.forEach(contacto => { const div = document.createElement('div'); div.className = 'flex items-center p-4 border-b border-slate-200 hover:bg-slate-50 cursor-pointer'; div.onclick = () => abrirConversacion(contacto); const avatar = 'ES'; const color = '10B981'; div.innerHTML = `<img src="https://placehold.co/48x48/${color}/FFF?text=${avatar}" class="w-12 h-12 rounded-full mr-4"><div class="flex-1"><h3 class="font-semibold">${contacto.nombre}</h3><p class="text-sm text-slate-600">Estudiante</p></div>`; lista.appendChild(div); }); } catch (error) { console.error('Error al cargar contactos:', error); } } async function abrirConversacion(contacto) { contactoActual = contacto; const conversacionId = generarConversacionId(USUARIO_ID, TIPO_USUARIO, contacto.id, contacto.tipo); conversacionActual = conversacionId; mostrarAreaConversacion(contacto); await cargarHistorial(conversacionId); await marcarComoLeido(conversacionId); } function generarConversacionId(id1, tipo1, id2, tipo2) { const parte1 = id1 + '_' + tipo1; const parte2 = id2 + '_' + tipo2; return parte1 < parte2 ? parte1 + '_' + parte2 : parte2 + '_' + parte1; } async function cargarHistorial(conversacionId) { try { const response = await fetch(`/api/chat/mensajes/${conversacionId}`); const mensajes = await response.json(); const container = document.getElementById('mensajesContainer'); if (!container) return; container.innerHTML = ''; mensajes.forEach(mensaje => agregarMensajeAlDOM(mensaje)); scrollToBottom(); } catch (error) { console.error('Error al cargar historial:', error); } } function mostrarAreaConversacion(contacto) { const avatar = 'ES'; const color = '10B981'; document.getElementById('conversacionArea').innerHTML = `<div class="p-4 bg-white border-b border-slate-200 flex items-center shadow-sm"><img src="https://placehold.co/40x40/${color}/FFF?text=${avatar}" class="w-10 h-10 rounded-full mr-3"><div><h3 class="font-semibold">${contacto.nombre}</h3><p class="text-xs text-green-500">En línea</p></div></div><div class="flex-1 p-6 overflow-y-auto space-y-4" id="mensajesContainer"></div><div class="p-4 bg-white border-t border-slate-200"><div class="flex items-center space-x-2"><input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." class="flex-1 p-3 border border-slate-300 rounded-full focus:ring-orange-500 focus:border-orange-500" onkeypress="if(event.key==='Enter') enviarMensaje()"><button onclick="enviarMensaje()" class="bg-orange-500 text-white p-3 rounded-full hover:bg-orange-600"><i data-lucide="send"></i></button></div></div>`; lucide.createIcons(); } function enviarMensaje() { const input = document.getElementById('mensajeInput'); const contenido = input.value.trim(); if (!contenido || !contactoActual) return; const mensajeDTO = { conversacionId: conversacionActual, remitenteId: USUARIO_ID, tipoRemitente: TIPO_USUARIO, remitenteNombre: USUARIO_NOMBRE, destinatarioId: contactoActual.id, tipoDestinatario: contactoActual.tipo, destinatarioNombre: contactoActual.nombre, contenido: contenido, fechaEnvio: new Date().toISOString(), leido: false }; stompClient.publish({ destination: '/app/chat.sendPrivateMessage', body: JSON.stringify(mensajeDTO) }); input.value = ''; } function onMensajeRecibido(mensaje) { if (mensaje.conversacionId === conversacionActual) { agregarMensajeAlDOM(mensaje); scrollToBottom(); } } function agregarMensajeAlDOM(mensaje) { const container = document.getElementById('mensajesContainer'); if (!container) return; const esPropio = mensaje.remitenteId === USUARIO_ID && mensaje.tipoRemitente === TIPO_USUARIO; const div = document.createElement('div'); div.className = esPropio ? 'flex items-start gap-3 justify-end' : 'flex items-start gap-3'; const avatar = mensaje.tipoRemitente === 'PROFESOR' ? 'PR' : 'ES'; const color = mensaje.tipoRemitente === 'PROFESOR' ? '3B82F6' : '10B981'; const bgClass = esPropio ? 'bg-orange-500 text-white rounded-br-none' : 'bg-white rounded-tl-none'; let hora = ''; try { const fecha = new Date(mensaje.fechaEnvio); if (!isNaN(fecha.getTime())) { hora = fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0'); } else { hora = 'Ahora'; } } catch (e) { hora = 'Ahora'; } div.innerHTML = `${!esPropio ? `<img src="https://placehold.co/40x40/${color}/FFF?text=${avatar}" class="w-10 h-10 rounded-full">` : ''}<div class="${bgClass} p-3 rounded-lg max-w-lg shadow-sm"><p class="text-sm">${mensaje.contenido}</p><p class="text-xs ${esPropio ? 'text-orange-200' : 'text-slate-400'} text-right mt-1">${hora}</p></div>${esPropio ? `<img src="https://placehold.co/40x40/3B82F6/FFF?text=PR" class="w-10 h-10 rounded-full">` : ''}`; container.appendChild(div); } async function marcarComoLeido(conversacionId) { try { await fetch(`/api/chat/marcar-leido/${conversacionId}?usuarioId=${USUARIO_ID}`, { method: 'POST' }); } catch (error) { console.error('Error al marcar como leído:', error); } } function scrollToBottom() { const container = document.getElementById('mensajesContainer'); if (container) container.scrollTop = container.scrollHeight; } function toggleSidebar() { const sidebar = document.getElementById('sidebar'); sidebar.classList.toggle('hidden'); sidebar.classList.toggle('absolute'); sidebar.classList.toggle('z-20'); sidebar.classList.toggle('w-full'); }
+    </script>
 </body>
+
 </html>
