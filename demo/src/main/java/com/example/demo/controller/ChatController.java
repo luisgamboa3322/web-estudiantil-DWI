@@ -47,19 +47,29 @@ public class ChatController {
         // Convertir a DTO para enviar
         MensajeDTO mensajeEnviado = convertirAMensajeDTO(mensaje);
 
-        // Enviar al destinatario específico
-        String destinatario = mensajeDTO.getDestinatarioId() + "_" + mensajeDTO.getTipoDestinatario().name();
-        messagingTemplate.convertAndSendToUser(
-                destinatario,
-                "/queue/messages",
-                mensajeEnviado);
+        // Enviar al destinatario específico usando su EMAIL (que es el Principal.name)
+        String destinatarioEmail = chatService.obtenerEmailUsuario(
+                mensajeDTO.getDestinatarioId(),
+                mensajeDTO.getTipoDestinatario());
 
-        // También enviar al remitente para confirmación
-        String remitente = mensajeDTO.getRemitenteId() + "_" + mensajeDTO.getTipoRemitente().name();
-        messagingTemplate.convertAndSendToUser(
-                remitente,
-                "/queue/messages",
-                mensajeEnviado);
+        if (destinatarioEmail != null) {
+            messagingTemplate.convertAndSendToUser(
+                    destinatarioEmail,
+                    "/queue/messages",
+                    mensajeEnviado);
+        }
+
+        // También enviar al remitente para confirmación usando su EMAIL
+        String remitenteEmail = chatService.obtenerEmailUsuario(
+                mensajeDTO.getRemitenteId(),
+                mensajeDTO.getTipoRemitente());
+
+        if (remitenteEmail != null) {
+            messagingTemplate.convertAndSendToUser(
+                    remitenteEmail,
+                    "/queue/messages",
+                    mensajeEnviado);
+        }
     }
 
     /**
@@ -75,7 +85,7 @@ public class ChatController {
 
         if (tipoRemitente == TipoRemitente.ESTUDIANTE) {
             // Obtener cursos del estudiante
-            cursos = studentCursoRepository.findByCursoId(usuarioId).stream()
+            cursos = studentCursoRepository.findByStudentId(usuarioId).stream()
                     .map(sc -> sc.getCurso())
                     .toList();
         } else {

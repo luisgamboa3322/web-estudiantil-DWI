@@ -235,4 +235,19 @@ public class ChatService {
                     .orElse("Profesor");
         }
     }
+
+    /**
+     * Obtener email de usuario por ID y tipo
+     */
+    public String obtenerEmailUsuario(Long id, TipoRemitente tipo) {
+        if (tipo == TipoRemitente.ESTUDIANTE) {
+            return studentRepository.findById(id)
+                    .map(Student::getEmail)
+                    .orElse(null);
+        } else {
+            return professorRepository.findById(id)
+                    .map(Professor::getEmail)
+                    .orElse(null);
+        }
+    }
 }
