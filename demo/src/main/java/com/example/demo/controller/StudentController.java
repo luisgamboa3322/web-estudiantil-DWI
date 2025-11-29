@@ -46,6 +46,9 @@ public class StudentController {
     @Autowired
     private EvaluacionService evaluacionService;
 
+    @Autowired
+    private CalendarioService calendarioService;
+
     public StudentController(StudentService studentService, StudentCursoService studentCursoService) {
         this.studentService = studentService;
         this.studentCursoService = studentCursoService;
@@ -111,10 +114,17 @@ public class StudentController {
     }
 
     @GetMapping("/calendario")
-    public String showCalendario(Model model) {
+    public String showCalendario(Authentication authentication, Model model) {
         model.addAttribute("activePage", "calendario");
-        // Lógica para la vista de calendario
-        return "student/calendario"; // Asegúrate de tener una vista calendario.html
+
+        String email = authentication != null ? authentication.getName() : null;
+        if (email != null) {
+            studentService.findByEmail(email).ifPresent(student -> {
+                model.addAttribute("studentName", student.getNombre());
+            });
+        }
+
+        return "student/calendario";
     }
 
     @GetMapping("/configuracion")
@@ -742,6 +752,120 @@ public class StudentController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
+        }
+    }
+
+    // ===========================
+    // ENDPOINTS DEL CALENDARIO
+    // ===========================
+
+    /**
+     * Obtener todos los eventos del calendario del estudiante
+     * Incluye: eventos personales, tareas y evaluaciones
+     */
+    @GetMapping("/calendario/eventos")
+    @ResponseBody
+    public ResponseEntity<?> getEventosCalendario(
+            @RequestParam(required = false) String fechaInicio,
+            @RequestParam(required = false) String fechaFin,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+            LocalDateTime inicio;
+            if (fechaInicio != null) {
+                // Manejar formato ISO 8601 (ej: 2025-10-25T05:00:00.000Z)
+                inicio = java.time.ZonedDateTime.parse(fechaInicio).toLocalDateTime();
+            } else {
+                inicio = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            }
+
+            LocalDateTime fin;
+            if (fechaFin != null) {
+                fin = java.time.ZonedDateTime.parse(fechaFin).toLocalDateTime();
+            } else {
+                fin = inicio.plusMonths(1).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+            }
+
+            var eventos = calendarioService.obtenerEventosEstudiante(student.getId(), inicio, fin);
+            return ResponseEntity.ok(eventos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener eventos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Crear un evento personal en el calendario
+     */
+    @PostMapping("/calendario/eventos")
+    @ResponseBody
+    public ResponseEntity<?> crearEventoPersonal(
+            @RequestBody com.example.demo.dto.EventoCalendarioDTO eventoDTO,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+            var eventoCreado = calendarioService.crearEventoPersonal(student.getId(), eventoDTO);
+            return ResponseEntity.ok(eventoCreado);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al crear evento: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Actualizar un evento personal
+     */
+    @PutMapping("/calendario/eventos/{eventoId}")
+    @ResponseBody
+    public ResponseEntity<?> actualizarEventoPersonal(
+            @PathVariable Long eventoId,
+            @RequestBody com.example.demo.dto.EventoCalendarioDTO eventoDTO,
+            Authentication authentication) {
+        try {
+            var eventoActualizado = calendarioService.actualizarEventoPersonal(eventoId, eventoDTO);
+            return ResponseEntity.ok(eventoActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar evento: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Eliminar un evento personal
+     */
+    @DeleteMapping("/calendario/eventos/{eventoId}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarEventoPersonal(
+            @PathVariable Long eventoId,
+            Authentication authentication) {
+        try {
+            calendarioService.eliminarEventoPersonal(eventoId);
+            return ResponseEntity.ok().body("Evento eliminado exitosamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al eliminar evento: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtener eventos próximos para notificaciones
+     */
+    @GetMapping("/calendario/proximos")
+    @ResponseBody
+    public ResponseEntity<?> getEventosProximos(
+            @RequestParam(defaultValue = "7") int dias,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+
+            var eventosProximos = calendarioService.obtenerEventosProximos(student.getId(), dias);
+            return ResponseEntity.ok(eventosProximos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener eventos próximos: " + e.getMessage());
         }
     }
 

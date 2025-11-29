@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,64 +12,104 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .sidebar-icon {
             width: 24px;
             height: 24px;
         }
-        /* Custom scrollbar for webkit browsers */
+
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 10px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        .evento-badge {
+            font-size: 0.65rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dia-calendario {
+            min-height: 100px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dia-calendario:hover {
+            background-color: #f8fafc !important;
+        }
+
+        .dia-hoy {
+            background-color: #fff7ed !important;
+        }
     </style>
 </head>
+
 <body class="bg-slate-100 text-slate-800">
 
     <div class="flex h-screen">
         <!-- Barra de navegación lateral (Sidebar) -->
-        <aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
+        <aside id="sidebar"
+            class="bg-gray-800 text-white w-64 min-h-screen p-4 flex-col justify-between hidden md:flex transition-all duration-300">
             <div>
                 <a href="#" class="flex items-center space-x-2 text-2xl font-bold mb-10 text-orange-500">
-                    <svg xmlns="http://www.w.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-8 w-8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
                     <span>UTP+class</span>
                 </a>
                 <nav>
                     <ul class="space-y-2">
                         <li>
-                            <a href="/student/dashboard" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <a href="/student/dashboard"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="layout-dashboard" class="sidebar-icon"></i>
                                 <span>Cursos</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/student/chat" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <a href="/student/chat"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="message-square" class="sidebar-icon"></i>
                                 <span>Chat</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/student/calendario" class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
+                            <a href="/student/calendario"
+                                class="flex items-center space-x-3 px-4 py-3 bg-orange-500 rounded-lg text-white font-semibold">
                                 <i data-lucide="calendar" class="sidebar-icon"></i>
                                 <span>Calendario</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <a href="#"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="help-circle" class="sidebar-icon"></i>
                                 <span>Ayuda</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
+                            <a href="/student/configuracion"
+                                class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
                                 <i data-lucide="settings" class="sidebar-icon"></i>
                                 <span>Configuración</span>
                             </a>
@@ -77,45 +118,44 @@
                 </nav>
             </div>
             <div>
-                 <nav>
+                <nav>
                     <ul class="space-y-2 border-t border-gray-700 pt-4 mt-4">
                         <li>
-                            <a href="#"
+                            <a href="/logout"
                                 class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
-                                <!-- En la barra lateral de cada vista de estudiante -->
-                                <a href="/logout"
-                                    class="flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors">
-                                    <i data-lucide="log-out" class="sidebar-icon"></i>
-                                    <span>Cerrar Sesión</span>
-                                </a>
+                                <i data-lucide="log-out" class="sidebar-icon"></i>
+                                <span>Cerrar Sesión</span>
                             </a>
                         </li>
-                       
                     </ul>
                 </nav>
             </div>
         </aside>
 
-        <!-- Contenido principal -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Cabecera (Header) -->
-            <header class="bg-white shadow-md p-4 flex justify-between items-center z-10">
-                <button id="menu-button" class="md:hidden">
-                    <i data-lucide="menu" class="h-6 w-6"></i>
-                </button>
-                <div class="text-xl font-semibold md:hidden text-orange-500">UTP+class</div>
-                <div class="flex items-center space-x-4 ml-auto">
-                    <button class="relative">
-                        <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
-                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+        <!-- Contenido Principal -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <button id="menu-button" class="md:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
                     </button>
-                    <div class="flex items-center space-x-2">
-                        <img src="https://placehold.co/40x40/EFEFEF/333333?text=LF" alt="Avatar de usuario" class="w-10 h-10 rounded-full">
-                        <div class="text-right hidden sm:block">
-                            <p class="font-semibold text-sm">Hola, Luis Francisco</p>
-                            <p class="text-xs text-gray-500">Estudiante</p>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <button class="p-2 rounded-full hover:bg-gray-100 text-gray-600 relative">
+                            <i data-lucide="bell" class="h-6 w-6"></i>
+                            <span class="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div class="flex items-center gap-3 pl-4 border-l">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-sm font-semibold text-gray-900">Hola, <span
+                                        th:text="${studentName}">Estudiante</span></p>
+                                <p class="text-xs text-gray-500">Estudiante</p>
+                            </div>
+                            <div
+                                class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
+                                <span th:text="${#strings.substring(studentName,0,1)}">U</span>
+                            </div>
                         </div>
-                        <i data-lucide="chevron-down" class="h-5 w-5 text-gray-500"></i>
                     </div>
                 </div>
             </header>
@@ -127,158 +167,670 @@
                     <!-- Cabecera del Calendario -->
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-2">
-                            <h2 class="text-2xl font-bold text-gray-800">Septiembre 2025</h2>
+                            <h2 id="mes-anio" class="text-2xl font-bold text-gray-800"></h2>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+                            <button id="btn-mes-anterior"
+                                class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
                                 <i data-lucide="chevron-left" class="h-5 w-5"></i>
                             </button>
-                            <button class="text-sm font-semibold px-4 py-2 border rounded-lg hover:bg-slate-50">Hoy</button>
-                            <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
+                            <button id="btn-hoy"
+                                class="text-sm font-semibold px-4 py-2 border rounded-lg hover:bg-slate-50">Hoy</button>
+                            <button id="btn-mes-siguiente"
+                                class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800">
                                 <i data-lucide="chevron-right" class="h-5 w-5"></i>
                             </button>
+                            <button id="btn-nuevo-evento"
+                                class="ml-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-2">
+                                <i data-lucide="plus" class="h-4 w-4"></i>
+                                <span>Nuevo Evento</span>
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="mb-6 flex gap-2 flex-wrap">
+                        <button
+                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 transition-all hover:bg-blue-200"
+                            data-tipo="TAREA">
+                            📝 Tareas
+                        </button>
+                        <button
+                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 transition-all hover:bg-red-200"
+                            data-tipo="EXAMEN">
+                            📋 Exámenes
+                        </button>
+                        <button
+                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 transition-all hover:bg-orange-200"
+                            data-tipo="FORO">
+                            💬 Foros
+                        </button>
+                        <button
+                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 transition-all hover:bg-green-200"
+                            data-tipo="PERSONAL">
+                            ⭐ Personal
+                        </button>
+                        <button id="btn-limpiar-filtros"
+                            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+                            Limpiar Filtros
+                        </button>
+                    </div>
+
+                    <!-- Encabezados de días -->
+                    <div class="grid grid-cols-7 mb-2 text-center text-sm font-semibold text-gray-500">
+                        <div class="py-2">Lun</div>
+                        <div class="py-2">Mar</div>
+                        <div class="py-2">Mié</div>
+                        <div class="py-2">Jue</div>
+                        <div class="py-2">Vie</div>
+                        <div class="py-2">Sáb</div>
+                        <div class="py-2">Dom</div>
                     </div>
 
                     <!-- Grid del Calendario -->
-                    <div class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200">
-                        <!-- Días de la semana -->
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">L</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">M</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">J</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">V</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">S</div>
-                        <div class="text-center py-2 text-sm font-semibold text-slate-600 bg-slate-50">D</div>
-
-                        <!-- Días del mes (ejemplo estático) -->
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">1</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">2</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">3</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">4</span><div class="mt-1 text-xs bg-blue-100 text-blue-800 rounded px-1 truncate">Entrega T1</div></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">5</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">6</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">7</span></div>
-                        
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">8</span></div>
-                        <div class="h-28 bg-orange-50 p-2 text-sm relative"><span class="font-bold text-white bg-orange-500 w-6 h-6 flex items-center justify-center rounded-full">9</span><div class="mt-1 text-xs bg-red-100 text-red-800 rounded px-1 truncate">Examen Parcial</div></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">10</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">11</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">12</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">13</span><div class="mt-1 text-xs bg-orange-100 text-orange-800 rounded px-1 truncate">Foro S05</div></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">14</span></div>
-
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">15</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">16</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">17</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">18</span><div class="mt-1 text-xs bg-blue-100 text-blue-800 rounded px-1 truncate">Entrega T2</div></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">19</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">20</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">21</span></div>
-
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">22</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">23</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">24</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">25</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">26</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">27</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">28</span></div>
-                        
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">29</span></div>
-                        <div class="h-28 bg-white p-2 text-sm relative"><span class="font-medium">30</span></div>
-                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">1</span></div>
-                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">2</span></div>
-                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">3</span></div>
-                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">4</span></div>
-                        <div class="h-28 bg-slate-50 p-2 text-sm text-slate-400 relative"><span class="font-medium">5</span></div>
+                    <div id="calendario-grid"
+                        class="grid grid-cols-7 border-l border-b border-slate-200 bg-slate-200 gap-px">
+                        <!-- Los días se generarán aquí mediante JS -->
                     </div>
                 </div>
 
-                <!-- Columna lateral de eventos -->
-                <aside class="w-full lg:w-80 xl:w-96 flex-shrink-0">
+                <!-- Barra lateral derecha (Próximos Eventos) -->
+                <aside class="w-full lg:w-80 space-y-6">
                     <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="font-bold text-lg mb-4">Próximos Eventos</h3>
-                        <div class="space-y-4">
-                            <!-- Evento -->
-                            <div class="flex items-start gap-3">
-                                <div class="w-1.5 h-10 bg-red-500 rounded-full"></div>
-                                <div>
-                                    <p class="font-semibold">Examen Parcial</p>
-                                    <p class="text-sm text-slate-500">Herramientas de Desarrollo</p>
-                                    <p class="text-sm text-slate-500">Hoy, 8:00 PM - 10:00 PM</p>
-                                </div>
-                            </div>
-                            <!-- Evento -->
-                            <div class="flex items-start gap-3">
-                                <div class="w-1.5 h-10 bg-orange-500 rounded-full"></div>
-                                <div>
-                                    <p class="font-semibold">Foro S05: Consultas</p>
-                                    <p class="text-sm text-slate-500">Diseño de Productos y Servicios</p>
-                                    <p class="text-sm text-slate-500">Vence: 13 Septiembre, 11:59 PM</p>
-                                </div>
-                            </div>
-                            <!-- Evento -->
-                            <div class="flex items-start gap-3">
-                                <div class="w-1.5 h-10 bg-blue-500 rounded-full"></div>
-                                <div>
-                                    <p class="font-semibold">Entrega Tarea 2</p>
-                                    <p class="text-sm text-slate-500">Desarrollo Web Integrado</p>
-                                    <p class="text-sm text-slate-500">Vence: 18 Septiembre, 11:59 PM</p>
-                                </div>
-                            </div>
-                             <!-- Evento -->
-                            <div class="flex items-start gap-3">
-                                <div class="w-1.5 h-10 bg-green-500 rounded-full"></div>
-                                <div>
-                                    <p class="font-semibold">Reunión de grupo</p>
-                                    <p class="text-sm text-slate-500">Proyecto final</p>
-                                    <p class="text-sm text-slate-500">22 Septiembre, 4:00 PM</p>
+                        <h3 class="font-bold text-lg mb-4 text-gray-800">Próximos Eventos</h3>
+                        <div id="proximos-eventos" class="space-y-3">
+                            <!-- Eventos próximos generados dinámicamente -->
+                            <div class="animate-pulse flex space-x-4">
+                                <div class="rounded-full bg-slate-200 h-10 w-10"></div>
+                                <div class="flex-1 space-y-2 py-1">
+                                    <div class="h-2 bg-slate-200 rounded"></div>
+                                    <div class="space-y-3">
+                                        <div class="grid grid-cols-3 gap-4">
+                                            <div class="h-2 bg-slate-200 rounded col-span-2"></div>
+                                            <div class="h-2 bg-slate-200 rounded col-span-1"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </aside>
-
             </main>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar evento -->
+    <div id="modal-evento"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-titulo" class="text-xl font-bold">Nuevo Evento</h3>
+                <button id="btn-cerrar-modal" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <form id="form-evento">
+                <input type="hidden" id="evento-id">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Título</label>
+                        <input type="text" id="evento-titulo" required
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Descripción</label>
+                        <textarea id="evento-descripcion" rows="3"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Tipo</label>
+                        <select id="evento-tipo" required
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                            <option value="PERSONAL">Personal</option>
+                            <option value="ESTUDIO">Sesión de Estudio</option>
+                            <option value="REUNION">Reunión de Grupo</option>
+                            <option value="RECORDATORIO">Recordatorio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Fecha y Hora de Inicio</label>
+                        <input type="datetime-local" id="evento-fecha-inicio" required
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Fecha y Hora de Fin</label>
+                        <input type="datetime-local" id="evento-fecha-fin" required
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Color</label>
+                        <div class="flex gap-2">
+                            <button type="button" class="color-btn w-8 h-8 rounded-full bg-green-500"
+                                data-color="#10B981"></button>
+                            <button type="button" class="color-btn w-8 h-8 rounded-full bg-purple-500"
+                                data-color="#8B5CF6"></button>
+                            <button type="button" class="color-btn w-8 h-8 rounded-full bg-pink-500"
+                                data-color="#EC4899"></button>
+                            <button type="button" class="color-btn w-8 h-8 rounded-full bg-yellow-500"
+                                data-color="#F59E0B"></button>
+                            <button type="button" class="color-btn w-8 h-8 rounded-full bg-indigo-500"
+                                data-color="#6366F1"></button>
+                        </div>
+                        <input type="hidden" id="evento-color" value="#10B981">
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                        Guardar
+                    </button>
+                    <button type="button" id="btn-cancelar" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btn-eliminar"
+                        class="hidden px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles del evento -->
+    <div id="modal-detalle"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="detalle-titulo" class="text-xl font-bold"></h3>
+                <button id="btn-cerrar-detalle" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="detalle-contenido" class="space-y-3">
+                <!-- Contenido generado dinámicamente -->
+            </div>
+            <div class="flex gap-2 mt-6">
+                <button id="btn-editar-evento"
+                    class="hidden flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                    Editar
+                </button>
+                <button id="btn-cerrar-detalle-2" class="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50">
+                    Cerrar
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
 
+        // Variables globales
+        let fechaActual = new Date();
+        let eventosData = [];
+        let filtrosTipoActivos = [];
+        let eventoSeleccionado = null;
+
+        // Elementos del DOM
         const menuButton = document.getElementById('menu-button');
         const sidebar = document.getElementById('sidebar');
+        const mesAnioElement = document.getElementById('mes-anio');
+        const calendarioGrid = document.getElementById('calendario-grid');
+        const proximosEventosElement = document.getElementById('proximos-eventos');
+        const modalEvento = document.getElementById('modal-evento');
+        const modalDetalle = document.getElementById('modal-detalle');
+        const formEvento = document.getElementById('form-evento');
 
-        // Lógica para mostrar/ocultar el menú lateral en móviles
-        menuButton.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            sidebar.classList.toggle('absolute');
-            sidebar.classList.toggle('z-20');
-            sidebar.classList.toggle('w-full');
+        // Menú lateral móvil
+        if (menuButton) {
+            menuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('z-20');
+                sidebar.classList.toggle('w-full');
+            });
+        }
+
+        // Navegación del calendario
+        document.getElementById('btn-mes-anterior').addEventListener('click', () => {
+            fechaActual.setMonth(fechaActual.getMonth() - 1);
+            cargarCalendario();
         });
-        
-        // Lógica para la selección de item de navegación
-        const navLinks = document.querySelectorAll('aside nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', e => {
 
-                // Quita la clase activa de todos los links
-                navLinks.forEach(l => {
-                    l.classList.remove('bg-orange-500', 'text-white', 'font-semibold');
-                    l.classList.add('hover:bg-gray-700');
+        document.getElementById('btn-mes-siguiente').addEventListener('click', () => {
+            fechaActual.setMonth(fechaActual.getMonth() + 1);
+            cargarCalendario();
+        });
+
+        document.getElementById('btn-hoy').addEventListener('click', () => {
+            fechaActual = new Date();
+            cargarCalendario();
+        });
+
+        // Modal de evento
+        document.getElementById('btn-nuevo-evento').addEventListener('click', () => {
+            abrirModalEvento();
+        });
+
+        document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarModalEvento);
+        document.getElementById('btn-cancelar').addEventListener('click', cerrarModalEvento);
+
+        document.getElementById('btn-cerrar-detalle').addEventListener('click', cerrarModalDetalle);
+        document.getElementById('btn-cerrar-detalle-2').addEventListener('click', cerrarModalDetalle);
+
+        // Selección de color
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('ring-4', 'ring-offset-2'));
+                e.target.classList.add('ring-4', 'ring-offset-2');
+                document.getElementById('evento-color').value = e.target.dataset.color;
+            });
+        });
+
+        // Filtros
+        document.querySelectorAll('.filtro-tipo').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tipo = e.currentTarget.dataset.tipo;
+                if (filtrosTipoActivos.includes(tipo)) {
+                    filtrosTipoActivos = filtrosTipoActivos.filter(t => t !== tipo);
+                    e.currentTarget.classList.remove('ring-2', 'ring-offset-2');
+                } else {
+                    filtrosTipoActivos.push(tipo);
+                    e.currentTarget.classList.add('ring-2', 'ring-offset-2');
+                }
+                renderizarCalendario();
+            });
+        });
+
+        document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
+            filtrosTipoActivos = [];
+            document.querySelectorAll('.filtro-tipo').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2');
+            });
+            renderizarCalendario();
+        });
+
+        // Formulario de evento
+        formEvento.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await guardarEvento();
+        });
+
+        document.getElementById('btn-eliminar').addEventListener('click', async () => {
+            if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+                await eliminarEvento();
+            }
+        });
+
+        document.getElementById('btn-editar-evento').addEventListener('click', () => {
+            cerrarModalDetalle();
+            abrirModalEvento(eventoSeleccionado);
+        });
+
+        // Helper para parsear fechas (Array o String)
+        function parsearFecha(fechaInput) {
+            if (!fechaInput) return null;
+
+            // Si es un array [year, month, day, hour, minute, second]
+            if (Array.isArray(fechaInput)) {
+                const [year, month, day, hour = 0, minute = 0, second = 0] = fechaInput;
+                // Mes en JS es 0-11, en Java es 1-12. Restamos 1 al mes.
+                return new Date(year, month - 1, day, hour, minute, second);
+            }
+
+            // Si es string ISO
+            return new Date(fechaInput);
+        }
+
+        // Funciones principales
+        async function cargarCalendario() {
+            const primerDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
+            const ultimoDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
+
+            // Ampliar rango para asegurar que cubrimos todo el mes visual
+            const fechaInicio = new Date(primerDia);
+            fechaInicio.setDate(fechaInicio.getDate() - 7);
+            const fechaFin = new Date(ultimoDia);
+            fechaFin.setDate(fechaFin.getDate() + 7);
+
+            try {
+                console.log(`Cargando eventos desde ${fechaInicio.toISOString()} hasta ${fechaFin.toISOString()}`);
+                const response = await fetch(`/student/calendario/eventos?fechaInicio=${fechaInicio.toISOString()}&fechaFin=${fechaFin.toISOString()}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                eventosData = await response.json();
+                console.log("Eventos recibidos:", eventosData);
+                renderizarCalendario();
+                cargarProximosEventos();
+            } catch (error) {
+                console.error('Error al cargar eventos:', error);
+                // Renderizar calendario vacío en caso de error para no romper la UI
+                renderizarCalendario();
+            }
+        }
+
+        function renderizarCalendario() {
+            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            mesAnioElement.textContent = `${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
+
+            const primerDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
+            const ultimoDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
+
+            // Ajustar primer día de la semana (Lunes = 0, Domingo = 6)
+            let primerDiaSemana = primerDia.getDay() - 1;
+            if (primerDiaSemana === -1) primerDiaSemana = 6; // Si es domingo (0), ponerlo al final (6)
+
+            calendarioGrid.innerHTML = '';
+
+            // Días del mes anterior
+            const diasMesAnterior = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 0).getDate();
+            for (let i = primerDiaSemana - 1; i >= 0; i--) {
+                const dia = diasMesAnterior - i;
+                const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 1, dia);
+                calendarioGrid.appendChild(crearDiaCalendario(dia, fecha, true));
+            }
+
+            // Días del mes actual
+            for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+                const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), dia);
+                calendarioGrid.appendChild(crearDiaCalendario(dia, fecha, false));
+            }
+
+            // Días del mes siguiente para completar la cuadrícula (42 celdas = 6 filas x 7 columnas)
+            const celdasTotales = 42;
+            const celdasOcupadas = primerDiaSemana + ultimoDia.getDate();
+            const diasRestantes = celdasTotales - celdasOcupadas;
+
+            for (let dia = 1; dia <= diasRestantes; dia++) {
+                const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, dia);
+                calendarioGrid.appendChild(crearDiaCalendario(dia, fecha, true));
+            }
+
+            lucide.createIcons();
+        }
+
+        function crearDiaCalendario(dia, fecha, otroMes) {
+            const div = document.createElement('div');
+            div.className = `dia-calendario bg-white p-2 text-sm relative border-t border-l border-slate-100 ${otroMes ? 'text-slate-400 bg-slate-50' : ''}`;
+            div.style.minHeight = "100px"; // Asegurar altura mínima
+
+            const hoy = new Date();
+            if (fecha.getDate() === hoy.getDate() &&
+                fecha.getMonth() === hoy.getMonth() &&
+                fecha.getFullYear() === hoy.getFullYear()) {
+                div.classList.add('dia-hoy');
+            }
+
+            const numeroDia = document.createElement('span');
+            numeroDia.className = 'font-medium block mb-1';
+            numeroDia.textContent = dia;
+            div.appendChild(numeroDia);
+
+            // Obtener eventos del día
+            if (eventosData && eventosData.length > 0) {
+                const eventosDia = eventosData.filter(evento => {
+                    if (!evento.fechaInicio) return false;
+                    const fechaEvento = parsearFecha(evento.fechaInicio);
+                    return fechaEvento.getDate() === fecha.getDate() &&
+                        fechaEvento.getMonth() === fecha.getMonth() &&
+                        fechaEvento.getFullYear() === fecha.getFullYear();
+                }).filter(evento => {
+                    if (filtrosTipoActivos.length === 0) return true;
+                    return filtrosTipoActivos.includes(evento.tipo);
                 });
 
-                // Añade la clase activa al link clickeado
-                e.currentTarget.classList.add('bg-orange-500', 'text-white', 'font-semibold');
-                e.currentTarget.classList.remove('hover:bg-gray-700');
+                // Mostrar eventos (máximo 3)
+                eventosDia.slice(0, 3).forEach(evento => {
+                    const badge = document.createElement('div');
+                    badge.className = 'evento-badge mb-1 cursor-pointer hover:opacity-80 transition-opacity';
+                    badge.style.backgroundColor = evento.color + '20'; // 20% opacidad
+                    badge.style.color = evento.color;
+                    badge.style.borderLeft = `3px solid ${evento.color}`;
+                    badge.textContent = evento.titulo;
+                    badge.title = evento.titulo; // Tooltip nativo
+                    badge.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        mostrarDetalleEvento(evento);
+                    });
+                    div.appendChild(badge);
+                });
 
-                // En móvil, oculta la barra lateral después de hacer clic
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('hidden');
+                if (eventosDia.length > 3) {
+                    const mas = document.createElement('div');
+                    mas.className = 'text-xs text-slate-500 mt-1 pl-1';
+                    mas.textContent = `+${eventosDia.length - 3} más`;
+                    div.appendChild(mas);
                 }
+            }
+
+            div.addEventListener('click', () => {
+                const fechaInicio = new Date(fecha);
+                fechaInicio.setHours(9, 0);
+                document.getElementById('evento-fecha-inicio').value = formatearFechaInput(fechaInicio);
+                fechaInicio.setHours(10, 0);
+                document.getElementById('evento-fecha-fin').value = formatearFechaInput(fechaInicio);
+                abrirModalEvento();
             });
+
+            return div;
+        }
+
+        async function cargarProximosEventos() {
+            try {
+                const response = await fetch('/student/calendario/proximos?dias=14');
+                if (!response.ok) return;
+
+                const eventos = await response.json();
+                proximosEventosElement.innerHTML = '';
+
+                if (eventos.length === 0) {
+                    proximosEventosElement.innerHTML = '<p class="text-sm text-gray-500 italic">No hay eventos próximos en los siguientes 14 días.</p>';
+                    return;
+                }
+
+                eventos.slice(0, 5).forEach(evento => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors';
+                    div.innerHTML = `
+                        <div class="w-1.5 h-10 rounded-full flex-shrink-0" style="background-color: ${evento.color}"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold truncate">${evento.titulo}</p>
+                            <p class="text-sm text-slate-500 truncate">${evento.cursoNombre || 'Personal'}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">${formatearFechaEvento(evento.fechaInicio)}</p>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => mostrarDetalleEvento(evento));
+                    proximosEventosElement.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error al cargar próximos eventos:', error);
+            }
+        }
+
+        function abrirModalEvento(evento = null) {
+            eventoSeleccionado = evento;
+
+            if (evento) {
+                document.getElementById('modal-titulo').textContent = 'Editar Evento';
+                document.getElementById('evento-id').value = evento.id;
+                document.getElementById('evento-titulo').value = evento.titulo;
+                document.getElementById('evento-descripcion').value = evento.descripcion || '';
+                document.getElementById('evento-tipo').value = evento.tipo;
+
+                if (evento.fechaInicio) {
+                    document.getElementById('evento-fecha-inicio').value = formatearFechaInput(parsearFecha(evento.fechaInicio));
+                }
+                if (evento.fechaFin) {
+                    document.getElementById('evento-fecha-fin').value = formatearFechaInput(parsearFecha(evento.fechaFin));
+                }
+
+                document.getElementById('evento-color').value = evento.color;
+                document.getElementById('btn-eliminar').classList.remove('hidden');
+
+                // Seleccionar color
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-offset-2');
+                    if (btn.dataset.color === evento.color) {
+                        btn.classList.add('ring-4', 'ring-offset-2');
+                    }
+                });
+            } else {
+                document.getElementById('modal-titulo').textContent = 'Nuevo Evento';
+                formEvento.reset();
+                document.getElementById('evento-color').value = '#10B981';
+                document.getElementById('btn-eliminar').classList.add('hidden');
+                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('ring-4', 'ring-offset-2'));
+                document.querySelector('.color-btn').classList.add('ring-4', 'ring-offset-2'); // Seleccionar verde por defecto
+            }
+
+            modalEvento.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cerrarModalEvento() {
+            modalEvento.classList.add('hidden');
+            eventoSeleccionado = null;
+        }
+
+        function mostrarDetalleEvento(evento) {
+            eventoSeleccionado = evento;
+            document.getElementById('detalle-titulo').textContent = evento.titulo;
+
+            const iconoTipo = {
+                'TAREA': '📝',
+                'EXAMEN': '📋',
+                'FORO': '💬',
+                'PERSONAL': '⭐',
+                'ESTUDIO': '📚',
+                'REUNION': '👥',
+                'RECORDATORIO': '🔔'
+            };
+
+            const contenidoDiv = document.getElementById('detalle-contenido');
+            contenidoDiv.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-2xl">${iconoTipo[evento.tipo] || '📌'}</span>
+                    <span class="font-medium px-2 py-1 rounded bg-slate-100 text-sm">${evento.tipo}</span>
+                </div>
+                ${evento.descripcion ? `<p class="text-gray-700 mb-2">${evento.descripcion}</p>` : ''}
+                ${evento.cursoNombre ? `<p class="text-sm text-gray-600 mb-1"><strong class="font-medium">Curso:</strong> ${evento.cursoNombre}</p>` : ''}
+                <div class="text-sm text-gray-600 space-y-1 mt-3 bg-slate-50 p-3 rounded-lg">
+                    <p><strong class="font-medium">Inicio:</strong> ${formatearFechaEvento(evento.fechaInicio)}</p>
+                    <p><strong class="font-medium">Fin:</strong> ${formatearFechaEvento(evento.fechaFin)}</p>
+                </div>
+            `;
+
+            // Botón para ir al examen
+            if (evento.tipo === 'EXAMEN') {
+                const btnExamen = document.createElement('a');
+                btnExamen.href = `/student/evaluacion/resultados/${evento.id}`;
+                btnExamen.className = 'block w-full text-center mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium';
+                btnExamen.innerHTML = '<i data-lucide="external-link" class="inline-block w-4 h-4 mr-2"></i>Ir al Examen';
+                contenidoDiv.appendChild(btnExamen);
+            }
+
+            if (evento.esEditable) {
+                document.getElementById('btn-editar-evento').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-editar-evento').classList.add('hidden');
+            }
+
+            modalDetalle.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cerrarModalDetalle() {
+            modalDetalle.classList.add('hidden');
+            eventoSeleccionado = null;
+        }
+
+        async function guardarEvento() {
+            const eventoData = {
+                titulo: document.getElementById('evento-titulo').value,
+                descripcion: document.getElementById('evento-descripcion').value,
+                tipo: document.getElementById('evento-tipo').value,
+                fechaInicio: document.getElementById('evento-fecha-inicio').value,
+                fechaFin: document.getElementById('evento-fecha-fin').value,
+                color: document.getElementById('evento-color').value
+            };
+
+            try {
+                const eventoId = document.getElementById('evento-id').value;
+                const url = eventoId ? `/student/calendario/eventos/${eventoId}` : '/student/calendario/eventos';
+                const method = eventoId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventoData)
+                });
+
+                if (response.ok) {
+                    cerrarModalEvento();
+                    await cargarCalendario();
+                } else {
+                    alert('Error al guardar el evento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar el evento');
+            }
+        }
+
+        async function eliminarEvento() {
+            const eventoId = document.getElementById('evento-id').value;
+
+            try {
+                const response = await fetch(`/student/calendario/eventos/${eventoId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    cerrarModalEvento();
+                    await cargarCalendario();
+                } else {
+                    alert('Error al eliminar el evento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar el evento');
+            }
+        }
+
+        function formatearFechaInput(fecha) {
+            if (!fecha) return '';
+            const year = fecha.getFullYear();
+            const month = String(fecha.getMonth() + 1).padStart(2, '0');
+            const day = String(fecha.getDate()).padStart(2, '0');
+            const hours = String(fecha.getHours()).padStart(2, '0');
+            const minutes = String(fecha.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function formatearFechaEvento(fechaInput) {
+            const fecha = parsearFecha(fechaInput);
+            if (!fecha) return '';
+
+            const opciones = {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return fecha.toLocaleDateString('es-ES', opciones);
+        }
+
+        // Cargar calendario al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCalendario();
         });
     </script>
 </body>
-</html>
 
+</html>
