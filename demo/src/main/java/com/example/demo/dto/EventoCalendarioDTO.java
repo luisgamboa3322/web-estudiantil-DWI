@@ -14,6 +14,7 @@ public class EventoCalendarioDTO {
     private Long cursoId;
     private String cursoNombre;
     private Boolean esEditable;
+    private String estado; // PENDIENTE, COMPLETADO, VENCIDO
 
     public EventoCalendarioDTO() {
     }
@@ -21,7 +22,7 @@ public class EventoCalendarioDTO {
     public EventoCalendarioDTO(Long id, String titulo, String descripcion,
             LocalDateTime fechaInicio, LocalDateTime fechaFin,
             TipoEvento tipo, String color, Long cursoId,
-            String cursoNombre, Boolean esEditable) {
+            String cursoNombre, Boolean esEditable, String estado) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -32,6 +33,7 @@ public class EventoCalendarioDTO {
         this.cursoId = cursoId;
         this.cursoNombre = cursoNombre;
         this.esEditable = esEditable;
+        this.estado = estado;
     }
 
     public Long getId() {
@@ -112,5 +114,13 @@ public class EventoCalendarioDTO {
 
     public void setEsEditable(Boolean esEditable) {
         this.esEditable = esEditable;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

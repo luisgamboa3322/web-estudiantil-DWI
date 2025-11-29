@@ -33,6 +33,12 @@ public class CalendarioService {
     @Autowired
     private StudentCursoRepository studentCursoRepository;
 
+    @Autowired
+    private EntregaTareaRepository entregaTareaRepository;
+
+    @Autowired
+    private IntentoEvaluacionRepository intentoEvaluacionRepository;
+
     /**
      * Obtiene todos los eventos del calendario de un estudiante
      * Incluye: eventos personales, tareas y evaluaciones de sus cursos
@@ -66,7 +72,7 @@ public class CalendarioService {
                     curso, fechaInicio, fechaFin);
 
             for (Tarea tarea : tareas) {
-                eventos.add(convertirTareaADTO(tarea, curso));
+                eventos.add(convertirTareaADTO(tarea, curso, estudiante));
             }
 
             // Obtener evaluaciones del curso en el rango de fechas
@@ -74,7 +80,7 @@ public class CalendarioService {
                     .findBySemana_CursoAndFechaLimiteBetween(curso, fechaInicio, fechaFin);
 
             for (Evaluacion evaluacion : evaluaciones) {
-                eventos.add(convertirEvaluacionADTO(evaluacion, curso));
+                eventos.add(convertirEvaluacionADTO(evaluacion, curso, estudiante));
             }
         }
 
@@ -169,6 +175,7 @@ public class CalendarioService {
         dto.setTipo(evento.getTipo());
         dto.setColor(evento.getColor());
         dto.setEsEditable(esEditable);
+        dto.setEstado("PENDIENTE"); // Por defecto para eventos personales
 
         if (evento.getCurso() != null) {
             dto.setCursoId(evento.getCurso().getId());
@@ -178,7 +185,7 @@ public class CalendarioService {
         return dto;
     }
 
-    private EventoCalendarioDTO convertirTareaADTO(Tarea tarea, Curso curso) {
+    private EventoCalendarioDTO convertirTareaADTO(Tarea tarea, Curso curso, Student estudiante) {
         EventoCalendarioDTO dto = new EventoCalendarioDTO();
         dto.setId(tarea.getId());
         dto.setTitulo(tarea.getTitulo());
@@ -186,14 +193,27 @@ public class CalendarioService {
         dto.setFechaInicio(tarea.getFechaLimite().minusHours(1)); // 1 hora antes como inicio
         dto.setFechaFin(tarea.getFechaLimite());
         dto.setTipo(TipoEvento.TAREA);
-        dto.setColor("#3B82F6"); // Azul para tareas
         dto.setCursoId(curso.getId());
         dto.setCursoNombre(curso.getNombre());
         dto.setEsEditable(false); // Las tareas del sistema no son editables
+
+        // Verificar estado
+        boolean entregada = entregaTareaRepository.existsByTareaAndStudent(tarea, estudiante);
+        if (entregada) {
+            dto.setEstado("COMPLETADO");
+            dto.setColor("#10B981"); // Verde
+        } else if (LocalDateTime.now().isAfter(tarea.getFechaLimite())) {
+            dto.setEstado("VENCIDO");
+            dto.setColor("#EF4444"); // Rojo intenso
+        } else {
+            dto.setEstado("PENDIENTE");
+            dto.setColor("#3B82F6"); // Azul
+        }
+
         return dto;
     }
 
-    private EventoCalendarioDTO convertirEvaluacionADTO(Evaluacion evaluacion, Curso curso) {
+    private EventoCalendarioDTO convertirEvaluacionADTO(Evaluacion evaluacion, Curso curso, Student estudiante) {
         EventoCalendarioDTO dto = new EventoCalendarioDTO();
         dto.setId(evaluacion.getId());
         dto.setTitulo(evaluacion.getTitulo());
@@ -201,10 +221,27 @@ public class CalendarioService {
         dto.setFechaInicio(evaluacion.getFechaInicio());
         dto.setFechaFin(evaluacion.getFechaLimite());
         dto.setTipo(TipoEvento.EXAMEN);
-        dto.setColor("#EF4444"); // Rojo para exámenes
         dto.setCursoId(curso.getId());
         dto.setCursoNombre(curso.getNombre());
         dto.setEsEditable(false); // Las evaluaciones del sistema no son editables
+
+        // Verificar estado
+        List<IntentoEvaluacion> intentos = intentoEvaluacionRepository
+                .findByEvaluacionIdAndEstudianteId(evaluacion.getId(), estudiante.getId());
+        boolean completada = intentos.stream()
+                .anyMatch(i -> i.getEstado() == EstadoIntento.COMPLETADO || i.getEstado() == EstadoIntento.CALIFICADO);
+
+        if (completada) {
+            dto.setEstado("COMPLETADO");
+            dto.setColor("#10B981"); // Verde
+        } else if (LocalDateTime.now().isAfter(evaluacion.getFechaLimite())) {
+            dto.setEstado("VENCIDO");
+            dto.setColor("#EF4444"); // Rojo intenso
+        } else {
+            dto.setEstado("PENDIENTE");
+            dto.setColor("#EF4444"); // Rojo para exámenes pendientes
+        }
+
         return dto;
     }
 }

@@ -121,6 +121,10 @@ public class StudentController {
         if (email != null) {
             studentService.findByEmail(email).ifPresent(student -> {
                 model.addAttribute("studentName", student.getNombre());
+
+                // Obtener cursos para el filtro
+                List<StudentCurso> cursos = studentCursoService.findByStudentId(student.getId());
+                model.addAttribute("cursos", cursos);
             });
         }
 

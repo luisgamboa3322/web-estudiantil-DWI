@@ -189,31 +189,37 @@
                     </div>
 
                     <!-- Filtros -->
-                    <div class="mb-6 flex gap-2 flex-wrap">
-                        <button
-                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 transition-all hover:bg-blue-200"
-                            data-tipo="TAREA">
-                            📝 Tareas
-                        </button>
-                        <button
-                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 transition-all hover:bg-red-200"
-                            data-tipo="EXAMEN">
-                            📋 Exámenes
-                        </button>
-                        <button
-                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 transition-all hover:bg-orange-200"
-                            data-tipo="FORO">
-                            💬 Foros
-                        </button>
-                        <button
-                            class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 transition-all hover:bg-green-200"
-                            data-tipo="PERSONAL">
-                            ⭐ Personal
-                        </button>
-                        <button id="btn-limpiar-filtros"
-                            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
-                            Limpiar Filtros
-                        </button>
+                    <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                        <div class="flex gap-2 flex-wrap">
+                            <button
+                                class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 transition-all hover:bg-blue-200"
+                                data-tipo="TAREA">📝 Tareas</button>
+                            <button
+                                class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 transition-all hover:bg-red-200"
+                                data-tipo="EXAMEN">📋 Exámenes</button>
+                            <button
+                                class="filtro-tipo px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 transition-all hover:bg-purple-200"
+                                data-tipo="PERSONAL">⭐ Personal</button>
+                            <button id="btn-limpiar-filtros"
+                                class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">Limpiar</button>
+                        </div>
+
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="filtro-curso"
+                                class="text-sm border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-orange-500 flex-1 sm:flex-none">
+                                <option value="">Todos los cursos</option>
+                                <option th:each="curso : ${cursos}" th:value="${curso.curso.id}"
+                                    th:text="${curso.curso.nombre}"></option>
+                            </select>
+
+                            <select id="filtro-estado"
+                                class="text-sm border-gray-300 rounded-lg shadow-sm focus:border-orange-500 focus:ring-orange-500 flex-1 sm:flex-none">
+                                <option value="">Todos los estados</option>
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="COMPLETADO">Completado</option>
+                                <option value="VENCIDO">Vencido</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Encabezados de días -->
@@ -368,6 +374,8 @@
         let fechaActual = new Date();
         let eventosData = [];
         let filtrosTipoActivos = [];
+        let filtroCursoActivo = "";
+        let filtroEstadoActivo = "";
         let eventoSeleccionado = null;
 
         // Elementos del DOM
@@ -443,11 +451,31 @@
 
         document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
             filtrosTipoActivos = [];
+            filtroCursoActivo = "";
+            filtroEstadoActivo = "";
             document.querySelectorAll('.filtro-tipo').forEach(btn => {
                 btn.classList.remove('ring-2', 'ring-offset-2');
             });
+            document.getElementById('filtro-curso').value = "";
+            document.getElementById('filtro-estado').value = "";
             renderizarCalendario();
         });
+
+        const filtroCurso = document.getElementById('filtro-curso');
+        if (filtroCurso) {
+            filtroCurso.addEventListener('change', (e) => {
+                filtroCursoActivo = e.target.value;
+                renderizarCalendario();
+            });
+        }
+
+        const filtroEstado = document.getElementById('filtro-estado');
+        if (filtroEstado) {
+            filtroEstado.addEventListener('change', (e) => {
+                filtroEstadoActivo = e.target.value;
+                renderizarCalendario();
+            });
+        }
 
         // Formulario de evento
         formEvento.addEventListener('submit', async (e) => {
@@ -577,8 +605,17 @@
                         fechaEvento.getMonth() === fecha.getMonth() &&
                         fechaEvento.getFullYear() === fecha.getFullYear();
                 }).filter(evento => {
-                    if (filtrosTipoActivos.length === 0) return true;
-                    return filtrosTipoActivos.includes(evento.tipo);
+                    // Type filter
+                    if (filtrosTipoActivos.length > 0 && !filtrosTipoActivos.includes(evento.tipo)) return false;
+
+                    // Course filter
+                    if (filtroCursoActivo && evento.cursoId && evento.cursoId.toString() !== filtroCursoActivo) return false;
+                    if (filtroCursoActivo && !evento.cursoId) return false; // Hide personal events if course selected
+
+                    // Status filter
+                    if (filtroEstadoActivo && evento.estado !== filtroEstadoActivo) return false;
+
+                    return true;
                 });
 
                 // Mostrar eventos (máximo 3)
@@ -695,42 +732,74 @@
         }
 
         function mostrarDetalleEvento(evento) {
-            eventoSeleccionado = evento;
-            document.getElementById('detalle-titulo').textContent = evento.titulo;
+            const modalTitulo = document.getElementById('detalle-titulo');
+            const modalContenido = document.getElementById('detalle-contenido');
 
-            const iconoTipo = {
-                'TAREA': '📝',
-                'EXAMEN': '📋',
-                'FORO': '💬',
-                'PERSONAL': '⭐',
-                'ESTUDIO': '📚',
-                'REUNION': '👥',
-                'RECORDATORIO': '🔔'
-            };
+            modalTitulo.textContent = evento.titulo;
 
-            const contenidoDiv = document.getElementById('detalle-contenido');
-            contenidoDiv.innerHTML = `
+            // Construir contenido
+            let contenidoHTML = `
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="text-2xl">${iconoTipo[evento.tipo] || '📌'}</span>
-                    <span class="font-medium px-2 py-1 rounded bg-slate-100 text-sm">${evento.tipo}</span>
-                </div>
-                ${evento.descripcion ? `<p class="text-gray-700 mb-2">${evento.descripcion}</p>` : ''}
-                ${evento.cursoNombre ? `<p class="text-sm text-gray-600 mb-1"><strong class="font-medium">Curso:</strong> ${evento.cursoNombre}</p>` : ''}
-                <div class="text-sm text-gray-600 space-y-1 mt-3 bg-slate-50 p-3 rounded-lg">
-                    <p><strong class="font-medium">Inicio:</strong> ${formatearFechaEvento(evento.fechaInicio)}</p>
-                    <p><strong class="font-medium">Fin:</strong> ${formatearFechaEvento(evento.fechaFin)}</p>
-                </div>
+                    <span class="px-2 py-1 rounded text-xs font-semibold text-white" style="background-color: ${evento.color}">
+                        ${evento.tipo}
+                    </span>
             `;
+
+            // Badge de Estado
+            if (evento.estado) {
+                let badgeClass = 'bg-gray-100 text-gray-800';
+                if (evento.estado === 'COMPLETADO') badgeClass = 'bg-green-100 text-green-800';
+                else if (evento.estado === 'VENCIDO') badgeClass = 'bg-red-100 text-red-800';
+                else if (evento.estado === 'PENDIENTE') badgeClass = 'bg-yellow-100 text-yellow-800';
+
+                contenidoHTML += `
+                    <span class="px-2 py-1 rounded text-xs font-semibold ${badgeClass}">
+                        ${evento.estado}
+                    </span>
+                `;
+            }
+
+            contenidoHTML += `</div>`;
+
+            if (evento.descripcion) {
+                contenidoHTML += `<p class="text-gray-600 mb-4">${evento.descripcion}</p>`;
+            }
+
+            contenidoHTML += `
+                <div class="space-y-2 text-sm text-gray-500">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="calendar" class="h-4 w-4"></i>
+                        <span>Inicio: ${formatearFechaEvento(evento.fechaInicio)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clock" class="h-4 w-4"></i>
+                        <span>Fin: ${formatearFechaEvento(evento.fechaFin)}</span>
+                    </div>
+            `;
+
+            if (evento.cursoNombre) {
+                contenidoHTML += `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="book" class="h-4 w-4"></i>
+                        <span>Curso: ${evento.cursoNombre}</span>
+                    </div>
+                `;
+            }
+
+            contenidoHTML += `</div>`;
+
+            modalContenido.innerHTML = contenidoHTML;
 
             // Botón para ir al examen
             if (evento.tipo === 'EXAMEN') {
                 const btnExamen = document.createElement('a');
                 btnExamen.href = `/student/evaluacion/resultados/${evento.id}`;
-                btnExamen.className = 'block w-full text-center mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium';
-                btnExamen.innerHTML = '<i data-lucide="external-link" class="inline-block w-4 h-4 mr-2"></i>Ir al Examen';
-                contenidoDiv.appendChild(btnExamen);
+                btnExamen.className = "block w-full text-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors";
+                btnExamen.textContent = "Ir al Examen";
+                modalContenido.appendChild(btnExamen);
             }
 
+            // Botones de acción
             if (evento.esEditable) {
                 document.getElementById('btn-editar-evento').classList.remove('hidden');
             } else {
@@ -743,7 +812,6 @@
 
         function cerrarModalDetalle() {
             modalDetalle.classList.add('hidden');
-            eventoSeleccionado = null;
         }
 
         async function guardarEvento() {
