@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,23 +8,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="bg-slate-100">
     <div class="min-h-screen">
         <header class="bg-white shadow-md p-4">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800" th:text="${evaluacion.titulo}">Resultados</h1>
-                    <p class="text-sm text-gray-600" th:text="${evaluacion.tipo}">Tipo</p>
+                    <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                        <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-medium"
+                            th:text="${evaluacion.tipo}">Tipo</span>
+                        <span th:if="${evaluacion.intentosMaximos != null}" class="text-slate-500">
+                            • Intentos permitidos: <span th:text="${evaluacion.intentosMaximos}">1</span>
+                        </span>
+                    </div>
                 </div>
-                <button onclick="window.history.back()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                    Volver
+                <button onclick="window.history.back()"
+                    class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
                 </button>
             </div>
         </header>
 
         <main class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 class="text-xl font-bold mb-4">Historial de Intentos</h2>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800">Historial de Intentos</h2>
+                    <div id="acciones-evaluacion">
+                        <!-- Botones de acción se inyectarán aquí -->
+                    </div>
+                </div>
+
                 <div id="intentos-container" class="space-y-4">
                     <!-- Los intentos se mostrarán aquí -->
                 </div>
@@ -38,10 +53,11 @@
             id: /*[[${evaluacion.id}]]*/ null,
             titulo: /*[[${evaluacion.titulo}]]*/ '',
             tipo: /*[[${evaluacion.tipo}]]*/ '',
-            descripcion: /*[[${evaluacion.descripcion}]]*/ ''
+            descripcion: /*[[${evaluacion.descripcion}]]*/ '',
+            intentosMaximos: /*[[${evaluacion.intentosMaximos}]]*/ 1
         };
         const intentosJson = /*[[${intentosJson}]]*/ '[]';
-        
+
         // Parsear JSON de intentos
         let intentos = [];
         try {
@@ -50,7 +66,7 @@
                 console.log('Intentos parseados desde JSON:', intentos);
             } else {
                 // Fallback: intentar usar los datos directamente de Thymeleaf
-                const intentosData = /*[[${intentos}]]*/ [];
+                const intentosData = /*[[${intentos}]]*/[];
                 if (Array.isArray(intentosData) && intentosData.length > 0) {
                     intentos = intentosData.map(intento => ({
                         intentoId: intento?.intentoId || intento?.id || null,
@@ -70,10 +86,9 @@
             console.error('Error parseando JSON de intentos:', e);
             intentos = [];
         }
-        
+
         console.log('Evaluación cargada:', evaluacion);
         console.log('Intentos cargados:', intentos);
-        console.log('Número de intentos:', intentos.length);
         /*]]>*/
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -83,166 +98,208 @@
 
         function renderIntentos() {
             const container = document.getElementById('intentos-container');
-            if (!container) {
-                console.error('No se encontró el contenedor de intentos');
-                return;
-            }
-            
-            container.innerHTML = '';
+            const accionesContainer = document.getElementById('acciones-evaluacion');
 
-            console.log('Renderizando intentos. Total:', intentos.length);
-            console.log('Datos de intentos:', JSON.stringify(intentos, null, 2));
-            console.log('Tipo de intentos:', typeof intentos, Array.isArray(intentos));
+            if (!container) return;
+
+            container.innerHTML = '';
+            accionesContainer.innerHTML = '';
+
+            const intentosRealizados = intentos.length;
+            const intentosMaximos = evaluacion.intentosMaximos || 1;
+            const tieneIntentoEnProgreso = intentos.some(i => i.estado === 'EN_PROGRESO');
+
+            // Botón principal: Iniciar Nuevo Intento
+            if (!tieneIntentoEnProgreso && intentosRealizados < intentosMaximos) {
+                const btnIniciar = document.createElement('button');
+                btnIniciar.className = 'px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium flex items-center gap-2 transition-colors shadow-sm';
+                btnIniciar.innerHTML = '<i data-lucide="play-circle" class="w-5 h-5"></i> Iniciar Nuevo Intento';
+                btnIniciar.onclick = iniciarEvaluacion;
+                accionesContainer.appendChild(btnIniciar);
+            } else if (intentosRealizados >= intentosMaximos) {
+                const badge = document.createElement('span');
+                badge.className = 'px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium border border-gray-200';
+                badge.textContent = 'Intentos agotados';
+                accionesContainer.appendChild(badge);
+            }
 
             if (!intentos || !Array.isArray(intentos) || intentos.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="file-question" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-                        <p class="text-lg font-medium mb-2">No hay intentos registrados</p>
-                        <p class="text-sm">Aún no has realizado ningún intento para esta evaluación.</p>
+                    <div class="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                            <i data-lucide="file-question" class="w-8 h-8 text-orange-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">No hay intentos registrados</h3>
+                        <p class="text-sm text-gray-500 mb-6">Aún no has realizado ningún intento para esta evaluación.</p>
+                        ${intentosRealizados < intentosMaximos ? `
+                            <button onclick="iniciarEvaluacion()" class="px-5 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium inline-flex items-center gap-2 transition-colors shadow-sm">
+                                <i data-lucide="play-circle" class="w-5 h-5"></i>
+                                Comenzar Evaluación
+                            </button>
+                        ` : ''}
                     </div>
                 `;
                 lucide.createIcons();
                 return;
             }
 
-            intentos.forEach((intento, index) => {
-                console.log(`Procesando intento ${index + 1}:`, intento);
-                
-                // Acceder a las propiedades del intento de forma segura
-                const calificacionNum = intento.calificacion !== null && intento.calificacion !== undefined 
-                    ? parseFloat(intento.calificacion) 
+            // Ordenar intentos: más recientes primero
+            const intentosOrdenados = [...intentos].sort((a, b) => {
+                const fechaA = a.fechaInicio ? new Date(Array.isArray(a.fechaInicio) ? new Date(a.fechaInicio[0], a.fechaInicio[1] - 1, a.fechaInicio[2], a.fechaInicio[3], a.fechaInicio[4]) : a.fechaInicio) : new Date(0);
+                const fechaB = b.fechaInicio ? new Date(Array.isArray(b.fechaInicio) ? new Date(b.fechaInicio[0], b.fechaInicio[1] - 1, b.fechaInicio[2], b.fechaInicio[3], b.fechaInicio[4]) : b.fechaInicio) : new Date(0);
+                return fechaB - fechaA;
+            });
+
+            intentosOrdenados.forEach((intento, index) => {
+                const calificacionNum = intento.calificacion !== null && intento.calificacion !== undefined
+                    ? parseFloat(intento.calificacion)
                     : null;
                 const comentarios = intento.comentarios || null;
                 const estado = intento.estado || 'N/A';
-                const numeroIntento = intento.numeroIntento || 'N/A';
+                const numeroIntento = intento.numeroIntento || (intentos.length - index);
                 const intentoId = intento.intentoId || intento.id || null;
-                
-                const estadoClass = {
-                    'EN_PROGRESO': 'bg-yellow-100 text-yellow-600',
-                    'COMPLETADO': 'bg-blue-100 text-blue-600',
-                    'EXPIRADO': 'bg-red-100 text-red-600',
-                    'CALIFICADO': 'bg-green-100 text-green-600'
-                }[estado] || 'bg-gray-100 text-gray-600';
 
-                // Formatear fechas de forma segura (parsear desde formato ISO o array)
-                let fechaInicioStr = 'Fecha no disponible';
-                let fechaFinStr = null;
-                
-                if (intento.fechaInicio) {
-                    try {
-                        // Manejar diferentes formatos de fecha
-                        let fechaInicio;
-                        if (Array.isArray(intento.fechaInicio)) {
-                            // Formato array [año, mes, día, hora, minuto, segundo]
-                            const [year, month, day, hour, minute, second] = intento.fechaInicio;
-                            fechaInicio = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
-                        } else if (typeof intento.fechaInicio === 'string') {
-                            // Formato string ISO
-                            fechaInicio = new Date(intento.fechaInicio);
-                        } else {
-                            fechaInicio = new Date(intento.fechaInicio);
-                        }
-                        
-                        if (!isNaN(fechaInicio.getTime())) {
-                            fechaInicioStr = fechaInicio.toLocaleString('es-ES', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        } else {
-                            console.warn('Fecha de inicio inválida:', intento.fechaInicio);
-                        }
-                    } catch (e) {
-                        console.error('Error parseando fechaInicio:', e, intento.fechaInicio);
-                    }
-                }
-                
-                if (intento.fechaFin) {
-                    try {
-                        // Manejar diferentes formatos de fecha
-                        let fechaFin;
-                        if (Array.isArray(intento.fechaFin)) {
-                            // Formato array [año, mes, día, hora, minuto, segundo]
-                            const [year, month, day, hour, minute, second] = intento.fechaFin;
-                            fechaFin = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
-                        } else if (typeof intento.fechaFin === 'string') {
-                            // Formato string ISO
-                            fechaFin = new Date(intento.fechaFin);
-                        } else {
-                            fechaFin = new Date(intento.fechaFin);
-                        }
-                        
-                        if (!isNaN(fechaFin.getTime())) {
-                            fechaFinStr = fechaFin.toLocaleString('es-ES', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        } else {
-                            console.warn('Fecha de fin inválida:', intento.fechaFin);
-                        }
-                    } catch (e) {
-                        console.error('Error parseando fechaFin:', e, intento.fechaFin);
-                    }
-                }
+                const estadoClass = {
+                    'EN_PROGRESO': 'bg-blue-100 text-blue-700 border-blue-200',
+                    'COMPLETADO': 'bg-green-100 text-green-700 border-green-200',
+                    'EXPIRADO': 'bg-red-100 text-red-700 border-red-200',
+                    'CALIFICADO': 'bg-green-100 text-green-700 border-green-200'
+                }[estado] || 'bg-gray-100 text-gray-600 border-gray-200';
+
+                // Formatear fechas
+                let fechaInicioStr = formatearFecha(intento.fechaInicio);
+                let fechaFinStr = formatearFecha(intento.fechaFin);
 
                 const intentoDiv = document.createElement('div');
-                intentoDiv.className = 'border border-gray-200 rounded-lg p-4 mb-4';
+                intentoDiv.className = 'border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white';
                 intentoDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div class="flex-1">
-                            <h3 class="font-semibold text-lg text-gray-800">Intento ${numeroIntento}</h3>
-                            <p class="text-sm text-gray-600 mt-1">
-                                Iniciado: ${fechaInicioStr}
-                                ${fechaFinStr ? `<br>Finalizado: ${fechaFinStr}` : ''}
-                            </p>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">Intento ${numeroIntento}</h3>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${estadoClass}">
+                                    ${estado.replace('_', ' ')}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p class="flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                                    Iniciado: ${fechaInicioStr}
+                                </p>
+                                ${fechaFinStr ? `
+                                    <p class="flex items-center gap-2">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-gray-400"></i>
+                                        Finalizado: ${fechaFinStr}
+                                    </p>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div class="text-right ml-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium ${estadoClass}">
-                                ${estado}
-                            </span>
+                        
+                        <div class="text-right">
                             ${calificacionNum !== null && !isNaN(calificacionNum) ? `
-                                <div class="mt-2">
-                                    <span class="text-2xl font-bold ${calificacionNum >= 70 ? 'text-green-600' : calificacionNum >= 50 ? 'text-yellow-600' : 'text-red-600'}">
-                                        ${calificacionNum.toFixed(1)}%
+                                <div class="flex flex-col items-end">
+                                    <span class="text-xs text-gray-500 font-medium uppercase tracking-wide">Calificación</span>
+                                    <span class="text-3xl font-bold ${calificacionNum >= 13 ? 'text-green-600' : calificacionNum >= 10 ? 'text-yellow-600' : 'text-red-600'}">
+                                        ${calificacionNum.toFixed(1)}
                                     </span>
+                                    <span class="text-xs text-gray-400">/ 20</span>
                                 </div>
                             ` : estado === 'CALIFICADO' ? `
-                                <div class="mt-2">
-                                    <span class="text-sm text-gray-500">Calificación pendiente</span>
-                                </div>
+                                <span class="text-sm text-gray-500 italic">Calificación pendiente</span>
                             ` : ''}
                         </div>
                     </div>
+                    
                     ${comentarios ? `
-                        <div class="bg-gray-50 rounded p-3 mb-3">
-                            <p class="text-sm text-gray-700"><strong>Comentarios:</strong> ${comentarios}</p>
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4 flex gap-3">
+                            <i data-lucide="message-square" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                            <div>
+                                <p class="text-xs font-semibold text-blue-800 mb-1">Comentarios del profesor:</p>
+                                <p class="text-sm text-blue-900">${comentarios}</p>
+                            </div>
                         </div>
                     ` : ''}
-                    ${estado === 'CALIFICADO' || estado === 'COMPLETADO' ? `
-                        <button onclick="verDetalleIntento(${intentoId || ''})" 
-                                class="text-blue-500 hover:text-blue-700 text-sm font-medium">
-                            Ver detalles del intento →
-                        </button>
-                    ` : ''}
+                    
+                    <div class="flex justify-end pt-2 border-t border-gray-100">
+                        ${estado === 'EN_PROGRESO' ? `
+                            <button onclick="continuarEvaluacion(${intentoId})" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 transition-colors shadow-sm w-full sm:w-auto justify-center">
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i> Continuar Evaluación
+                            </button>
+                        ` : (estado === 'CALIFICADO' || estado === 'COMPLETADO') ? `
+                            <button onclick="verDetalleIntento(${intentoId})" 
+                                    class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                                <i data-lucide="eye" class="w-4 h-4"></i> Ver detalles
+                            </button>
+                        ` : ''}
+                    </div>
                 `;
                 container.appendChild(intentoDiv);
             });
-            
-            // Actualizar iconos de Lucide después de agregar los elementos
+
             lucide.createIcons();
-            console.log('Intentos renderizados correctamente');
+        }
+
+        function formatearFecha(fechaInput) {
+            if (!fechaInput) return 'Fecha no disponible';
+            try {
+                let fecha;
+                if (Array.isArray(fechaInput)) {
+                    const [year, month, day, hour, minute, second] = fechaInput;
+                    fecha = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
+                } else {
+                    fecha = new Date(fechaInput);
+                }
+
+                if (isNaN(fecha.getTime())) return 'Fecha inválida';
+
+                return fecha.toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return 'Error fecha';
+            }
+        }
+
+        async function iniciarEvaluacion() {
+            if (!confirm('¿Estás seguro de que deseas iniciar una nueva evaluación? El tiempo comenzará a correr.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/student/evaluaciones/${evaluacion.id}/iniciar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const intento = await response.json();
+                    window.location.href = `/student/evaluacion/${intento.id}`;
+                } else {
+                    const errorMsg = await response.text();
+                    alert('Error al iniciar la evaluación: ' + errorMsg);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al iniciar la evaluación');
+            }
+        }
+
+        function continuarEvaluacion(intentoId) {
+            window.location.href = `/student/evaluacion/${intentoId}`;
         }
 
         function verDetalleIntento(intentoId) {
-            // Implementar vista detallada del intento
-            alert('Vista detallada del intento (por implementar)');
+            // Implementar vista detallada del intento si existe
+            alert('La vista detallada del intento se implementará próximamente.');
         }
     </script>
 </body>
+
 </html>
