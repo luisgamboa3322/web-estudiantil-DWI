@@ -1,0 +1,560 @@
+/* ============================================
+   SISTEMA DE MODO OSCURO - UTP+class
+   ============================================ */
+
+/* Variables de tema claro (por defecto) */
+:root {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-sidebar: #1f2937;
+    --bg-header: #ffffff;
+    --bg-card: #ffffff;
+    --bg-hover: #f8fafc;
+    --bg-input: #ffffff;
+    
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --text-sidebar: #ffffff;
+    --text-muted: #6b7280;
+    
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    --accent-orange: #f97316;
+    --accent-orange-dark: #ea580c;
+    --accent-orange-light: #fb923c;
+    
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+}
+
+/* Variables de tema oscuro */
+[data-theme="dark"] {
+    /* Backgrounds - Darker and more contrasted */
+    --bg-primary: #0a0e1a;          /* Muy oscuro para fondo principal */
+    --bg-secondary: #151b2e;        /* Oscuro para cards */
+    --bg-sidebar: #0a0e1a;          /* Igual que primary para consistencia */
+    --bg-header: #151b2e;           /* Oscuro para header */
+    --bg-card: #1a2235;             /* Más claro que secondary para destacar */
+    --bg-hover: #252f47;            /* Hover state visible */
+    --bg-input: #1f2937;            /* Inputs con buen contraste */
+    
+    /* Text - High contrast for readability */
+    --text-primary: #f8fafc;        /* Casi blanco para texto principal */
+    --text-secondary: #e2e8f0;      /* Gris muy claro para secundario */
+    --text-tertiary: #cbd5e1;       /* Gris claro para terciario */
+    --text-sidebar: #f8fafc;        /* Blanco para sidebar */
+    --text-muted: #94a3b8;          /* Gris medio para texto deshabilitado */
+    
+    /* Borders - Subtle but visible */
+    --border-color: #2d3748;        /* Bordes visibles pero sutiles */
+    --border-light: #374151;        /* Bordes más claros */
+    
+    /* Shadows - Stronger for depth */
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+    
+    /* Accent colors - Brighter for dark mode */
+    --accent-orange: #fb923c;       /* Naranja más brillante */
+    --accent-orange-dark: #f97316;  /* Naranja medio */
+    --accent-orange-light: #fdba74; /* Naranja claro */
+}
+
+/* Transición suave al cambiar de tema */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Aplicar variables a elementos comunes */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Sidebar */
+.sidebar,
+aside[id="sidebar"] {
+    background-color: var(--bg-sidebar) !important;
+    color: var(--text-sidebar) !important;
+}
+
+/* Header */
+header {
+    background-color: var(--bg-header) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Cards y contenedores blancos */
+.bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+/* Texto */
+.text-gray-800 {
+    color: var(--text-primary) !important;
+}
+
+.text-gray-600 {
+    color: var(--text-secondary) !important;
+}
+
+.text-gray-500 {
+    color: var(--text-tertiary) !important;
+}
+
+.text-gray-400 {
+    color: var(--text-muted) !important;
+}
+
+/* Bordes */
+.border-gray-200,
+.border-gray-300 {
+    border-color: var(--border-color) !important;
+}
+
+/* Inputs y selects */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    background-color: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Hover states */
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-100:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Backgrounds específicos */
+.bg-slate-100 {
+    background-color: var(--bg-primary) !important;
+}
+
+.bg-gray-50 {
+    background-color: var(--bg-secondary) !important;
+}
+
+.bg-gray-100 {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Sombras */
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg,
+.shadow-xl {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Scrollbar personalizado para modo oscuro */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Toggle Switch Styles */
+.theme-toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.theme-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.4s;
+    border-radius: 28px;
+}
+
+.theme-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.theme-toggle input:checked + .theme-toggle-slider {
+    background-color: var(--accent-orange);
+}
+
+.theme-toggle input:checked + .theme-toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* Iconos del toggle */
+.theme-toggle-slider .sun-icon,
+.theme-toggle-slider .moon-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    transition: opacity 0.3s;
+}
+
+.theme-toggle-slider .sun-icon {
+    left: 6px;
+    color: #f59e0b;
+}
+
+.theme-toggle-slider .moon-icon {
+    right: 6px;
+    color: #ffffff;
+    opacity: 0;
+}
+
+.theme-toggle input:checked + .theme-toggle-slider .sun-icon {
+    opacity: 0;
+}
+
+.theme-toggle input:checked + .theme-toggle-slider .moon-icon {
+    opacity: 1;
+}
+
+/* Ajustes específicos para elementos que no deben cambiar */
+.bg-orange-500,
+.bg-orange-600,
+.bg-red-500,
+.bg-red-600,
+.bg-green-500,
+.bg-green-600,
+.bg-blue-500,
+.bg-blue-600,
+.bg-yellow-500 {
+    /* Mantener colores de acento sin cambios */
+    filter: none !important;
+}
+
+/* Ajuste para modales */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Ajuste para tablas */
+[data-theme="dark"] table {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] thead {
+    background-color: var(--bg-hover);
+}
+
+[data-theme="dark"] tbody tr:hover {
+    background-color: var(--bg-hover);
+}
+
+/* Ajuste para código y pre */
+[data-theme="dark"] pre,
+[data-theme="dark"] code {
+    background-color: #0f172a;
+    border-color: var(--border-color);
+}
+
+/* Ajuste para badges y pills */
+[data-theme="dark"] .badge,
+[data-theme="dark"] .pill {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Ajuste para dropdowns */
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--bg-hover);
+}
+
+/* ============================================
+   REGLAS ADICIONALES PARA LEGIBILIDAD PERFECTA
+   ============================================ */
+
+/* Todos los textos grises de Tailwind */
+[data-theme="dark"] .text-gray-900 {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-gray-700 {
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .text-slate-800 {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-slate-700 {
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .text-slate-600 {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+/* Backgrounds adicionales */
+[data-theme="dark"] .bg-slate-50 {
+    background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .bg-gray-200 {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Bordes adicionales */
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-gray-100 {
+    border-color: var(--border-color) !important;
+}
+
+/* Inputs adicionales */
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="url"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="datetime-local"],
+[data-theme="dark"] input[type="checkbox"],
+[data-theme="dark"] input[type="radio"] {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Labels y pequeños textos */
+[data-theme="dark"] label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-xs,
+[data-theme="dark"] .text-sm {
+    color: inherit;
+}
+
+/* Links */
+[data-theme="dark"] a:not(.bg-orange-500):not(.bg-blue-500):not(.bg-red-500) {
+    color: var(--accent-orange-light);
+}
+
+[data-theme="dark"] a:hover:not(.bg-orange-500):not(.bg-blue-500):not(.bg-red-500) {
+    color: var(--accent-orange);
+}
+
+/* Botones secundarios */
+[data-theme="dark"] button:not([class*="bg-"]) {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .border {
+    border-color: var(--border-color) !important;
+}
+
+/* Hover states adicionales */
+[data-theme="dark"] .hover\\:bg-slate-50:hover,
+[data-theme="dark"] .hover\\:bg-slate-100:hover {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Disabled states */
+[data-theme="dark"] :disabled,
+[data-theme="dark"] [disabled] {
+    opacity: 0.5;
+    color: var(--text-muted) !important;
+}
+
+/* Placeholders más visibles */
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: #6b7280 !important;
+    opacity: 1;
+}
+
+/* Asegurar que los iconos de Lucide sean visibles */
+[data-theme="dark"] [data-lucide] {
+    color: inherit;
+}
+
+/* Cards y paneles */
+[data-theme="dark"] .rounded-lg,
+[data-theme="dark"] .rounded-md {
+    background-color: inherit;
+}
+
+/* Asegurar contraste en elementos específicos */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] p {
+    color: var(--text-secondary);
+}
+
+/* Mejoras para formularios */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select {
+    background-color: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Focus states mejorados */
+[data-theme="dark"] *:focus {
+    outline-color: var(--accent-orange) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    border-color: var(--accent-orange) !important;
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.3) !important;
+}
+
+/* Asegurar que los badges sean legibles */
+[data-theme="dark"] .bg-blue-100 {
+    background-color: #1e3a5f !important;
+}
+
+[data-theme="dark"] .bg-green-100 {
+    background-color: #1a3d2e !important;
+}
+
+[data-theme="dark"] .bg-red-100 {
+    background-color: #3d1a1a !important;
+}
+
+[data-theme="dark"] .bg-yellow-100 {
+    background-color: #3d3a1a !important;
+}
+
+[data-theme="dark"] .bg-purple-100 {
+    background-color: #2d1a3d !important;
+}
+
+/* Textos de badges más brillantes */
+[data-theme="dark"] .text-blue-800,
+[data-theme="dark"] .text-blue-700,
+[data-theme="dark"] .text-blue-600 {
+    color: #93c5fd !important;
+}
+
+[data-theme="dark"] .text-green-800,
+[data-theme="dark"] .text-green-700,
+[data-theme="dark"] .text-green-600 {
+    color: #86efac !important;
+}
+
+[data-theme="dark"] .text-red-800,
+[data-theme="dark"] .text-red-700,
+[data-theme="dark"] .text-red-600 {
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .text-yellow-800,
+[data-theme="dark"] .text-yellow-700,
+[data-theme="dark"] .text-yellow-600 {
+    color: #fde047 !important;
+}
+
+[data-theme="dark"] .text-purple-800,
+[data-theme="dark"] .text-purple-700,
+[data-theme="dark"] .text-purple-600 {
+    color: #d8b4fe !important;
+}
+
+/* Asegurar que el texto naranja sea visible */
+[data-theme="dark"] .text-orange-500,
+[data-theme="dark"] .text-orange-600,
+[data-theme="dark"] .text-orange-700 {
+    color: #fb923c !important;
+}
+
+/* Dividers */
+[data-theme="dark"] hr {
+    border-color: var(--border-color) !important;
+}
+
+/* Skeleton loaders */
+[data-theme="dark"] .animate-pulse {
+    background-color: var(--bg-hover) !important;
+}
+
+/* Asegurar que los modales sean visibles */
+[data-theme="dark"] .fixed.inset-0 {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Mejorar contraste de elementos interactivos */
+[data-theme="dark"] button:hover:not(:disabled),
+[data-theme="dark"] a:hover {
+    opacity: 0.9;
+}
+
+/* Asegurar que los tooltips sean legibles */
+[data-theme="dark"] [title]:hover::after {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}

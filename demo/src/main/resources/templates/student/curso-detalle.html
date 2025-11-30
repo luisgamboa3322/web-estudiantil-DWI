@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Dark Mode Support -->
+    <link rel="stylesheet" th:href="@{/css/dark-mode.css}">
+    <script th:src="@{/js/theme-manager.js}"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -49,11 +53,13 @@
             background-color: #fed7aa;
         }
 
-        .material-card, .task-card {
+        .material-card,
+        .task-card {
             transition: all 0.3s ease;
         }
 
-        .material-card:hover, .task-card:hover {
+        .material-card:hover,
+        .task-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
@@ -138,15 +144,26 @@
                     <button id="menu-button" class="md:hidden">
                         <i data-lucide="menu" class="h-6 w-6"></i>
                     </button>
-                    <button onclick="window.history.back()" class="flex items-center space-x-2 text-sm font-semibold text-orange-500 hover:text-orange-700">
+                    <button onclick="window.history.back()"
+                        class="flex items-center space-x-2 text-sm font-semibold text-orange-500 hover:text-orange-700">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         <span>Volver a cursos</span>
                     </button>
                 </div>
                 <div class="flex items-center space-x-4 ml-auto">
+                    <!-- Dark Mode Toggle -->
+                    <label class="theme-toggle" title="Cambiar tema">
+                        <input type="checkbox" id="theme-toggle-checkbox">
+                        <span class="theme-toggle-slider">
+                            <i data-lucide="sun" class="sun-icon"></i>
+                            <i data-lucide="moon" class="moon-icon"></i>
+                        </span>
+                    </label>
+
                     <button class="relative" id="notifications-btn">
                         <i data-lucide="bell" class="h-6 w-6 text-gray-600"></i>
-                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white hidden"
+                        <span
+                            class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white hidden"
                             id="notification-badge"></span>
                     </button>
                     <div class="flex items-center space-x-2 cursor-pointer" id="user-menu-btn">
@@ -172,7 +189,8 @@
                             <div class="flex items-center space-x-4 mt-4">
                                 <span class="text-sm text-gray-500">
                                     <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
-                                    Profesor: <span th:text="${curso.profesor.nombre}" class="font-medium">Profesor</span>
+                                    Profesor: <span th:text="${curso.profesor.nombre}"
+                                        class="font-medium">Profesor</span>
                                 </span>
                                 <span class="text-sm text-gray-500">
                                     <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
@@ -234,7 +252,8 @@
                             placeholder="Escribe aquí tu respuesta o entrega..."></textarea>
                     </div>
                     <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancel-task" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        <button type="button" id="cancel-task"
+                            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
                             Cancelar
                         </button>
                         <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
@@ -470,15 +489,15 @@
                     const intentosCompletados = intentos.filter(i => i.estado === 'COMPLETADO' || i.estado === 'CALIFICADO');
                     const intentosEnProgreso = intentos.filter(i => i.estado === 'EN_PROGRESO');
                     const puedeIniciar = evaluacion.estado === 'PUBLICADA' || evaluacion.estado === 'EN_CURSO';
-                    
+
                     // Parsear fechas correctamente (formato ISO de LocalDateTime: "2024-01-15T10:30:00")
                     let fechaInicio, fechaLimite;
                     try {
                         // Jackson puede serializar LocalDateTime como array [año, mes, día, hora, minuto, segundo] o como string
                         if (Array.isArray(evaluacion.fechaInicio)) {
                             // Formato array: [2024, 1, 15, 10, 30, 0]
-                            fechaInicio = new Date(evaluacion.fechaInicio[0], evaluacion.fechaInicio[1] - 1, 
-                                evaluacion.fechaInicio[2], evaluacion.fechaInicio[3] || 0, 
+                            fechaInicio = new Date(evaluacion.fechaInicio[0], evaluacion.fechaInicio[1] - 1,
+                                evaluacion.fechaInicio[2], evaluacion.fechaInicio[3] || 0,
                                 evaluacion.fechaInicio[4] || 0, evaluacion.fechaInicio[5] || 0);
                         } else if (typeof evaluacion.fechaInicio === 'string') {
                             // Formato string ISO: "2024-01-15T10:30:00" o "2024-01-15T10:30"
@@ -491,10 +510,10 @@
                         } else {
                             fechaInicio = new Date(evaluacion.fechaInicio);
                         }
-                        
+
                         if (Array.isArray(evaluacion.fechaLimite)) {
-                            fechaLimite = new Date(evaluacion.fechaLimite[0], evaluacion.fechaLimite[1] - 1, 
-                                evaluacion.fechaLimite[2], evaluacion.fechaLimite[3] || 0, 
+                            fechaLimite = new Date(evaluacion.fechaLimite[0], evaluacion.fechaLimite[1] - 1,
+                                evaluacion.fechaLimite[2], evaluacion.fechaLimite[3] || 0,
                                 evaluacion.fechaLimite[4] || 0, evaluacion.fechaLimite[5] || 0);
                         } else if (typeof evaluacion.fechaLimite === 'string') {
                             let fechaStr = evaluacion.fechaLimite;
@@ -505,7 +524,7 @@
                         } else {
                             fechaLimite = new Date(evaluacion.fechaLimite);
                         }
-                        
+
                         // Validar que las fechas sean válidas
                         if (isNaN(fechaInicio.getTime()) || isNaN(fechaLimite.getTime())) {
                             console.error('Fechas inválidas:', evaluacion.fechaInicio, evaluacion.fechaLimite);
@@ -518,7 +537,7 @@
                         fechaLimite = new Date();
                         fechaLimite.setDate(fechaLimite.getDate() + 1);
                     }
-                    
+
                     const ahora = new Date();
                     // Comparar fechas correctamente
                     const disponible = ahora >= fechaInicio && ahora <= fechaLimite;

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Este fragmento contiene los recursos necesarios para el modo oscuro -->
+
+    <!-- Dark Mode CSS and JS Fragment -->
+    <th:block th:fragment="dark-mode-resources">
+        <!-- Dark Mode Support -->
+        <link rel="stylesheet" th:href="@{/css/dark-mode.css}">
+        <script th:src="@{/js/theme-manager.js}"></script>
+    </th:block>
+
+    <!-- Dark Mode Toggle Button Fragment -->
+    <th:block th:fragment="dark-mode-toggle">
+        <label class="theme-toggle" title="Cambiar tema">
+            <input type="checkbox" id="theme-toggle-checkbox">
+            <span class="theme-toggle-slider">
+                <i data-lucide="sun" class="sun-icon"></i>
+                <i data-lucide="moon" class="moon-icon"></i>
+            </span>
+        </label>
+    </th:block>
+</head>
+
+<body>
+</body>
+
+</html>

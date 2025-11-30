@@ -1,24 +1,39 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realizar Evaluación</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Dark Mode Support -->
+    <link rel="stylesheet" th:href="@{/css/dark-mode.css}">
+    <script th:src="@{/js/theme-manager.js}"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .timer-warning {
             animation: pulse 1s infinite;
         }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
     </style>
 </head>
+
 <body class="bg-slate-100">
     <div class="min-h-screen">
         <!-- Header con Timer -->
@@ -52,14 +67,17 @@
                 </div>
 
                 <div class="mt-8 flex justify-between items-center bg-white rounded-lg shadow-sm p-6">
-                    <button type="button" onclick="window.history.back()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                    <button type="button" onclick="window.history.back()"
+                        class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
                         Cancelar
                     </button>
                     <div class="flex gap-3">
-                        <button type="button" id="save-btn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        <button type="button" id="save-btn"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                             Guardar Respuestas
                         </button>
-                        <button type="submit" id="submit-btn" class="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 font-semibold">
+                        <button type="submit" id="submit-btn"
+                            class="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 font-semibold">
                             Finalizar Evaluación
                         </button>
                     </div>
@@ -72,7 +90,7 @@
         /*<![CDATA[*/
         const intentoId = /*[[${intento.id}]]*/ 0;
         const evaluacionId = /*[[${evaluacion.id}]]*/ 0;
-        const preguntas = /*[[${preguntas}]]*/ [];
+        const preguntas = /*[[${preguntas}]]*/[];
         const tiempoLimiteMinutos = /*[[${evaluacion.tiempoLimiteMinutos}]]*/ null;
         const fechaLimiteIntento = /*[[${intento.fechaLimiteIntento}]]*/ null;
         /*]]>*/
@@ -114,11 +132,11 @@
             preguntas.forEach((pregunta, index) => {
                 const preguntaDiv = document.createElement('div');
                 preguntaDiv.className = 'bg-white rounded-lg shadow-sm p-6';
-                
+
                 // Escapar HTML en el enunciado para evitar problemas
                 const enunciado = escapeHtml(pregunta.enunciado || '');
                 const tipoPregunta = String(pregunta.tipo || '').toUpperCase();
-                
+
                 preguntaDiv.innerHTML = `
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">
@@ -137,10 +155,10 @@
         function renderPreguntaContent(pregunta, tipoPregunta) {
             // Asegurarse de que el tipo sea string y en mayúsculas
             const tipo = tipoPregunta || String(pregunta.tipo || '').toUpperCase();
-            
+
             console.log('Renderizando pregunta:', pregunta.id, 'Tipo:', tipo, 'Opciones:', pregunta.opciones);
-            
-            switch(tipo) {
+
+            switch (tipo) {
                 case 'OPCION_MULTIPLE':
                     return renderOpcionMultiple(pregunta);
                 case 'VERDADERO_FALSO':
@@ -261,13 +279,13 @@
 
         function startTimer() {
             if (!fechaLimiteIntento) return;
-            
+
             // Parsear fecha límite del intento
             let fechaLimite;
             try {
                 if (Array.isArray(fechaLimiteIntento)) {
-                    fechaLimite = new Date(fechaLimiteIntento[0], fechaLimiteIntento[1] - 1, 
-                        fechaLimiteIntento[2], fechaLimiteIntento[3] || 0, 
+                    fechaLimite = new Date(fechaLimiteIntento[0], fechaLimiteIntento[1] - 1,
+                        fechaLimiteIntento[2], fechaLimiteIntento[3] || 0,
                         fechaLimiteIntento[4] || 0, fechaLimiteIntento[5] || 0);
                 } else if (typeof fechaLimiteIntento === 'string') {
                     let fechaStr = fechaLimiteIntento;
@@ -282,7 +300,7 @@
                 console.error('Error parseando fecha límite:', e);
                 return;
             }
-            
+
             const updateTimer = () => {
                 const ahora = new Date();
                 const diff = Math.max(0, Math.floor((fechaLimite - ahora) / 1000));
@@ -296,9 +314,9 @@
                 const minutos = Math.floor(diff / 60);
                 const segundos = diff % 60;
                 const display = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-                
+
                 document.getElementById('timer-display').textContent = display;
-                
+
                 // Cambiar color cuando quedan menos de 5 minutos
                 const timerEl = document.getElementById('timer');
                 if (minutos < 5) {
@@ -340,11 +358,11 @@
         function guardarTodasLasRespuestas() {
             // Guardar todas las respuestas del formulario
             const preguntas = document.querySelectorAll('[data-pregunta-id]');
-            
+
             preguntas.forEach(preguntaContainer => {
                 const preguntaId = preguntaContainer.getAttribute('data-pregunta-id');
                 const tipo = preguntaContainer.getAttribute('data-tipo');
-                
+
                 if (tipo === 'OPCION_MULTIPLE' || tipo === 'VERDADERO_FALSO') {
                     const radio = preguntaContainer.querySelector(`input[name="pregunta-${preguntaId}"]:checked`);
                     if (radio) {
@@ -374,7 +392,7 @@
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Finalizando...';
                 }
-                
+
                 const response = await fetch(`/student/intentos/${intentoId}/finalizar`, {
                     method: 'POST',
                     headers: {
@@ -385,14 +403,14 @@
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Evaluación finalizada:', data);
-                    
+
                     if (timerInterval) clearInterval(timerInterval);
                     if (autoSaveInterval) clearInterval(autoSaveInterval);
-                    
+
                     if (automatico) {
                         alert('El tiempo se ha agotado. Tu evaluación ha sido finalizada automáticamente.');
                     }
-                    
+
                     // Redirigir a resultados usando el evaluacionId del response o el del contexto
                     const evalId = data.evaluacionId || evaluacionId;
                     window.location.href = `/student/evaluacion/resultados/${evalId}`;
@@ -400,7 +418,7 @@
                     const error = await response.text();
                     console.error('Error al finalizar:', error);
                     alert('Error al finalizar la evaluación: ' + error);
-                    
+
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Finalizar Evaluación';
@@ -409,7 +427,7 @@
             } catch (error) {
                 console.error('Error de conexión:', error);
                 alert('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
-                
+
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -424,5 +442,5 @@
         });
     </script>
 </body>
-</html>
 
+</html>
