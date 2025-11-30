@@ -9,7 +9,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
-
 import jakarta.validation.Valid;
 
 import com.example.demo.model.Admin;
@@ -24,6 +23,8 @@ import com.example.demo.service.AdminService;
 import com.example.demo.service.StudentService;
 import com.example.demo.service.ProfessorService;
 import com.example.demo.service.StudentCursoService;
+import com.example.demo.service.DashboardStatsService;
+import com.example.demo.dto.DashboardStatsDTO;
 
 import com.example.demo.repository.CursoRepository;
 import com.example.demo.repository.ProfessorRepository;
@@ -43,6 +44,7 @@ public class AdminController {
     private final StudentService studentService;
     private final ProfessorService professorService;
     private final StudentCursoService studentCursoService;
+    private final DashboardStatsService dashboardStatsService;
 
     @Autowired
     private CursoRepository cursoRepository;
@@ -54,15 +56,17 @@ public class AdminController {
     private RoleRepository roleRepository;
 
     public AdminController(AdminService adminService,
-                           StudentService studentService,
-                           ProfessorService professorService,
-                           StudentCursoService studentCursoService,
-                           CursoRepository cursoRepository,
-                           ProfessorRepository professorRepository) {
+            StudentService studentService,
+            ProfessorService professorService,
+            StudentCursoService studentCursoService,
+            DashboardStatsService dashboardStatsService,
+            CursoRepository cursoRepository,
+            ProfessorRepository professorRepository) {
         this.adminService = adminService;
         this.studentService = studentService;
         this.professorService = professorService;
         this.studentCursoService = studentCursoService;
+        this.dashboardStatsService = dashboardStatsService;
         this.cursoRepository = cursoRepository;
         this.professorRepository = professorRepository;
     }
@@ -74,7 +78,7 @@ public class AdminController {
     public String dashboard(Model model, Authentication authentication) {
         // Verificar si el usuario tiene permiso para acceder al dashboard admin
         boolean hasAdminPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
+                .anyMatch(auth -> auth.getAuthority().equals("ACCESS_ADMIN_DASHBOARD"));
 
         if (!hasAdminPermission) {
             // Usuario no tiene permiso para acceder al dashboard admin
@@ -92,17 +96,33 @@ public class AdminController {
         System.out.println("DEBUG: Asignaciones count: " + asignaciones.size());
 
         for (var curso : cursos) {
-            System.out.println("DEBUG: Curso - ID: " + curso.getId() + ", Nombre: " + curso.getNombre() + ", Estado: " + curso.getEstado() + ", Profesor: " + (curso.getProfesor() != null ? curso.getProfesor().getNombre() : "null"));
+            System.out.println("DEBUG: Curso - ID: " + curso.getId() + ", Nombre: " + curso.getNombre() + ", Estado: "
+                    + curso.getEstado() + ", Profesor: "
+                    + (curso.getProfesor() != null ? curso.getProfesor().getNombre() : "null"));
         }
 
         model.addAttribute("students", students);
         model.addAttribute("professors", professors);
-        // También exponemos la lista con la clave en español porque los templates la usan así
+        // También exponemos la lista con la clave en español porque los templates la
+        // usan así
         model.addAttribute("profesores", professors);
         model.addAttribute("admins", adminService.findAll());
         model.addAttribute("cursos", cursos);
         model.addAttribute("asignaciones", asignaciones);
         return "administrador/dashboard";
+    }
+
+    // Endpoint para obtener estadísticas del dashboard
+    @GetMapping("/dashboard/stats")
+    @ResponseBody
+    public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
+        try {
+            DashboardStatsDTO stats = dashboardStatsService.getDashboardStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // ===========================
@@ -113,15 +133,14 @@ public class AdminController {
     public ResponseEntity<?> createStudent(@Valid @RequestBody Student student, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return ResponseEntity.badRequest().body(errors);
         }
 
         try {
             // Asignar rol STUDENT por defecto
             Role studentRole = roleRepository.findByName("STUDENT")
-                .orElseThrow(() -> new IllegalStateException("Rol STUDENT no encontrado"));
+                    .orElseThrow(() -> new IllegalStateException("Rol STUDENT no encontrado"));
             Set<Role> roles = new HashSet<>();
             roles.add(studentRole);
             student.setRoles(roles);
@@ -153,12 +172,13 @@ public class AdminController {
             // Verificar si el estudiante tiene asignaciones activas
             var asignaciones = studentCursoService.findByStudentId(id);
             boolean hasActiveAsignaciones = asignaciones.stream()
-                .anyMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
+                    .anyMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
 
             if (hasActiveAsignaciones) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
-                response.put("message", "No se puede eliminar el estudiante porque tiene cursos asignados activos. Primero desasigne los cursos.");
+                response.put("message",
+                        "No se puede eliminar el estudiante porque tiene cursos asignados activos. Primero desasigne los cursos.");
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -183,15 +203,14 @@ public class AdminController {
     public ResponseEntity<?> createProfessor(@Valid @RequestBody Professor professor, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return ResponseEntity.badRequest().body(errors);
         }
 
         try {
             // Asignar rol TEACHER por defecto
             Role teacherRole = roleRepository.findByName("TEACHER")
-                .orElseThrow(() -> new IllegalStateException("Rol TEACHER no encontrado"));
+                    .orElseThrow(() -> new IllegalStateException("Rol TEACHER no encontrado"));
             Set<Role> roles = new HashSet<>();
             roles.add(teacherRole);
             professor.setRoles(roles);
@@ -225,7 +244,8 @@ public class AdminController {
             if (!cursosAsignados.isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", false);
-                response.put("message", "No se puede eliminar el profesor porque tiene cursos asignados. Primero reasigne o elimine los cursos.");
+                response.put("message",
+                        "No se puede eliminar el profesor porque tiene cursos asignados. Primero reasigne o elimine los cursos.");
                 return ResponseEntity.badRequest().body(response);
             }
             professorService.delete(id);
@@ -249,15 +269,14 @@ public class AdminController {
     public ResponseEntity<?> createAdmin(@Valid @RequestBody Admin admin, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return ResponseEntity.badRequest().body(errors);
         }
 
         try {
             // Asignar rol ADMIN por defecto
             Role adminRole = roleRepository.findByName("ADMIN")
-                .orElseThrow(() -> new IllegalStateException("Rol ADMIN no encontrado"));
+                    .orElseThrow(() -> new IllegalStateException("Rol ADMIN no encontrado"));
             Set<Role> roles = new HashSet<>();
             roles.add(adminRole);
             admin.setRoles(roles);
@@ -394,13 +413,14 @@ public class AdminController {
             if (cursoRepository.existsById(cursoId)) {
                 // Verificar si el curso tiene estudiantes asignados activos
                 var asignacionesActivas = studentCursoService.findAll().stream()
-                    .filter(a -> a.getCurso().getId().equals(cursoId) && a.getEstado() == EstadoAsignacion.ACTIVO)
-                    .findAny();
+                        .filter(a -> a.getCurso().getId().equals(cursoId) && a.getEstado() == EstadoAsignacion.ACTIVO)
+                        .findAny();
 
                 if (asignacionesActivas.isPresent()) {
                     Map<String, Object> response = new HashMap<>();
                     response.put("success", false);
-                    response.put("message", "No se puede eliminar el curso porque tiene estudiantes asignados activos. Primero desasigne los estudiantes.");
+                    response.put("message",
+                            "No se puede eliminar el curso porque tiene estudiantes asignados activos. Primero desasigne los estudiantes.");
                     return ResponseEntity.badRequest().body(response);
                 }
 

@@ -10,12 +10,17 @@ import java.util.List;
 @Repository
 public interface StudentCursoRepository extends JpaRepository<StudentCurso, Long> {
     List<StudentCurso> findByStudentId(Long studentId);
+
     List<StudentCurso> findByCursoId(Long cursoId);
+
     List<StudentCurso> findByEstado(String estado);
 
     @Query("SELECT sc FROM StudentCurso sc JOIN FETCH sc.student s JOIN FETCH sc.curso c LEFT JOIN FETCH c.profesor p WHERE sc.estado = 'ACTIVO'")
     List<StudentCurso> findAllWithDetails();
 
     boolean existsByStudentIdAndEstado(Long studentId, EstadoAsignacion estado);
+
     boolean existsByCursoIdAndEstado(Long cursoId, EstadoAsignacion estado);
+
+    long countByEstado(EstadoAsignacion estado);
 }
