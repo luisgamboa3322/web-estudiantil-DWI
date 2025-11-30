@@ -53,8 +53,14 @@ public class EvaluacionService {
     }
 
     @Transactional(readOnly = true)
+    public List<Evaluacion> findByCurso(Curso curso) {
+        return evaluacionRepository.findBySemana_Curso(curso);
+    }
+
+    @Transactional(readOnly = true)
     public List<IntentoEvaluacion> getIntentosByEvaluacionIdAndEstudianteId(Long evaluacionId, Long estudianteId) {
-        List<IntentoEvaluacion> intentos = intentoEvaluacionRepository.findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
+        List<IntentoEvaluacion> intentos = intentoEvaluacionRepository.findByEvaluacionIdAndEstudianteId(evaluacionId,
+                estudianteId);
         // Inicializar relaciones lazy
         for (IntentoEvaluacion intento : intentos) {
             Hibernate.initialize(intento.getEstudiante());
@@ -66,14 +72,14 @@ public class EvaluacionService {
 
     @Transactional
     public Evaluacion createEvaluacion(Long semanaId, String titulo, String descripcion, TipoEvaluacion tipo,
-                                      LocalDateTime fechaInicio, LocalDateTime fechaLimite,
-                                      Integer tiempoLimiteMinutos, Integer intentosMaximos,
-                                      int puntosMaximos, Boolean mostrarResultadosInmediatos,
-                                      Boolean permitirRevisarRespuestas, Long profesorId) {
+            LocalDateTime fechaInicio, LocalDateTime fechaLimite,
+            Integer tiempoLimiteMinutos, Integer intentosMaximos,
+            int puntosMaximos, Boolean mostrarResultadosInmediatos,
+            Boolean permitirRevisarRespuestas, Long profesorId) {
         Semana semana = semanaService.findById(semanaId)
-            .orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Semana no encontrada"));
         Professor profesor = professorService.getById(profesorId)
-            .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado"));
 
         Evaluacion evaluacion = new Evaluacion();
         evaluacion.setTitulo(titulo);
@@ -84,7 +90,8 @@ public class EvaluacionService {
         evaluacion.setTiempoLimiteMinutos(tiempoLimiteMinutos);
         evaluacion.setIntentosMaximos(intentosMaximos != null ? intentosMaximos : 1);
         evaluacion.setPuntosMaximos(puntosMaximos);
-        evaluacion.setMostrarResultadosInmediatos(mostrarResultadosInmediatos != null ? mostrarResultadosInmediatos : false);
+        evaluacion.setMostrarResultadosInmediatos(
+                mostrarResultadosInmediatos != null ? mostrarResultadosInmediatos : false);
         evaluacion.setPermitirRevisarRespuestas(permitirRevisarRespuestas != null ? permitirRevisarRespuestas : false);
         evaluacion.setSemana(semana);
         evaluacion.setProfesor(profesor);
@@ -96,8 +103,8 @@ public class EvaluacionService {
     @Transactional
     public Evaluacion publicarEvaluacion(Long evaluacionId) {
         Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+
         if (evaluacion.getPreguntas().isEmpty()) {
             throw new IllegalStateException("No se puede publicar una evaluación sin preguntas");
         }
@@ -109,18 +116,18 @@ public class EvaluacionService {
     @Transactional
     public void deleteEvaluacion(Long evaluacionId) {
         Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
         evaluacionRepository.delete(evaluacion);
     }
 
     @Transactional
     public IntentoEvaluacion iniciarIntento(Long evaluacionId, Long estudianteId) {
         Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
 
         // Verificar que la evaluación esté publicada o en curso
-        if (evaluacion.getEstado() != EstadoEvaluacion.PUBLICADA && 
-            evaluacion.getEstado() != EstadoEvaluacion.EN_CURSO) {
+        if (evaluacion.getEstado() != EstadoEvaluacion.PUBLICADA &&
+                evaluacion.getEstado() != EstadoEvaluacion.EN_CURSO) {
             throw new IllegalStateException("La evaluación no está disponible");
         }
 
@@ -135,10 +142,10 @@ public class EvaluacionService {
 
         // Buscar intentos en progreso
         List<IntentoEvaluacion> intentosEnProgreso = intentoEvaluacionRepository
-            .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
-            .stream()
-            .filter(i -> i.getEstado() == EstadoIntento.EN_PROGRESO)
-            .collect(Collectors.toList());
+                .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
+                .stream()
+                .filter(i -> i.getEstado() == EstadoIntento.EN_PROGRESO)
+                .collect(Collectors.toList());
 
         if (!intentosEnProgreso.isEmpty()) {
             return intentosEnProgreso.get(0); // Retornar el intento en progreso
@@ -146,10 +153,10 @@ public class EvaluacionService {
 
         // Contar intentos completados
         List<IntentoEvaluacion> intentosCompletados = intentoEvaluacionRepository
-            .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
-            .stream()
-            .filter(i -> i.getEstado() == EstadoIntento.COMPLETADO || i.getEstado() == EstadoIntento.CALIFICADO)
-            .collect(Collectors.toList());
+                .findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId)
+                .stream()
+                .filter(i -> i.getEstado() == EstadoIntento.COMPLETADO || i.getEstado() == EstadoIntento.CALIFICADO)
+                .collect(Collectors.toList());
 
         if (intentosCompletados.size() >= evaluacion.getIntentosMaximos()) {
             throw new IllegalStateException("Has alcanzado el número máximo de intentos");
@@ -158,15 +165,15 @@ public class EvaluacionService {
         // Crear nuevo intento
         Integer numeroIntento = intentosCompletados.size() + 1;
         Student estudiante = studentService.findById(estudianteId)
-            .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+
         IntentoEvaluacion intento = new IntentoEvaluacion();
         intento.setNumeroIntento(numeroIntento);
         intento.setEvaluacion(evaluacion);
         intento.setEstudiante(estudiante);
         intento.setEstado(EstadoIntento.EN_PROGRESO);
         intento.setFechaInicio(LocalDateTime.now());
-        
+
         // Calcular fecha límite del intento si hay tiempo límite
         if (evaluacion.getTiempoLimiteMinutos() != null) {
             intento.setFechaLimiteIntento(intento.getFechaInicio().plusMinutes(evaluacion.getTiempoLimiteMinutos()));
@@ -191,20 +198,20 @@ public class EvaluacionService {
 
     @Transactional
     public RespuestaEstudiante guardarRespuesta(Long intentoId, Long preguntaId, String respuestaTexto,
-                                                Long opcionSeleccionadaId, String opcionesOrdenadas) {
+            Long opcionSeleccionadaId, String opcionesOrdenadas) {
         IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
-            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
 
         if (intento.getEstado() != EstadoIntento.EN_PROGRESO) {
             throw new IllegalStateException("No se puede modificar un intento que ya está completado");
         }
 
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
-            .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
 
         // Buscar respuesta existente o crear nueva
         Optional<RespuestaEstudiante> respuestaOpt = respuestaEstudianteRepository
-            .findByIntentoIdAndPreguntaId(intentoId, preguntaId);
+                .findByIntentoIdAndPreguntaId(intentoId, preguntaId);
 
         RespuestaEstudiante respuesta;
         if (respuestaOpt.isPresent()) {
@@ -224,7 +231,7 @@ public class EvaluacionService {
     @Transactional
     public IntentoEvaluacion finalizarIntento(Long intentoId) {
         IntentoEvaluacion intento = intentoEvaluacionRepository.findById(intentoId)
-            .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Intento no encontrado"));
 
         if (intento.getEstado() != EstadoIntento.EN_PROGRESO) {
             throw new IllegalStateException("El intento ya está finalizado");
@@ -244,7 +251,7 @@ public class EvaluacionService {
         // Guardar y refrescar para asegurar que todas las relaciones estén cargadas
         IntentoEvaluacion intentoGuardado = intentoEvaluacionRepository.save(intento);
         intentoEvaluacionRepository.flush(); // Forzar flush para asegurar que se guarde
-        
+
         return intentoGuardado;
     }
 
@@ -259,23 +266,25 @@ public class EvaluacionService {
             // Inicializar relaciones lazy para evitar problemas
             Hibernate.initialize(respuesta.getPregunta());
             Pregunta pregunta = respuesta.getPregunta();
-            if (pregunta == null) continue;
-            
+            if (pregunta == null)
+                continue;
+
             puntosMaximos += pregunta.getPuntos();
-            
+
             // Inicializar opciones si es necesario
-            if (pregunta.getTipo() == TipoPregunta.COMPLETAR || 
-                pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 
-                pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
+            if (pregunta.getTipo() == TipoPregunta.COMPLETAR ||
+                    pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE ||
+                    pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
                 Hibernate.initialize(pregunta.getOpciones());
             }
 
             // Calificar según el tipo de pregunta
-            if (pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE || 
-                pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
-                
+            if (pregunta.getTipo() == TipoPregunta.OPCION_MULTIPLE ||
+                    pregunta.getTipo() == TipoPregunta.VERDADERO_FALSO) {
+
                 if (respuesta.getOpcionSeleccionadaId() != null) {
-                    Optional<OpcionRespuesta> opcionOpt = opcionRespuestaRepository.findById(respuesta.getOpcionSeleccionadaId());
+                    Optional<OpcionRespuesta> opcionOpt = opcionRespuestaRepository
+                            .findById(respuesta.getOpcionSeleccionadaId());
                     if (opcionOpt.isPresent() && opcionOpt.get().getEsCorrecta()) {
                         respuesta.setEsCorrecta(true);
                         respuesta.setPuntosObtenidos(pregunta.getPuntos());
@@ -306,9 +315,9 @@ public class EvaluacionService {
         }
 
         // Calcular calificación final
-        double calificacionFinal = puntosMaximos > 0 
-            ? (double) puntosTotales / puntosMaximos * 100.0 
-            : 0.0;
+        double calificacionFinal = puntosMaximos > 0
+                ? (double) puntosTotales / puntosMaximos * 100.0
+                : 0.0;
 
         // Crear o actualizar calificación
         Optional<Calificacion> calificacionOpt = calificacionRepository.findByIntentoId(intento.getId());
@@ -340,10 +349,10 @@ public class EvaluacionService {
     }
 
     @Transactional
-    public Pregunta createPregunta(Long evaluacionId, String enunciado, TipoPregunta tipo, int puntos, 
-                                   List<Map<String, Object>> opcionesData) {
+    public Pregunta createPregunta(Long evaluacionId, String enunciado, TipoPregunta tipo, int puntos,
+            List<Map<String, Object>> opcionesData) {
         Evaluacion evaluacion = evaluacionRepository.findById(evaluacionId)
-            .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Evaluación no encontrada"));
 
         // Obtener el siguiente orden
         List<Pregunta> preguntasExistentes = preguntaRepository.findByEvaluacionIdOrderByOrden(evaluacionId);
@@ -376,7 +385,7 @@ public class EvaluacionService {
     @Transactional
     public void deletePregunta(Long preguntaId) {
         Pregunta pregunta = preguntaRepository.findById(preguntaId)
-            .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Pregunta no encontrada"));
         preguntaRepository.delete(pregunta);
     }
 }

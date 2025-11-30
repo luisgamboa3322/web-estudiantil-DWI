@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.example.demo.dto.IntentoEvaluacionResumenDTO;
+import com.example.demo.dto.EventoCalendarioDTO;
+import com.example.demo.dto.NotificacionDTO;
+import com.example.demo.model.Notificacion;
 
 @Controller
 @RequestMapping("/student")
@@ -48,6 +51,9 @@ public class StudentController {
 
     @Autowired
     private CalendarioService calendarioService;
+
+    @Autowired
+    private NotificacionService notificacionService;
 
     public StudentController(StudentService studentService, StudentCursoService studentCursoService) {
         this.studentService = studentService;
@@ -75,6 +81,9 @@ public class StudentController {
 
         // Obtener cursos asignados al estudiante
         List<StudentCurso> cursosAsignados = new ArrayList<>();
+        Map<Long, Integer> progresoCursos = new HashMap<>();
+        Map<Long, Double> promediosCursos = new HashMap<>();
+
         if (email != null) {
             var studentOpt = studentService.findByEmail(email);
             if (studentOpt.isPresent()) {
@@ -82,6 +91,49 @@ public class StudentController {
                 cursosAsignados = studentCursoService.findByStudentId(student.getId());
                 System.out.println("DEBUG: Student " + student.getNombre() + " has " + cursosAsignados.size()
                         + " courses assigned");
+
+                // Calcular progreso de cada curso
+                for (StudentCurso sc : cursosAsignados) {
+                    if (sc.getEstado() == EstadoAsignacion.ACTIVO) {
+                        int progreso = calcularProgreso(student, sc.getCurso());
+                        progresoCursos.put(sc.getCurso().getId(), progreso);
+
+                        double promedio = calcularPromedio(student, sc.getCurso());
+                        promediosCursos.put(sc.getCurso().getId(), promedio);
+                    }
+                }
+
+                // Obtener actividades semanales (próximos 7 días)
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime nextWeek = now.plusDays(7);
+                List<EventoCalendarioDTO> eventos = calendarioService.obtenerEventosEstudiante(student.getId(), now,
+                        nextWeek);
+
+                // Filtrar para mostrar solo tareas y evaluaciones pendientes o próximas
+                List<EventoCalendarioDTO> actividadesSemanales = eventos.stream()
+                        .filter(e -> !e.getEstado().equals("COMPLETADO"))
+                        .limit(5) // Limitar a 5 actividades
+                        .toList();
+
+                model.addAttribute("actividadesSemanales", actividadesSemanales);
+
+                // Obtener notificaciones
+                List<Notificacion> notificaciones = notificacionService.getNotificacionesPorEstudiante(student);
+                if (notificaciones.isEmpty()) {
+                    // Crear notificación de bienvenida si no tiene ninguna
+                    notificacionService.crearNotificacion("Bienvenido al Portal",
+                            "Hola " + student.getNombre() + ", bienvenido a tu nuevo dashboard estudiantil.",
+                            student, "SISTEMA", null);
+                    notificaciones = notificacionService.getNotificacionesPorEstudiante(student);
+                }
+
+                List<NotificacionDTO> notificacionesDTO = notificaciones.stream()
+                        .map(n -> new NotificacionDTO(n.getId(), n.getTitulo(), n.getMensaje(), n.getFechaCreacion(),
+                                n.isLeida(), n.getTipo(), n.getLink()))
+                        .toList();
+                model.addAttribute("notificaciones", notificacionesDTO);
+                model.addAttribute("notificacionesNoLeidas", notificacionService.contarNoLeidas(student));
+
             } else {
                 System.out.println("DEBUG: Student not found for email: " + email);
             }
@@ -89,12 +141,90 @@ public class StudentController {
             System.out.println("DEBUG: No authentication found");
         }
         model.addAttribute("cursosAsignados", cursosAsignados);
+        model.addAttribute("progresoCursos", progresoCursos);
+        model.addAttribute("promediosCursos", promediosCursos);
 
         boolean mostrarMensajeNoCursos = cursosAsignados.isEmpty()
                 || cursosAsignados.stream().noneMatch(a -> a.getEstado() == EstadoAsignacion.ACTIVO);
         model.addAttribute("mostrarMensajeNoCursos", mostrarMensajeNoCursos);
 
         return "student/dashboard";
+    }
+
+    private int calcularProgreso(Student student, Curso curso) {
+        try {
+            // Obtener todas las tareas y evaluaciones del curso
+            List<Tarea> tareas = tareaService.findByCurso(curso);
+            List<Evaluacion> evaluaciones = evaluacionService.findByCurso(curso);
+
+            int totalActividades = tareas.size() + evaluaciones.size();
+            if (totalActividades == 0)
+                return 0;
+
+            int completadas = 0;
+
+            // Verificar tareas completadas
+            for (Tarea tarea : tareas) {
+                if (entregaTareaService.findByTareaIdAndStudentId(tarea.getId(), student.getId()).isPresent()) {
+                    completadas++;
+                }
+            }
+
+            // Verificar evaluaciones completadas
+            for (Evaluacion eval : evaluaciones) {
+                List<IntentoEvaluacion> intentos = evaluacionService
+                        .getIntentosByEvaluacionIdAndEstudianteId(eval.getId(), student.getId());
+                boolean completada = intentos.stream()
+                        .anyMatch(i -> i.getEstado() == EstadoIntento.COMPLETADO
+                                || i.getEstado() == EstadoIntento.CALIFICADO);
+                if (completada) {
+                    completadas++;
+                }
+            }
+
+            return (int) ((double) completadas / totalActividades * 100);
+        } catch (Exception e) {
+            System.err.println("Error calculando progreso para curso " + curso.getId() + ": " + e.getMessage());
+            return 0;
+        }
+    }
+
+    private double calcularPromedio(Student student, Curso curso) {
+        try {
+            List<Evaluacion> evaluaciones = evaluacionService.findByCurso(curso);
+            if (evaluaciones.isEmpty())
+                return 0.0;
+
+            double sumaNotas = 0;
+            int totalEvaluaciones = 0;
+
+            for (Evaluacion eval : evaluaciones) {
+                // Obtener mejor nota para esta evaluación
+                List<IntentoEvaluacion> intentos = evaluacionService
+                        .getIntentosByEvaluacionIdAndEstudianteId(eval.getId(), student.getId());
+
+                double maxNota = 0;
+                boolean tieneIntento = false;
+
+                for (IntentoEvaluacion intento : intentos) {
+                    if (intento.getCalificacion() != null) {
+                        maxNota = Math.max(maxNota, intento.getCalificacion().getCalificacion());
+                        tieneIntento = true;
+                    }
+                }
+
+                if (tieneIntento) {
+                    sumaNotas += maxNota;
+                    totalEvaluaciones++;
+                }
+            }
+
+            if (totalEvaluaciones == 0)
+                return 0.0;
+            return Math.round((sumaNotas / totalEvaluaciones) * 10.0) / 10.0;
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
 
     @GetMapping("/chat")
@@ -756,6 +886,23 @@ public class StudentController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/notificaciones/marcar-leidas")
+    @ResponseBody
+    public ResponseEntity<?> marcarNotificacionesLeidas(Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            Student student = studentService.findByEmail(email).orElse(null);
+
+            if (student != null) {
+                notificacionService.marcarTodasComoLeidas(student);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.status(404).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 

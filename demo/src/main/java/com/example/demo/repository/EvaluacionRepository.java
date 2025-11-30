@@ -32,4 +32,6 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Long> {
 
     List<Evaluacion> findBySemana_CursoAndFechaLimiteBetween(Curso curso, LocalDateTime fechaInicio,
             LocalDateTime fechaFin);
+
+    List<Evaluacion> findBySemana_Curso(Curso curso);
 }

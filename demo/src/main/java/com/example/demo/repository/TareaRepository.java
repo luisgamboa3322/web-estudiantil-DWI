@@ -23,4 +23,6 @@ public interface TareaRepository extends JpaRepository<Tarea, Long> {
     List<Tarea> findByFechaLimiteAfter(LocalDateTime fecha);
 
     List<Tarea> findBySemana_CursoAndFechaLimiteBetween(Curso curso, LocalDateTime fechaInicio, LocalDateTime fechaFin);
+
+    List<Tarea> findBySemana_Curso(Curso curso);
 }

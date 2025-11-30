@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.Tarea;
 import com.example.demo.model.Semana;
 import com.example.demo.model.Professor;
+import com.example.demo.model.Curso;
 import com.example.demo.repository.TareaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,8 @@ public class TareaService {
         return tareaRepository.save(tarea);
     }
 
-    public Tarea createTarea(String titulo, String descripcion, LocalDateTime fechaLimite, int puntosMaximos, Semana semana, Professor profesor) {
+    public Tarea createTarea(String titulo, String descripcion, LocalDateTime fechaLimite, int puntosMaximos,
+            Semana semana, Professor profesor) {
         Tarea tarea = new Tarea(titulo, descripcion, fechaLimite, puntosMaximos, semana, profesor);
         return save(tarea);
     }
@@ -68,5 +70,9 @@ public class TareaService {
             throw new IllegalArgumentException("Tarea no encontrada");
         }
         tareaRepository.deleteById(id);
+    }
+
+    public List<Tarea> findByCurso(Curso curso) {
+        return tareaRepository.findBySemana_Curso(curso);
     }
 }
