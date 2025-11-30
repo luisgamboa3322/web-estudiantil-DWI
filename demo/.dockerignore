@@ -1,0 +1,59 @@
+# Archivos y directorios a excluir del contexto de Docker
+# Esto optimiza el build al no copiar archivos innecesarios
+
+# Directorios de build
+target/
+build/
+out/
+bin/
+
+# Archivos de IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Archivos de configuración local
+.env
+.env.local
+application-local.properties
+
+# Documentación
+README.md
+README-DOCKER.md
+DEPLOYMENT-GUIDE.md
+*.md
+
+# Tests
+**/test-results/
+**/coverage/
