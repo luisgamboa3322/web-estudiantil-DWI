@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import com.example.demo.model.Student;
+import com.example.demo.model.Curso;
 
 @Repository
 public interface StudentCursoRepository extends JpaRepository<StudentCurso, Long> {
@@ -14,6 +16,10 @@ public interface StudentCursoRepository extends JpaRepository<StudentCurso, Long
     List<StudentCurso> findByCursoId(Long cursoId);
 
     List<StudentCurso> findByEstado(String estado);
+
+    List<StudentCurso> findByStudent(Student student);
+
+    List<StudentCurso> findByCurso(Curso curso);
 
     @Query("SELECT sc FROM StudentCurso sc JOIN FETCH sc.student s JOIN FETCH sc.curso c LEFT JOIN FETCH c.profesor p WHERE sc.estado = 'ACTIVO'")
     List<StudentCurso> findAllWithDetails();

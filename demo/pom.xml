@@ -84,6 +84,30 @@
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
+		<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>kernel</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>layout</artifactId>
+    <version>7.2.5</version>
+</dependency>
+
+<!-- Apache POI para Excel -->
+<dependency>
+    <groupId>org.apache.poi</groupId>
+    <artifactId>poi-ooxml</artifactId>
+    <version>5.2.3</version>
+</dependency>
+
+<!-- OpenCSV para archivos CSV -->
+<dependency>
+    <groupId>com.opencsv</groupId>
+    <artifactId>opencsv</artifactId>
+    <version>5.7.1</version>
+</dependency>
 	</dependencies>
 
 	<build>
