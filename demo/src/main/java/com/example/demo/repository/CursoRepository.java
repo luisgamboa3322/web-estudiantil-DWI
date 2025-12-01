@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import com.example.demo.model.Professor;
 
 @Repository
 public interface CursoRepository extends JpaRepository<Curso, Long> {
@@ -19,4 +20,6 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
     List<Curso> findByEstado(String estado);
 
     long countByEstado(EstadoCurso estado);
+
+    List<Curso> findByProfesor(Professor profesor);
 }

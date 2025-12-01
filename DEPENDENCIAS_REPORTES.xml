@@ -1,0 +1,27 @@
+<!-- ========================================= -->
+<!-- DEPENDENCIAS PARA REPORTES -->
+<!-- Agregar estas dependencias en el pom.xml -->
+<!-- ANTES del cierre de </dependencies> (línea 87) -->
+<!-- ========================================= -->
+
+<!-- iText para generación de PDF -->
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>itext7-core</artifactId>
+    <version>7.2.5</version>
+    <type>pom</type>
+</dependency>
+
+<!-- Apache POI para generación de Excel -->
+<dependency>
+    <groupId>org.apache.poi</groupId>
+    <artifactId>poi-ooxml</artifactId>
+    <version>5.2.3</version>
+</dependency>
+
+<!-- OpenCSV para generación de archivos CSV -->
+<dependency>
+    <groupId>com.opencsv</groupId>
+    <artifactId>opencsv</artifactId>
+    <version>5.7.1</version>
+</dependency>
