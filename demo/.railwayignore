@@ -1,0 +1,49 @@
+# Archivos y directorios a excluir del despliegue en Railway
+
+# Directorios de build
+target/
+.mvn/
+
+# Archivos de configuración local
+.env
+.env.local
+.env.*.local
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Documentación (opcional, comentar si quieres incluirla)
+README*.md
+DEPLOYMENT-GUIDE.md
+PERFORMANCE-TESTS.md
+
+# Docker (Railway usa su propio sistema)
+docker-compose.yml
+.dockerignore
+
+# Scripts locales
+scripts/
+
+# Archivos de test
+src/test/
+
+# Git
+.git/
+.gitignore
+.gitattributes
